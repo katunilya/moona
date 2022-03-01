@@ -7,5 +7,8 @@
     "python.testing.pytestArgs": [
         "tests"
     ],
-    "restructuredtext.confPath": ""
+    "restructuredtext.confPath": "",
+    "vscodeGitCommit.template": [
+        "{message}"
+    ]
 }
