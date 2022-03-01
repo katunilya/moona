@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mona"
 version = "0.0.1"
-description = "Fairly simple pointfree monads in Python"
+description = "ASGI server with functional approach in mind"
 authors = ["Katun Ilya <katun.ilya@gmail.com>"]
 license = "MIT"
 
