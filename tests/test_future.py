@@ -4,7 +4,7 @@ import pytest
 
 from mona import future
 
-# TODO: improve structure of tests for Future monad (decompose)
+# TODO improve structure of tests for Future monad (decompose)
 
 
 async def async_identity(x):

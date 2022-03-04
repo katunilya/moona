@@ -1,19 +1,9 @@
-from typing import Awaitable, ByteString, Callable, Dict, Optional
+from typing import Any, Awaitable, ByteString, Dict, Iterable, Optional
 
-from black import Any
-from typeguard import Iterable
-from typing_extensions import TypeAlias
-
-from mona import state, types
-
-Message: TypeAlias = Dict[str, Any]
-Scope: TypeAlias = Message
-Receive: TypeAlias = types.Construct[Awaitable[Message]]
-Send: TypeAlias = types.Transform[Message, Awaitable[None]]
-ASGIServer: TypeAlias = Callable[[Scope, Receive, Send], Awaitable[None]]
+from mona import future, state, types
 
 
-class ASGIContext:
+class Context:
     """Request handling context that stores all the required for computation info.
 
     Instance of `Context` is constructed every time request is received by ASGI.
@@ -23,7 +13,6 @@ class ASGIContext:
     """
 
     __slots__ = (
-        # default scope information
         "type",
         "asgi_version",
         "asgi_spec_version",
@@ -40,10 +29,8 @@ class ASGIContext:
         "server_host",
         "server_port",
         "raw_subprotocols",
-        # functions
         "receive",
         "send",
-        # custom
         "subprotocols",
         "raw_request_body",
         "request_body",
@@ -57,9 +44,9 @@ class ASGIContext:
 
     def __init__(
         self,
-        scope: Scope,
-        receive: Receive,
-        send: Send,
+        scope: types.Scope,
+        receive: types.Receive,
+        send: types.Send,
     ) -> None:
         self.type: str = scope["type"]
         self.asgi_version: str = scope["asgi"]["version"]
@@ -78,8 +65,8 @@ class ASGIContext:
         self.server_port: Optional[int] = scope["server"][1]
         self.raw_subprotocols: Optional[Iterable[str]] = scope.get("subprotocols", None)
         # functions
-        self.receive: Receive = receive
-        self.send: Send = send
+        self.receive: types.Receive = receive
+        self.send: types.Send = send
         # custom
         self.subprotocols: Iterable[str] = []
         self.raw_request_body: ByteString = None
@@ -89,8 +76,25 @@ class ASGIContext:
         self.params: Dict[str, str] = None
         # response
         self.response_status: int = 200
-        self.response_body: Any = None
+        self.response_body: ByteString = b""
         self.response_headers: Dict[str, str] = {}
 
 
-ASGIHandler = types.Transform[ASGIContext, Awaitable[state.State[ASGIContext]]]
+StateContext = state.State[Context]
+FutureStateContext = Awaitable[StateContext]
+Handler = types.Transform[StateContext, FutureStateContext]
+
+
+async def pack(ctx: Context) -> StateContext:
+    """Wraps `context.Context` into `State` and `Future` monad."""
+    return state.pack(await future.pack(ctx))
+
+
+async def bind(handler: Handler, ctx: FutureStateContext) -> StateContext:
+    """Executes `context.Handler` considering `State` and `Future`."""
+    ctx: StateContext = await pack(ctx)
+
+    if ctx.valid:
+        ctx = handler(ctx.value)
+
+    return state.pack(await future.pack(ctx))
