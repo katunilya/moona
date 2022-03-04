@@ -1,6 +1,6 @@
 import pytest
 
-from mona.asgi import ASGIContext, Message
+from mona import context, types
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def scope():
 
 @pytest.fixture
 def receive():
-    async def receive() -> Message:
+    async def receive() -> types.Message:
         return {"type": "http.receive.body", "body": b"body"}
 
     return receive
@@ -56,12 +56,12 @@ def receive():
 
 @pytest.fixture
 def send():
-    async def send(_: Message) -> None:
+    async def send(_: types.Message) -> None:
         return None
 
     return send
 
 
 @pytest.fixture
-def context(scope, receive, send) -> ASGIContext:
-    return ASGIContext(scope, receive, send)
+def asgi_context(scope, receive, send) -> context.Context:
+    return context.Context(scope, receive, send)
