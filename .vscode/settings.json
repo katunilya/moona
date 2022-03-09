@@ -10,5 +10,6 @@
     "restructuredtext.confPath": "",
     "vscodeGitCommit.template": [
         "{message}"
-    ]
+    ],
+    "esbonio.server.enabled": true
 }

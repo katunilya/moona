@@ -54,7 +54,7 @@ class Context:
         self.http_version: str = scope["http_version"]
         self.method: Optional[str] = scope.get("method", None)
         self.scheme: str = scope["scheme"]
-        self.path: str = scope["path"]
+        self.path: str = scope["path"].strip("/")
         self.raw_path: ByteString = scope["raw_path"]
         self.query_string: ByteString = scope["query_string"]
         self.root_path: str = scope["root_path"]
