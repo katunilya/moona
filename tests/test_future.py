@@ -1,10 +1,9 @@
 import inspect
+from typing import Any
 
 import pytest
 
 from mona import future
-
-# TODO improve structure of tests for Future monad (decompose)
 
 
 async def async_identity(x):
@@ -16,92 +15,90 @@ def sync_identity(x):
 
 
 @pytest.mark.asyncio
-async def test_pack():
+@pytest.mark.parametrize(
+    "value",
+    [
+        1,
+        2,
+        -3,
+        {},
+        [],
+        {"name": "John Doe"},
+    ],
+)
+async def test_pack_value(value: Any):
+    _value = future.pack_value(value)
+    assert inspect.isawaitable(_value)
 
-    result = future.pack(3)
-    assert inspect.isawaitable(result)
-
-    result = await result
-    assert result == 3
-
-    result = future.pack(future.pack(3))
-    assert inspect.isawaitable(result)
-
-    result = await result
-    assert result == 3
-
-
-@pytest.mark.asyncio
-async def test_bind():
-
-    result = future.bind(async_identity, 3)
-    assert inspect.isawaitable(result)
-
-    result = await result
-    assert result == 3
-
-    result = future.bind(sync_identity, 3)
-    assert inspect.isawaitable(result)
-
-    result = await result
-    assert result == 3
-
-    result = future.bind(async_identity, 3)
-    result = future.bind(sync_identity, result)
-    assert inspect.isawaitable(result)
-
-    result = await result
-    assert result == 3
-
-    result = future.bind(async_identity, 3)
-    result = future.bind(async_identity, result)
-    assert inspect.isawaitable(result)
-
-    result = await result
-    assert result == 3
-
-
-def plus(x, y):
-    return x + y
-
-
-def plus_1(x):
-    return plus(1, x)
+    _value = await _value
+    assert _value == value
 
 
 @pytest.mark.asyncio
-async def test_compose():
-    func = future.compose(
-        sync_identity,
-        plus_1,
-    )
+@pytest.mark.parametrize(
+    "value, num_of_packings, result",
+    [
+        (1, 1, 1),
+        (1, 2, 1),
+        (1, 10, 1),
+    ],
+)
+async def test_pack(value, num_of_packings, result):
+    for _ in range(num_of_packings):
+        value = future.pack(value)
 
-    result = func(1)
-    assert inspect.isawaitable(result)
-    result = await result
-    assert result == 2
+    assert inspect.isawaitable(value)
 
+    value = await value
 
-@future.wrap
-def sync_function(x: int) -> int:
-    return (x + 1) ** 2
+    assert value == result
 
 
 @pytest.mark.asyncio
-async def test_wrap():
+@pytest.mark.parametrize(
+    "value, functions, result",
+    [
+        (1, [sync_identity], 1),
+        (1, [async_identity], 1),
+        (1, [async_identity, sync_identity], 1),
+        (1, [sync_identity, async_identity], 1),
+        (1, [async_identity, async_identity], 1),
+        (1, [sync_identity, sync_identity], 1),
+        (1, [lambda x: x + 1], 2),
+        (1, [lambda x: x + 1, lambda x: x**2], 4),
+    ],
+)
+async def test_bind(value, functions, result):
+    for function in functions:
+        value = future.bind(function, value)
 
-    result = sync_function(3)
-    assert inspect.isawaitable(result)
-    result = await result
-    assert result == 16
+    assert inspect.isawaitable(value)
 
-    result = sync_function(future.pack(3))
-    assert inspect.isawaitable(result)
-    result = await result
-    assert result == 16
+    value = await value
+    assert value == result
 
-    f = future.wrap(future.pack)
-    result = f(1)
-    assert inspect.isawaitable(result)
-    result = await result
-    assert result == 1
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "value,functions,result",
+    [
+        (1, [sync_identity], 1),
+        (1, [async_identity], 1),
+        (1, [sync_identity, async_identity], 1),
+        (1, [async_identity, sync_identity], 1),
+        (1, [async_identity, async_identity], 1),
+        (1, [sync_identity, sync_identity], 1),
+        (1, [lambda x: x + 1], 2),
+        (1, [lambda x: x + 1, lambda x: x**2], 4),
+    ],
+)
+async def test_compose(value, functions, result):
+    composition = future.compose(*functions)
+
+    _value = composition(value)
+
+    assert inspect.isawaitable(_value)
+
+    _value = await _value
+
+    assert _value == result
