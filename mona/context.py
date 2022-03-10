@@ -94,7 +94,4 @@ async def bind(handler: Handler, ctx: FutureStateContext) -> StateContext:
     """Executes `context.Handler` considering `State` and `Future`."""
     ctx: StateContext = await pack(ctx)
 
-    if ctx.valid:
-        ctx = handler(ctx.value)
-
-    return state.pack(await future.pack(ctx))
+    return await pack(handler(ctx) if isinstance(ctx, state.Valid) else ctx)

@@ -35,8 +35,8 @@ async def test_compose(asgi_context):
 
     ctx = await ctx
 
-    assert isinstance(ctx, state.State)
-    assert ctx.valid is False
+    assert state.is_state(ctx)
+    assert state.is_invalid(ctx)
 
 
 @pytest.mark.asyncio
@@ -64,5 +64,5 @@ async def test_choose(asgi_context):
 
     ctx = await ctx
 
-    assert isinstance(ctx, state.State)
-    assert ctx.valid
+    assert state.is_state(ctx)
+    assert state.is_valid(ctx)
