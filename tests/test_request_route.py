@@ -1,5 +1,5 @@
 import pytest
-from mona import context, req
+from mona import context, req, state
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ def test_on_route(asgi_context: context.Context, path: str, pattern: str, valid:
 
     ctx: context.StateContext = handler(asgi_context)
 
-    assert ctx.valid == valid
+    assert state.is_valid(ctx) == valid
 
 
 @pytest.mark.parametrize(
@@ -60,7 +60,7 @@ def test_on_subroute(
 
     ctx: context.StateContext = handle(asgi_context)
 
-    assert ctx.valid == valid
+    assert state.is_valid(ctx) == valid
     assert ctx.value.path == afterpath
 
 
@@ -145,7 +145,7 @@ def test_on_ciroute(
 
     ctx: context.StateContext = handler(asgi_context)
 
-    assert ctx.valid == valid
+    assert state.is_valid(ctx) == valid
 
 
 @pytest.mark.parametrize(
@@ -186,5 +186,5 @@ def test_on_cisubroute(
 
     ctx: context.StateContext = handle(asgi_context)
 
-    assert ctx.valid == valid
+    assert state.is_valid(ctx) == valid
     assert ctx.value.path == afterpath

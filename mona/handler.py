@@ -1,6 +1,6 @@
 from functools import reduce, wraps
 
-from mona import context, types
+from mona import context, types, state
 
 
 def wrap(handler: types.Transform[context.Context, context.Context]) -> context.Handler:
@@ -31,7 +31,7 @@ def choose(*handlers: context.Handler) -> context.Handler:
         for handler in handlers:
             _ctx: context.StateContext = await context.bind(handler, ctx)
 
-            if _ctx.valid:
+            if isinstance(_ctx, state.Valid):
                 return _ctx
 
         return ctx
