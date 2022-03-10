@@ -22,7 +22,7 @@ async def test_pack(asgi_context: context.Context):
 
     asgi_context = await asgi_context
 
-    assert isinstance(asgi_context, state.State)
+    assert state.is_state(asgi_context)
 
 
 @pytest.mark.asyncio
@@ -34,7 +34,7 @@ async def test_multiple_pack(asgi_context: context.Context):
 
     asgi_context = await asgi_context
 
-    assert isinstance(asgi_context, state.State)
+    assert state.is_state(asgi_context)
 
 
 @pytest.mark.asyncio
@@ -53,5 +53,5 @@ async def test_bind(
 
     ctx = await ctx
 
-    assert isinstance(ctx, state.State)
-    assert ctx.valid == valid
+    assert state.is_state(ctx)
+    assert state.is_valid(ctx) == valid

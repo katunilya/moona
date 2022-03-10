@@ -1,102 +1,104 @@
 from dataclasses import dataclass
-from functools import reduce, wraps
-from typing import Generic, TypeVar, Union
-
-from mona.types import Transform
+from functools import reduce
+from typing import Callable, Generic, TypeVar, Union
 
 T = TypeVar("T")
 V = TypeVar("V")
 
 
 @dataclass(frozen=True)
-class State(Generic[T]):
-    """Immutable container for adding state of wrapped value.
+class Valid(Generic[T]):
+    """Container for `Valid` `State` of `value`."""
 
-    Attributes:
-        value (T): wrapped value stored in container
-        valid (bool): marker for state of the container. True - valid, False - invalid
-    """
-
-    __slots__ = ("value", "valid")
+    __slots__ = "value"
 
     value: T
-    valid: bool
 
 
+@dataclass(frozen=True)
+class Invalid(Generic[T]):
+    """Container for `Invalid` `State` of `value`."""
+
+    __slots__ = "value"
+
+    value: T
+
+
+State = Union[Valid[T], Invalid[T]]
 _State = Union[T, State[T]]
 
 
-def valid(value: _State[T]) -> State[T]:
-    """Packs value into valid State container."""
-    if isinstance(value, State):
-        return State(value.value, True)
-    return State(value, True)
+def is_state(value: _State[T]) -> bool:
+    """`True` if `value` is `Valid` or `Invalid`."""
+    return isinstance(value, (Valid, Invalid))
 
 
-def invalid(value: _State[T]) -> State[T]:
-    """Packs value into invalid State container."""
-    if isinstance(value, State):
-        return State(value.value, False)
-    return State(value, False)
+def is_valid(value: _State[T]) -> bool:
+    """`True` if `value` is `Valid`."""
+    return isinstance(value, Valid)
+
+
+def is_invalid(value: _State[T]) -> bool:
+    """`True` if `value` is `Invalid`."""
+    return isinstance(value, Invalid)
+
+
+def valid(value: _State[T]) -> Valid[T]:
+    """Packs passed `value` into `Valid` container, even if it is `Invalid`."""
+    return Valid(value.value if isinstance(value, (Valid, Invalid)) else value)
+
+
+def invalid(value: _State[T]) -> Invalid[T]:
+    """Packs passed `value` into `Invalid` container, even if it is `Valid`."""
+    return Invalid(value.value if isinstance(value, (Valid, Invalid)) else value)
 
 
 def pack(value: _State[T]) -> State[T]:
-    """Wraps value into Valid container if value is not container itself."""
-    if isinstance(value, State):
-        return value
-
-    return valid(value)
+    """Packs `value` into `Valid` container if one is not container already."""
+    return value if isinstance(value, (Valid, Invalid)) else Valid(value)
 
 
 def unpack(monad: _State[T]) -> T:
-    """Extracts value from container or just returns value if one is not monad."""
-    if isinstance(monad, State):
-        return monad.value
-    return monad
+    """Returns `value` of `monad` if one is `State`, else returns `monad` itself."""
+    return monad.value if isinstance(monad, (Valid, Invalid)) else monad
 
 
-def bind(function: Transform[_State[T], _State[V]], monad: _State[T]) -> State[V]:
-    """Execute function only when monad is not in invalid State."""
-    if isinstance(monad, State) and monad.valid is False:
+def bind(function: Callable[[T], _State[V]], monad: _State[T]) -> State[V]:
+    """Executes `function` only if `monad` is not in `INvalid"""
+    if isinstance(monad, Invalid):
         return monad
 
     return pack(function(unpack(monad)))
 
 
-def wrap(function: Transform[_State[T], _State[V]]) -> Transform[_State[T], State[V]]:
-    """Passed function is executed based on State monad rules."""
+def compose(*functions: Callable[[T], _State[V]]) -> Callable[[_State[T]], State[V]]:
+    """Composition of multiple `functions` with `State` monad binding."""
 
-    @wraps(function)
-    def _wrapper(monad: _State[T]) -> State[V]:
-        return bind(function, monad)
-
-    return _wrapper
-
-
-def compose(
-    *functions: Transform[_State[T], State[V]]
-) -> Transform[_State[T], State[T]]:
-    """Composes multiple monadic functions into one sequential execution of them."""
-
-    @wrap
     def _compose(monad: _State[T]) -> State[V]:
+        monad = pack(monad)
+
+        if isinstance(monad, Invalid):
+            return monad
+
         return reduce(lambda m, f: bind(f, m), functions, monad)
 
     return _compose
 
 
-def choose(
-    *functions: Transform[_State[T], _State[V]]
-) -> Transform[_State[T], State[V]]:
-    """Compose multiple functions where result of execution is the first Valid state."""
+def choose(*functions: Callable[[T], _State[V]]) -> Callable[[_State[T]], State[V]]:
+    """Composition that returns first `Valid` result of `functions` execution."""
 
-    @wrap
     def _choose(monad: _State[T]) -> State[V]:
+        monad = pack(monad)
+
+        if isinstance(monad, Invalid):
+            return monad
+
         return next(
             (
-                result
-                for result in (bind(func, monad) for func in functions)
-                if result.valid
+                monad_
+                for monad_ in (bind(func, monad) for func in functions)
+                if isinstance(monad_, Valid)
             ),
             monad,
         )

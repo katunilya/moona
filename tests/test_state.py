@@ -6,11 +6,47 @@ from mona import state
 
 
 @pytest.mark.parametrize(
+    "monad,valid",
+    [
+        (5, False),
+        (state.Valid(5), True),
+        (state.Invalid(5), False),
+    ],
+)
+def test_is_valid(monad: state._State, valid: bool):
+    assert state.is_valid(monad) is valid
+
+
+@pytest.mark.parametrize(
+    "monad,valid",
+    [
+        (5, False),
+        (state.Valid(5), False),
+        (state.Invalid(5), True),
+    ],
+)
+def test_is_invalid(monad: state._State, valid: bool):
+    assert state.is_invalid(monad) is valid
+
+
+@pytest.mark.parametrize(
+    "monad,valid",
+    [
+        (5, False),
+        (state.Valid(5), True),
+        (state.Invalid(5), True),
+    ],
+)
+def test_is_state(monad: state._State, valid: bool):
+    assert state.is_state(monad) is valid
+
+
+@pytest.mark.parametrize(
     "value,monad",
     [
-        (5, state.State(5, True)),
-        (state.State(5, False), state.State(5, True)),
-        (state.State(5, True), state.State(5, True)),
+        (5, state.Valid(5)),
+        (state.Invalid(5), state.Valid(5)),
+        (state.Valid(5), state.Valid(5)),
     ],
 )
 def test_valid(value: Any, monad: state.State[Any]):
@@ -20,9 +56,9 @@ def test_valid(value: Any, monad: state.State[Any]):
 @pytest.mark.parametrize(
     "value,monad",
     [
-        (5, state.State(5, False)),
-        (state.State(5, False), state.State(5, False)),
-        (state.State(5, True), state.State(5, False)),
+        (5, state.Invalid(5)),
+        (state.Invalid(5), state.Invalid(5)),
+        (state.Valid(5), state.Invalid(5)),
     ],
 )
 def test_invalid(value: Any, monad: state.State[Any]):
@@ -32,9 +68,9 @@ def test_invalid(value: Any, monad: state.State[Any]):
 @pytest.mark.parametrize(
     "value,monad",
     [
-        (5, state.State(5, True)),
-        (state.State(5, False), state.State(5, False)),
-        (state.State(5, True), state.State(5, True)),
+        (5, state.Valid(5)),
+        (state.Invalid(5), state.Invalid(5)),
+        (state.Valid(5), state.Valid(5)),
     ],
 )
 def test_pack(value: Any, monad: state.State[Any]):
@@ -45,8 +81,8 @@ def test_pack(value: Any, monad: state.State[Any]):
     "value,monad",
     [
         (5, 5),
-        (state.State(5, False), 5),
-        (state.State(5, True), 5),
+        (state.Invalid(5), 5),
+        (state.Valid(5), 5),
     ],
 )
 def test_unpack(value: Any, monad: state.State[Any]):
@@ -56,40 +92,21 @@ def test_unpack(value: Any, monad: state.State[Any]):
 @pytest.mark.parametrize(
     "input,output",
     [
-        (1, state.State(2, True)),
-        (state.State(1, True), state.State(2, True)),
-        (state.State(1, False), state.State(1, False)),
+        (1, state.Valid(2)),
+        (state.Valid(1), state.Valid(2)),
+        (state.Invalid(1), state.Invalid(1)),
     ],
 )
 def test_bind(input, output):
-    def plus_1(x: int) -> int:
-        return x + 1
-
-    assert state.bind(plus_1, input) == output
+    assert state.bind(lambda x: x + 1, input) == output
 
 
 @pytest.mark.parametrize(
     "input,output",
     [
-        (1, state.State(2, True)),
-        (state.State(1, True), state.State(2, True)),
-        (state.State(1, False), state.State(1, False)),
-    ],
-)
-def test_wraps(input, output):
-    @state.wrap
-    def plus_1(x: int) -> int:
-        return x + 1
-
-    assert plus_1(input) == output
-
-
-@pytest.mark.parametrize(
-    "input,output",
-    [
-        (1, state.State(7, True)),
-        (state.State(1, True), state.State(7, True)),
-        (state.State(1, False), state.State(1, False)),
+        (1, state.Valid(7)),
+        (state.Valid(1), state.Valid(7)),
+        (state.Invalid(1), state.Invalid(1)),
     ],
 )
 def test_compose_simple(input, output):
@@ -106,12 +123,12 @@ def test_compose_simple(input, output):
 @pytest.mark.parametrize(
     "input,output",
     [
-        (1, state.State(4, False)),
-        (state.State(1, True), state.State(4, False)),
-        (state.State(1, False), state.State(1, False)),
-        (2, state.State(12, True)),
-        (state.State(2, True), state.State(12, True)),
-        (state.State(2, False), state.State(2, False)),
+        (1, state.Invalid(4)),
+        (state.Valid(1), state.Invalid(4)),
+        (state.Invalid(1), state.Invalid(1)),
+        (2, state.Valid(12)),
+        (state.Valid(2), state.Valid(12)),
+        (state.Invalid(2), state.Invalid(2)),
     ],
 )
 def test_compose_with_invalid(input, output):
@@ -129,11 +146,11 @@ def test_compose_with_invalid(input, output):
 @pytest.mark.parametrize(
     "input,output",
     [
-        (1, state.State(1, True)),
-        (state.State(1, False), state.State(1, False)),
-        (4, state.State(5, True)),
-        (state.State(4, True), state.State(5, True)),
-        (state.State(4, False), state.State(4, False)),
+        (1, state.Valid(1)),
+        (state.Invalid(1), state.Invalid(1)),
+        (4, state.Valid(5)),
+        (state.Valid(4), state.Valid(5)),
+        (state.Invalid(4), state.Invalid(4)),
     ],
 )
 def test_choose(input, output):
@@ -145,5 +162,6 @@ def test_choose(input, output):
             lambda x: x + 1,
         ),
     )
+    result = func(input)
 
-    assert func(input) == output
+    assert result == output
