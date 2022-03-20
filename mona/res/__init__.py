@@ -1,4 +1,10 @@
-from .body import set_body, set_body_from, set_body_text
+from .body import (
+    set_body,
+    set_body_from,
+    set_body_from_dict,
+    set_body_from_pydantic,
+    set_body_text,
+)
 from .events import send_body, send_start
 from .header import set_header, set_header_content_type
 from .status import (
