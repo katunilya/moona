@@ -283,7 +283,7 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "31f9a1cab81bb9df595d2e6f136683f8ecb1d2c772142199b1235ade146cb84c"
+content-hash = "5d284acadb96430bd99133266b009c66b7afdd0183df8ddf9db8a9aee2d02e17"
 
 [metadata.files]
 asyncio = [
