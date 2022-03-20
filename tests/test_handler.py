@@ -1,7 +1,8 @@
 import inspect
 
 import pytest
-from mona import handler, context, state
+
+from mona import context, handler, state
 
 
 def sync_handler(context_: context.Context) -> context.Context:
