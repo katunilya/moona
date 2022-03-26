@@ -5,6 +5,7 @@ from .body import (
     parse_to_string,
 )
 from .events import receive_body, receive_json_dict
+from .header import on_header, parse_headers
 from .method import (
     on_connect,
     on_delete,
