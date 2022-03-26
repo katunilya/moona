@@ -2,7 +2,6 @@ import urllib.parse as urlparser
 
 from toolz.functoolz import pipe
 
-
 from mona import context
 
 
