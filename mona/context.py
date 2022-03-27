@@ -4,13 +4,7 @@ from mona import future, state, types
 
 
 class Context:
-    """Request handling context that stores all the required for computation info.
-
-    Instance of `Context` is constructed every time request is received by ASGI.
-    Initially it takes and parses `scope` information, `receive` and `send` functions.
-    It is suitable for both HTTP and WebSocket connections. To be minimal in terms of
-    weight and efficiency it has a strict set of predefined `__slots__`.
-    """
+    """Request handling context that stores all the required for computation info."""
 
     __slots__ = (
         "type",
@@ -48,6 +42,18 @@ class Context:
         receive: types.Receive,
         send: types.Send,
     ) -> None:
+        """Request handling context that stores all the required for computation info.
+
+        Instance of `Context` is constructed every time request is received by ASGI.
+        Initially it takes and parses `scope` information, `receive` and `send`
+        functions. It is suitable for both HTTP and WebSocket connections. To be minimal
+        in terms of weight and efficiency it has a strict set of predefined `__slots__`.
+
+        Args:
+            scope (types.Scope): ASGI scope object passed on request
+            receive (types.Receive): function for receiving info from client
+            send (types.Send): function for sending info to client
+        """
         self.type: str = scope["type"]
         self.asgi_version: str = scope["asgi"]["version"]
         self.asgi_spec_version: str = scope["asgi"]["spec_version"]
