@@ -6,15 +6,16 @@ from mona import context, req, state
 @pytest.mark.parametrize(
     "raw_headers, parsed_headers",
     [
-        ([[b"host", b"asgi-scope"]], {"host": "asgi-scope"}),
+        ([[b"host", b"asgi-scope"]], {"host": b"asgi-scope"}),
+        ([[b"Host", b"asgi-scope"]], {"host": b"asgi-scope"}),
         (
             [
                 [b"accept-language", b"en-US,en;q=0.5"],
                 [b"accept-encoding", b"gzip, deflate, br"],
             ],
             {
-                "accept-language": "en-US,en;q=0.5",
-                "accept-encoding": "gzip, deflate, br",
+                "accept-language": b"en-US,en;q=0.5",
+                "accept-encoding": b"gzip, deflate, br",
             },
         ),
     ],
@@ -34,6 +35,12 @@ def test_parse_request_headers(
     [
         (
             [[b"Content-Type", b"application/json"]],
+            "Content-Type",
+            "application/json",
+            True,
+        ),
+        (
+            [[b"content-type", b"application/json"]],
             "Content-Type",
             "application/json",
             True,

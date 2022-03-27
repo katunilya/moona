@@ -3,7 +3,6 @@ from mona import context, handler, types
 
 def create(*handlers: context.Handler) -> types.ASGIServer:
     """Constructs ASGI Server function from sequence of handlers."""
-
     _handler = handler.compose(*handlers)
 
     async def _asgi(

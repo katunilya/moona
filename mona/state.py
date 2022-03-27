@@ -64,7 +64,7 @@ def unpack(monad: _State[T]) -> T:
 
 
 def bind(function: Callable[[T], _State[V]], monad: _State[T]) -> State[V]:
-    """Executes `function` only if `monad` is not in `INvalid"""
+    """Executes `function` only if `monad` is not in `Invalid`."""
     if isinstance(monad, Invalid):
         return monad
 

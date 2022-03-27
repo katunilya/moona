@@ -13,7 +13,7 @@ from .body import (
 
 
 async def receive_body(ctx: context.Context) -> context.Context:
-    """Read entire request body and place it into context as ByteString"""
+    """Read entire request body and place it into context as ByteString."""
     body = b""
     more_body = True
 
@@ -40,7 +40,6 @@ async def receive_json_dict(ctx: context.Context) -> context.Context:
 
 def receive_json_dataclass(dataclass_: Type) -> context.Handler:
     """Read entire request body and parse it directly to dataclass from json string."""
-
     return handler.compose(
         receive_body,
         parse_json_to_dataclass(dataclass_),
@@ -49,7 +48,6 @@ def receive_json_dataclass(dataclass_: Type) -> context.Handler:
 
 def receive_json_pydantic(pydantic_model: Type[BaseModel]) -> context.Handler:
     """Read entire request body and parse it directly to `BaseModel` from json."""
-
     return handler.compose(
         receive_body,
         parse_json_to_pydantic(pydantic_model),

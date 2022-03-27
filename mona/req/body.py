@@ -17,9 +17,11 @@ def parse_json_to_dict(ctx: context.Context) -> context.Context:
 
 def parse_json_to_dataclass(dataclass_: Type) -> context.Handler:
     """When raw request body is not `None` parse it to passed dataclass."""
-
-    # TODO get rid of assert as it is unsafe
-    assert dataclasses.is_dataclass(dataclass_)
+    if not dataclasses.is_dataclass(dataclass_):
+        # TODO use concrete Exception
+        raise Exception(
+            f"Connot generate function for parsing dataclass based on {dataclass_}"
+        )
 
     def _handler(ctx: context.Context) -> context.Context:
         if ctx.raw_request_body is not None:
@@ -31,9 +33,11 @@ def parse_json_to_dataclass(dataclass_: Type) -> context.Handler:
 
 def parse_json_to_pydantic(pydantic_model: Type[BaseModel]) -> context.Context:
     """When raw request body is not `None` parse it to passed `pydantic.BaseModel`."""
-
-    # TODO get rid of assert as it is unsafe
-    assert issubclass(pydantic_model, BaseModel)
+    if not issubclass(pydantic_model, BaseModel):
+        # TODO use concrete Exception
+        raise Exception(
+            f"Connot generate function for parsing pydantic based on {pydantic_model}"
+        )
 
     def _handler(ctx: context.Context) -> context.Context:
         if ctx.raw_request_body is not None:
