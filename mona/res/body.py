@@ -1,62 +1,127 @@
-from typing import Awaitable, ByteString, Callable
+import typing
 
 import orjson
-from pydantic import BaseModel
+import pydantic
+import toolz
 
-from mona import context, future, types
+from mona import context, error, future, handler, state
 
-
-def set_body(body: ByteString) -> context.Handler:
-    """Generates handler that sets response body from byte string."""
-
-    def _handler(ctx: context.Context) -> context.Context:
-        ctx.response_body = body
-        return ctx
-
-    return _handler
+from . import header, status
 
 
-def set_body_text(text: str) -> context.Handler:
-    """Generates handler that sets response body from Unicode string."""
+def set_body_bytes(body: typing.ByteString) -> handler.Handler:
+    """Set response body from byte string."""
 
-    def _handler(ctx: context.Context) -> context.Context:
-        ctx.response_body = text.encode("utf-8")
-        return ctx
+    @state.accepts_right
+    def _handler(ctx: context.Context) -> context.StateContext:
+        ctx.response.body = body
+        return state.right(ctx)
 
     return _handler
 
 
-def set_body_from(
-    handler: types.Transform[context.Context, Awaitable[ByteString]]
-) -> context.Handler:
-    """Generates handler that sets response body from result of other function."""
+def set_body_text(body: str) -> handler.Handler:
+    """Set response body from string."""
+    body = body.encode("UTF-8")
 
-    async def _handler(ctx: context.Context) -> context.Context:
-        ctx.response_body = await future.bind(handler, ctx)
-        return ctx
+    @state.accepts_right
+    def _handler(ctx: context.Context) -> context.StateContext:
+        ctx.response.body = body
+        return state.right(ctx)
+
+    return _handler
+
+
+def set_body_from_bytes(
+    function: typing.Callable[
+        [context.Context], future.Future[state.RE[typing.ByteString]]
+    ]
+) -> handler.Handler:
+    """Set body from function calculation result."""
+
+    @state.accepts_right
+    async def _handler(ctx: context.Context) -> context.StateContext:
+        body: state.RE[dict] = await (future.from_value(ctx) >> function)
+
+        if body.state != state.RIGHT:
+            err: error.Error = body.value
+
+            return toolz.pipe(
+                ctx,
+                state.right,
+                set_body_text(err.message),
+                status.set_status_bad_request,
+                state.switch_error,
+            )
+
+        return toolz.pipe(
+            ctx,
+            state.right,
+            set_body_bytes(body.value),
+        )
 
     return _handler
 
 
 def set_body_from_dict(
-    handler_: Callable[[context.Context], Awaitable[dict]]
-) -> context.Handler:
-    """Generates handler that sets response body from dict result of other function."""
+    function: typing.Callable[[context.Context], future.Future[state.RE[dict]]]
+) -> handler.Handler:
+    """Set body from function calculation result."""
 
-    async def _handler(ctx: context.Context) -> context.Context:
-        ctx.response_body = orjson.dumps(await future.bind(handler_, ctx))
-        return ctx
+    @state.accepts_right
+    async def _handler(ctx: context.Context) -> context.StateContext:
+        body: state.RE[dict] = await (future.from_value(ctx) >> function)
+
+        if body.state != state.RIGHT:
+            err: error.Error = body.value
+
+            return toolz.pipe(
+                ctx,
+                state.right,
+                set_body_text(err.message),
+                status.set_status_bad_request,
+                state.switch_error,
+            )
+
+        return toolz.pipe(
+            ctx,
+            state.right,
+            set_body_bytes(orjson.dumps(body.value)),
+            header.set_header("Content-Type", "application/json"),
+            status.set_status_ok,
+        )
 
     return _handler
 
 
 def set_body_from_pydantic(
-    handler_: Callable[[context.Context], Awaitable[BaseModel]]
-) -> context.Handler:
-    """Generates handler that sets response body from dict result of other function."""
+    function: typing.Callable[
+        [context.Context], future.Future[state.RE[pydantic.BaseModel]]
+    ]
+) -> handler.Handler:
+    """Set body from function calculation result."""
 
-    async def _handler(ctx: context.Context) -> context.Context:
-        ctx.response_body = orjson.dumps((await future.bind(handler_, ctx)).dict())
-        return ctx
+    @state.accepts_right
+    async def _handler(ctx: context.Context) -> context.StateContext:
+        body: state.RE[pydantic.BaseModel] = await (future.from_value(ctx) >> function)
+
+        if body.state != state.RIGHT:
+            err: error.Error = body.value
+
+            return toolz.pipe(
+                ctx,
+                state.right,
+                set_body_text(err.message),
+                status.set_status_bad_request,
+                state.switch_error,
+            )
+
+        return toolz.pipe(
+            ctx,
+            state.right,
+            set_body_bytes(orjson.dumps(body.value.dict())),
+            header.set_header("Content-Type", "application/json"),
+            status.set_status_ok,
+        )
 
     return _handler

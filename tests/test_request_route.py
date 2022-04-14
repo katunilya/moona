@@ -4,188 +4,348 @@ from mona import context, req, state
 
 
 @pytest.mark.parametrize(
-    "path,pattern,valid",
+    "arrange_path,arrange_pattern,arrange_state,assert_state",
     [
-        ("path", "path", True),
-        ("path", "/path", True),
-        ("path", "path/", True),
-        ("path", "/path/", True),
-        ("path", "paths", False),
-        ("path", "/paths", False),
-        ("path", "paths/", False),
-        ("path", "/paths/", False),
-        ("some/path", "some/path", True),
-        ("some/path", "/some/path", True),
-        ("some/path", "some/path/", True),
-        ("some/path", "/some/path/", True),
-        ("some/path", "somes/path", False),
-        ("some/path", "/somes/path", False),
-        ("some/path", "somes/path/", False),
-        ("some/path", "/somes/path/", False),
-        ("some/path", "some/paath", False),
-        ("some/path", "/some/paath", False),
-        ("some/path", "some/paath/", False),
-        ("some/path", "/some/paath/", False),
-        ("some/path", "x/some/path", False),
-        ("some/path", "some/path/x", False),
-        ("some/path", "x/some/path/x", False),
+        ("path", "path", state.RIGHT, state.RIGHT),
+        ("path", "/path", state.RIGHT, state.RIGHT),
+        ("path", "path/", state.RIGHT, state.RIGHT),
+        ("path", "/path/", state.RIGHT, state.RIGHT),
+        ("path", "paths", state.RIGHT, state.WRONG),
+        ("path", "/paths", state.RIGHT, state.WRONG),
+        ("path", "paths/", state.RIGHT, state.WRONG),
+        ("path", "/paths/", state.RIGHT, state.WRONG),
+        ("some/path", "some/path", state.RIGHT, state.RIGHT),
+        ("some/path", "/some/path", state.RIGHT, state.RIGHT),
+        ("some/path", "some/path/", state.RIGHT, state.RIGHT),
+        ("some/path", "/some/path/", state.RIGHT, state.RIGHT),
+        ("some/path", "somes/path", state.RIGHT, state.WRONG),
+        ("some/path", "/somes/path", state.RIGHT, state.WRONG),
+        ("some/path", "somes/path/", state.RIGHT, state.WRONG),
+        ("some/path", "/somes/path/", state.RIGHT, state.WRONG),
+        ("some/path", "some/paath", state.RIGHT, state.WRONG),
+        ("some/path", "/some/paath", state.RIGHT, state.WRONG),
+        ("some/path", "some/paath/", state.RIGHT, state.WRONG),
+        ("some/path", "/some/paath/", state.RIGHT, state.WRONG),
+        ("some/path", "x/some/path", state.RIGHT, state.WRONG),
+        ("some/path", "some/path/x", state.RIGHT, state.WRONG),
+        ("some/path", "x/some/path/x", state.RIGHT, state.WRONG),
+        ("path", "path", state.WRONG, state.WRONG),
+        ("path", "/path", state.WRONG, state.WRONG),
+        ("path", "path/", state.WRONG, state.WRONG),
+        ("path", "/path/", state.WRONG, state.WRONG),
+        ("path", "paths", state.WRONG, state.WRONG),
+        ("path", "/paths", state.WRONG, state.WRONG),
+        ("path", "paths/", state.WRONG, state.WRONG),
+        ("path", "/paths/", state.WRONG, state.WRONG),
+        ("some/path", "some/path", state.WRONG, state.WRONG),
+        ("some/path", "/some/path", state.WRONG, state.WRONG),
+        ("some/path", "some/path/", state.WRONG, state.WRONG),
+        ("some/path", "/some/path/", state.WRONG, state.WRONG),
+        ("some/path", "somes/path", state.WRONG, state.WRONG),
+        ("some/path", "/somes/path", state.WRONG, state.WRONG),
+        ("some/path", "somes/path/", state.WRONG, state.WRONG),
+        ("some/path", "/somes/path/", state.WRONG, state.WRONG),
+        ("some/path", "some/paath", state.WRONG, state.WRONG),
+        ("some/path", "/some/paath", state.WRONG, state.WRONG),
+        ("some/path", "some/paath/", state.WRONG, state.WRONG),
+        ("some/path", "/some/paath/", state.WRONG, state.WRONG),
+        ("some/path", "x/some/path", state.WRONG, state.WRONG),
+        ("some/path", "some/path/x", state.WRONG, state.WRONG),
+        ("some/path", "x/some/path/x", state.WRONG, state.WRONG),
     ],
 )
-def test_on_route(asgi_context: context.Context, path: str, pattern: str, valid: bool):
-    asgi_context.path = path.strip("/")
-    handler = req.on_route(pattern)
-
-    ctx: context.StateContext = handler(asgi_context)
-
-    assert state.is_valid(ctx) == valid
-
-
-@pytest.mark.parametrize(
-    "path,pattern,valid,afterpath",
-    [
-        ("subroute/path", "subroute", True, "path"),
-        ("subroute/path", "subroute/", True, "path"),
-        ("subroute/path", "/subroute", True, "path"),
-        ("subroute/path", "/subroute/", True, "path"),
-        ("subroute/path", "subroutes", False, "subroute/path"),
-        ("subroute/path", "subroutes/", False, "subroute/path"),
-        ("subroute/path", "/subroutes", False, "subroute/path"),
-        ("subroute/path", "/subroutes/", False, "subroute/path"),
-    ],
-)
-def test_on_subroute(
-    asgi_context: context.Context, path: str, pattern: str, valid: bool, afterpath: str
+def test_on_route(
+    mock_context: context.Context,
+    arrange_path,
+    arrange_pattern,
+    arrange_state,
+    assert_state,
 ):
-    asgi_context.path = path
-    handle = req.on_subroute(pattern)
+    # arrange
+    mock_context.request.path = arrange_path.strip("/")
+    ctx = state.pack(arrange_state, mock_context)
+    handler = req.on_route(arrange_pattern)
 
-    ctx: context.StateContext = handle(asgi_context)
+    # act
+    ctx: context.StateContext = handler(ctx)
 
-    assert state.is_valid(ctx) == valid
-    assert ctx.value.path == afterpath
+    # assert
+    assert ctx.state == assert_state
 
 
 @pytest.mark.parametrize(
-    "path,pattern,valid",
+    "arrange_path,arrange_pattern,arrange_state,assert_state",
     [
-        ("path", "path", True),
-        ("path", "/path", True),
-        ("path", "path/", True),
-        ("path", "/path/", True),
-        ("path", "paths", False),
-        ("path", "/paths", False),
-        ("path", "paths/", False),
-        ("path", "/paths/", False),
-        ("some/path", "some/path", True),
-        ("some/path", "/some/path", True),
-        ("some/path", "some/path/", True),
-        ("some/path", "/some/path/", True),
-        ("some/path", "somes/path", False),
-        ("some/path", "/somes/path", False),
-        ("some/path", "somes/path/", False),
-        ("some/path", "/somes/path/", False),
-        ("some/path", "some/paath", False),
-        ("some/path", "/some/paath", False),
-        ("some/path", "some/paath/", False),
-        ("some/path", "/some/paath/", False),
-        ("some/path", "x/some/path", False),
-        ("some/path", "some/path/x", False),
-        ("some/path", "x/some/path/x", False),
-        ("Path", "path", True),
-        ("Path", "/path", True),
-        ("Path", "path/", True),
-        ("Path", "/path/", True),
-        ("Path", "paths", False),
-        ("Path", "/paths", False),
-        ("Path", "paths/", False),
-        ("Path", "/paths/", False),
-        ("sOme/path", "some/path", True),
-        ("sOme/path", "/some/path", True),
-        ("sOme/path", "some/path/", True),
-        ("sOme/path", "/some/path/", True),
-        ("sOme/path", "somes/path", False),
-        ("sOme/path", "/somes/path", False),
-        ("sOme/path", "somes/path/", False),
-        ("sOme/path", "/somes/path/", False),
-        ("sOme/path", "some/paath", False),
-        ("sOme/path", "/some/paath", False),
-        ("sOme/path", "some/paath/", False),
-        ("sOme/path", "/some/paath/", False),
-        ("sOme/path", "x/some/path", False),
-        ("sOme/path", "some/path/x", False),
-        ("sOme/path", "x/some/path/x", False),
-        ("Path", "/pAth", True),
-        ("Path", "pAth/", True),
-        ("Path", "/pAth/", True),
-        ("Path", "pAths", False),
-        ("Path", "/pAths", False),
-        ("Path", "pAths/", False),
-        ("Path", "/pAths/", False),
-        ("sOme/path", "some/patH", True),
-        ("sOme/path", "/some/patH", True),
-        ("sOme/path", "some/patH/", True),
-        ("sOme/path", "/some/patH/", True),
-        ("sOme/path", "somes/patH", False),
-        ("sOme/path", "/somes/patH", False),
-        ("sOme/path", "somes/patH/", False),
-        ("sOme/path", "/somes/patH/", False),
-        ("sOme/path", "some/paatH", False),
-        ("sOme/path", "/some/paatH", False),
-        ("sOme/path", "some/paatH/", False),
-        ("sOme/path", "/some/paatH/", False),
-        ("sOme/path", "x/some/patH", False),
-        ("sOme/path", "some/patH/x", False),
-        ("sOme/path", "x/some/patH/x", False),
+        ("path", "path", state.RIGHT, state.RIGHT),
+        ("path", "/path", state.RIGHT, state.RIGHT),
+        ("path", "path/", state.RIGHT, state.RIGHT),
+        ("path", "/path/", state.RIGHT, state.RIGHT),
+        ("path", "paths", state.RIGHT, state.WRONG),
+        ("path", "/paths", state.RIGHT, state.WRONG),
+        ("path", "paths/", state.RIGHT, state.WRONG),
+        ("path", "/paths/", state.RIGHT, state.WRONG),
+        ("some/path", "some/path", state.RIGHT, state.RIGHT),
+        ("some/path", "/some/path", state.RIGHT, state.RIGHT),
+        ("some/path", "some/path/", state.RIGHT, state.RIGHT),
+        ("some/path", "/some/path/", state.RIGHT, state.RIGHT),
+        ("some/path", "somes/path", state.RIGHT, state.WRONG),
+        ("some/path", "/somes/path", state.RIGHT, state.WRONG),
+        ("some/path", "somes/path/", state.RIGHT, state.WRONG),
+        ("some/path", "/somes/path/", state.RIGHT, state.WRONG),
+        ("some/path", "some/paath", state.RIGHT, state.WRONG),
+        ("some/path", "/some/paath", state.RIGHT, state.WRONG),
+        ("some/path", "some/paath/", state.RIGHT, state.WRONG),
+        ("some/path", "/some/paath/", state.RIGHT, state.WRONG),
+        ("some/path", "x/some/path", state.RIGHT, state.WRONG),
+        ("some/path", "some/path/x", state.RIGHT, state.WRONG),
+        ("some/path", "x/some/path/x", state.RIGHT, state.WRONG),
+        ("Path", "path", state.RIGHT, state.RIGHT),
+        ("Path", "/path", state.RIGHT, state.RIGHT),
+        ("Path", "path/", state.RIGHT, state.RIGHT),
+        ("Path", "/path/", state.RIGHT, state.RIGHT),
+        ("Path", "paths", state.RIGHT, state.WRONG),
+        ("Path", "/paths", state.RIGHT, state.WRONG),
+        ("Path", "paths/", state.RIGHT, state.WRONG),
+        ("Path", "/paths/", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/path", state.RIGHT, state.RIGHT),
+        ("sOme/path", "/some/path", state.RIGHT, state.RIGHT),
+        ("sOme/path", "some/path/", state.RIGHT, state.RIGHT),
+        ("sOme/path", "/some/path/", state.RIGHT, state.RIGHT),
+        ("sOme/path", "somes/path", state.RIGHT, state.WRONG),
+        ("sOme/path", "/somes/path", state.RIGHT, state.WRONG),
+        ("sOme/path", "somes/path/", state.RIGHT, state.WRONG),
+        ("sOme/path", "/somes/path/", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/paath", state.RIGHT, state.WRONG),
+        ("sOme/path", "/some/paath", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/paath/", state.RIGHT, state.WRONG),
+        ("sOme/path", "/some/paath/", state.RIGHT, state.WRONG),
+        ("sOme/path", "x/some/path", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/path/x", state.RIGHT, state.WRONG),
+        ("sOme/path", "x/some/path/x", state.RIGHT, state.WRONG),
+        ("Path", "/pAth", state.RIGHT, state.RIGHT),
+        ("Path", "pAth/", state.RIGHT, state.RIGHT),
+        ("Path", "/pAth/", state.RIGHT, state.RIGHT),
+        ("Path", "pAths", state.RIGHT, state.WRONG),
+        ("Path", "/pAths", state.RIGHT, state.WRONG),
+        ("Path", "pAths/", state.RIGHT, state.WRONG),
+        ("Path", "/pAths/", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/patH", state.RIGHT, state.RIGHT),
+        ("sOme/path", "/some/patH", state.RIGHT, state.RIGHT),
+        ("sOme/path", "some/patH/", state.RIGHT, state.RIGHT),
+        ("sOme/path", "/some/patH/", state.RIGHT, state.RIGHT),
+        ("sOme/path", "somes/patH", state.RIGHT, state.WRONG),
+        ("sOme/path", "/somes/patH", state.RIGHT, state.WRONG),
+        ("sOme/path", "somes/patH/", state.RIGHT, state.WRONG),
+        ("sOme/path", "/somes/patH/", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/paatH", state.RIGHT, state.WRONG),
+        ("sOme/path", "/some/paatH", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/paatH/", state.RIGHT, state.WRONG),
+        ("sOme/path", "/some/paatH/", state.RIGHT, state.WRONG),
+        ("sOme/path", "x/some/patH", state.RIGHT, state.WRONG),
+        ("sOme/path", "some/patH/x", state.RIGHT, state.WRONG),
+        ("sOme/path", "x/some/patH/x", state.RIGHT, state.WRONG),
+        ("path", "path", state.WRONG, state.WRONG),
+        ("path", "/path", state.WRONG, state.WRONG),
+        ("path", "path/", state.WRONG, state.WRONG),
+        ("path", "/path/", state.WRONG, state.WRONG),
+        ("path", "paths", state.WRONG, state.WRONG),
+        ("path", "/paths", state.WRONG, state.WRONG),
+        ("path", "paths/", state.WRONG, state.WRONG),
+        ("path", "/paths/", state.WRONG, state.WRONG),
+        ("some/path", "some/path", state.WRONG, state.WRONG),
+        ("some/path", "/some/path", state.WRONG, state.WRONG),
+        ("some/path", "some/path/", state.WRONG, state.WRONG),
+        ("some/path", "/some/path/", state.WRONG, state.WRONG),
+        ("some/path", "somes/path", state.WRONG, state.WRONG),
+        ("some/path", "/somes/path", state.WRONG, state.WRONG),
+        ("some/path", "somes/path/", state.WRONG, state.WRONG),
+        ("some/path", "/somes/path/", state.WRONG, state.WRONG),
+        ("some/path", "some/paath", state.WRONG, state.WRONG),
+        ("some/path", "/some/paath", state.WRONG, state.WRONG),
+        ("some/path", "some/paath/", state.WRONG, state.WRONG),
+        ("some/path", "/some/paath/", state.WRONG, state.WRONG),
+        ("some/path", "x/some/path", state.WRONG, state.WRONG),
+        ("some/path", "some/path/x", state.WRONG, state.WRONG),
+        ("some/path", "x/some/path/x", state.WRONG, state.WRONG),
+        ("Path", "path", state.WRONG, state.WRONG),
+        ("Path", "/path", state.WRONG, state.WRONG),
+        ("Path", "path/", state.WRONG, state.WRONG),
+        ("Path", "/path/", state.WRONG, state.WRONG),
+        ("Path", "paths", state.WRONG, state.WRONG),
+        ("Path", "/paths", state.WRONG, state.WRONG),
+        ("Path", "paths/", state.WRONG, state.WRONG),
+        ("Path", "/paths/", state.WRONG, state.WRONG),
+        ("sOme/path", "some/path", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/path", state.WRONG, state.WRONG),
+        ("sOme/path", "some/path/", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/path/", state.WRONG, state.WRONG),
+        ("sOme/path", "somes/path", state.WRONG, state.WRONG),
+        ("sOme/path", "/somes/path", state.WRONG, state.WRONG),
+        ("sOme/path", "somes/path/", state.WRONG, state.WRONG),
+        ("sOme/path", "/somes/path/", state.WRONG, state.WRONG),
+        ("sOme/path", "some/paath", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/paath", state.WRONG, state.WRONG),
+        ("sOme/path", "some/paath/", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/paath/", state.WRONG, state.WRONG),
+        ("sOme/path", "x/some/path", state.WRONG, state.WRONG),
+        ("sOme/path", "some/path/x", state.WRONG, state.WRONG),
+        ("sOme/path", "x/some/path/x", state.WRONG, state.WRONG),
+        ("Path", "/pAth", state.WRONG, state.WRONG),
+        ("Path", "pAth/", state.WRONG, state.WRONG),
+        ("Path", "/pAth/", state.WRONG, state.WRONG),
+        ("Path", "pAths", state.WRONG, state.WRONG),
+        ("Path", "/pAths", state.WRONG, state.WRONG),
+        ("Path", "pAths/", state.WRONG, state.WRONG),
+        ("Path", "/pAths/", state.WRONG, state.WRONG),
+        ("sOme/path", "some/patH", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/patH", state.WRONG, state.WRONG),
+        ("sOme/path", "some/patH/", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/patH/", state.WRONG, state.WRONG),
+        ("sOme/path", "somes/patH", state.WRONG, state.WRONG),
+        ("sOme/path", "/somes/patH", state.WRONG, state.WRONG),
+        ("sOme/path", "somes/patH/", state.WRONG, state.WRONG),
+        ("sOme/path", "/somes/patH/", state.WRONG, state.WRONG),
+        ("sOme/path", "some/paatH", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/paatH", state.WRONG, state.WRONG),
+        ("sOme/path", "some/paatH/", state.WRONG, state.WRONG),
+        ("sOme/path", "/some/paatH/", state.WRONG, state.WRONG),
+        ("sOme/path", "x/some/patH", state.WRONG, state.WRONG),
+        ("sOme/path", "some/patH/x", state.WRONG, state.WRONG),
+        ("sOme/path", "x/some/patH/x", state.WRONG, state.WRONG),
     ],
 )
 def test_on_ciroute(
-    asgi_context: context.Context, path: str, pattern: str, valid: bool
+    mock_context: context.Context,
+    arrange_path,
+    arrange_pattern,
+    arrange_state,
+    assert_state,
 ):
-    asgi_context.path = path.strip("/")
-    handler = req.on_ciroute(pattern)
+    # arrange
+    mock_context.request.path = arrange_path.strip("/")
+    ctx = state.pack(arrange_state, mock_context)
+    handler = req.on_ciroute(arrange_pattern)
 
-    ctx: context.StateContext = handler(asgi_context)
+    # act
+    ctx: context.StateContext = handler(ctx)
 
-    assert state.is_valid(ctx) == valid
+    # assert
+    assert ctx.state == assert_state
 
 
 @pytest.mark.parametrize(
-    "path,pattern,valid,afterpath",
+    "arrange_path,arrange_pattern,arrange_state,assert_state,arrange_afterpath",
     [
-        ("subroute/path", "subroute", True, "path"),
-        ("subroute/path", "subroute/", True, "path"),
-        ("subroute/path", "/subroute", True, "path"),
-        ("subroute/path", "/subroute/", True, "path"),
-        ("subroute/path", "subroutes", False, "subroute/path"),
-        ("subroute/path", "subroutes/", False, "subroute/path"),
-        ("subroute/path", "/subroutes", False, "subroute/path"),
-        ("subroute/path", "/subroutes/", False, "subroute/path"),
-        ("Subroute/path", "subroute", True, "path"),
-        ("Subroute/path", "subroute/", True, "path"),
-        ("Subroute/path", "/subroute", True, "path"),
-        ("Subroute/path", "/subroute/", True, "path"),
-        ("Subroute/path", "subroutes", False, "Subroute/path"),
-        ("Subroute/path", "subroutes/", False, "Subroute/path"),
-        ("Subroute/path", "/subroutes", False, "Subroute/path"),
-        ("Subroute/path", "/subroutes/", False, "Subroute/path"),
-        ("subroute/path", "/subroutes/", False, "subroute/path"),
-        ("Subroute/path", "suBroute", True, "path"),
-        ("Subroute/path", "suBroute/", True, "path"),
-        ("Subroute/path", "/suBroute", True, "path"),
-        ("Subroute/path", "/suBroute/", True, "path"),
-        ("Subroute/path", "suBroutes", False, "Subroute/path"),
-        ("Subroute/path", "suBroutes/", False, "Subroute/path"),
-        ("Subroute/path", "/suBroutes", False, "Subroute/path"),
-        ("Subroute/path", "/suBroutes/", False, "Subroute/path"),
+        ("subroute/path", "subroute", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "subroute/", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "/subroute", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "/subroute/", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "subroutes", state.RIGHT, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroutes/", state.RIGHT, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes", state.RIGHT, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes/", state.RIGHT, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroute", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroute/", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroute", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroute/", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroutes", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroutes/", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes/", state.WRONG, state.WRONG, "subroute/path"),
+    ],
+)
+def test_on_subroute(
+    mock_context: context.Context,
+    arrange_path,
+    arrange_pattern,
+    arrange_state,
+    assert_state,
+    arrange_afterpath,
+):
+    # arrange
+    mock_context.request.path = arrange_path
+    ctx = state.pack(arrange_state, mock_context)
+    handle = req.on_subroute(arrange_pattern)
+
+    # act
+    ctx: context.StateContext = handle(ctx)
+
+    # assert
+    assert ctx.state == assert_state
+    assert ctx.value.request.path == arrange_afterpath
+
+
+@pytest.mark.parametrize(
+    "arrange_path,arrange_pattern,arrange_state,assert_state,arrange_afterpath",
+    [
+        ("subroute/path", "subroute", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "subroute/", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "/subroute", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "/subroute/", state.RIGHT, state.RIGHT, "path"),
+        ("subroute/path", "subroutes", state.RIGHT, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroutes/", state.RIGHT, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes", state.RIGHT, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes/", state.RIGHT, state.WRONG, "subroute/path"),
+        ("Subroute/path", "subroute", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "subroute/", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "/subroute", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "/subroute/", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "subroutes", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "subroutes/", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/subroutes", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/subroutes/", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("subroute/path", "/subroutes/", state.RIGHT, state.WRONG, "subroute/path"),
+        ("Subroute/path", "suBroute", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "suBroute/", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "/suBroute", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "/suBroute/", state.RIGHT, state.RIGHT, "path"),
+        ("Subroute/path", "suBroutes", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "suBroutes/", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/suBroutes", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/suBroutes/", state.RIGHT, state.WRONG, "Subroute/path"),
+        ("subroute/path", "subroute", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroute/", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroute", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroute/", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroutes", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "subroutes/", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes", state.WRONG, state.WRONG, "subroute/path"),
+        ("subroute/path", "/subroutes/", state.WRONG, state.WRONG, "subroute/path"),
+        ("Subroute/path", "subroute", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "subroute/", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/subroute", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/subroute/", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "subroutes", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "subroutes/", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/subroutes", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/subroutes/", state.WRONG, state.WRONG, "Subroute/path"),
+        ("subroute/path", "/subroutes/", state.WRONG, state.WRONG, "subroute/path"),
+        ("Subroute/path", "suBroute", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "suBroute/", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/suBroute", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/suBroute/", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "suBroutes", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "suBroutes/", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/suBroutes", state.WRONG, state.WRONG, "Subroute/path"),
+        ("Subroute/path", "/suBroutes/", state.WRONG, state.WRONG, "Subroute/path"),
     ],
 )
 def test_on_cisubroute(
-    asgi_context: context.Context, path: str, pattern: str, valid: bool, afterpath: str
+    mock_context: context.Context,
+    arrange_path,
+    arrange_pattern,
+    arrange_state,
+    assert_state,
+    arrange_afterpath,
 ):
-    asgi_context.path = path
-    handle = req.on_cisubroute(pattern)
+    # arrange
+    mock_context.request.path = arrange_path
+    ctx = state.pack(arrange_state, mock_context)
+    handle = req.on_cisubroute(arrange_pattern)
 
-    ctx: context.StateContext = handle(asgi_context)
+    # act
+    ctx: context.StateContext = handle(ctx)
 
-    assert state.is_valid(ctx) == valid
-    assert ctx.value.path == afterpath
+    # assert
+    assert ctx.state == assert_state
+    assert ctx.value.request.path == arrange_afterpath

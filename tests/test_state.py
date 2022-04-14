@@ -1,167 +1,106 @@
-from typing import Any
-
+"""Tests for `State` monad."""
 import pytest
 
 from mona import state
 
 
 @pytest.mark.parametrize(
-    "monad,valid",
+    "value, init_state, target_state",
     [
-        (5, False),
-        (state.Valid(5), True),
-        (state.Invalid(5), False),
+        (1, 1, 2),
+        ("1", 1, 2),
+        (object(), 1, 2),
+        (1, "1", "2"),
+        ("1", "1", "2"),
+        (object(), "1", "2"),
+        (1, object(), object()),
+        ("1", object(), object()),
+        (object(), object(), object()),
     ],
 )
-def test_is_valid(monad: state._State, valid: bool):
-    assert state.is_valid(monad) is valid
+def test_pack(value, init_state, target_state):
+    cnt: state.State = state.pack(target_state, value)
+
+    assert cnt.state == target_state
+    assert cnt.value == value
 
 
 @pytest.mark.parametrize(
-    "monad,valid",
+    "value, init_state, target_state",
     [
-        (5, False),
-        (state.Valid(5), False),
-        (state.Invalid(5), True),
+        (1, 1, 2),
+        ("1", 1, 2),
+        (object(), 1, 2),
+        (1, "1", "2"),
+        ("1", "1", "2"),
+        (object(), "1", "2"),
+        (1, object(), object()),
+        ("1", object(), object()),
+        (object(), object(), object()),
     ],
 )
-def test_is_invalid(monad: state._State, valid: bool):
-    assert state.is_invalid(monad) is valid
+def test_curry_pack(value, init_state, target_state):
+    switcher = state.pack(target_state)
+
+    cnt: state.State = switcher(value)
+
+    assert cnt.state == target_state
+    assert cnt.value == value
 
 
 @pytest.mark.parametrize(
-    "monad,valid",
+    "value, init_state, guard_state, target_value, target_state, function",
     [
-        (5, False),
-        (state.Valid(5), True),
-        (state.Invalid(5), True),
+        (1, 1, 1, 1, 1, lambda x: state.State(x, 1)),
+        (1, 1, 2, 1, 1, lambda x: state.State(x + 1, 1)),
+        (1, 1, 2, 1, 1, lambda x: state.State(x + 1, 3)),
+        (1, 1, 1, 2, 3, lambda x: state.State(x + 1, 3)),
     ],
 )
-def test_is_state(monad: state._State, valid: bool):
-    assert state.is_state(monad) is valid
+def test_accepts(value, init_state, guard_state, target_value, target_state, function):
+    cnt = state.State(value, init_state)
+    guard = state.accpets(guard_state)
+    function = guard(function)
+
+    cnt = function(cnt)
+
+    assert cnt.value == target_value
+    assert cnt.state == target_state
 
 
 @pytest.mark.parametrize(
-    "value,monad",
+    "value, init_state, guard_state, target_value, target_state, function",
     [
-        (5, state.Valid(5)),
-        (state.Invalid(5), state.Valid(5)),
-        (state.Valid(5), state.Valid(5)),
+        (1, 1, 2, 1, 1, lambda x: state.State(x, 1)),
+        (1, 1, 1, 1, 1, lambda x: state.State(x + 1, 1)),
+        (1, 1, 1, 1, 1, lambda x: state.State(x + 1, 3)),
+        (1, 1, 2, 2, 3, lambda x: state.State(x + 1, 3)),
     ],
 )
-def test_valid(value: Any, monad: state.State[Any]):
-    assert state.valid(value) == monad
+def test_rejects(value, init_state, guard_state, target_value, target_state, function):
+    cnt = state.State(value, init_state)
+    guard = state.rejects(guard_state)
+    function = guard(function)
+
+    cnt = function(cnt)
+
+    assert cnt.value == target_value
+    assert cnt.state == target_state
 
 
 @pytest.mark.parametrize(
-    "value,monad",
+    "switcher, target_state",
     [
-        (5, state.Invalid(5)),
-        (state.Invalid(5), state.Invalid(5)),
-        (state.Valid(5), state.Invalid(5)),
+        (state.right, state.RIGHT),
+        (state.wrong, state.WRONG),
+        (state.error, state.ERROR),
+        (state.final, state.FINAL),
     ],
 )
-def test_invalid(value: Any, monad: state.State[Any]):
-    assert state.invalid(value) == monad
+def test_state_switching(
+    switcher,
+    target_state,
+):
+    ctx: state.State[int] = switcher(1)
 
-
-@pytest.mark.parametrize(
-    "value,monad",
-    [
-        (5, state.Valid(5)),
-        (state.Invalid(5), state.Invalid(5)),
-        (state.Valid(5), state.Valid(5)),
-    ],
-)
-def test_pack(value: Any, monad: state.State[Any]):
-    assert state.pack(value) == monad
-
-
-@pytest.mark.parametrize(
-    "value,monad",
-    [
-        (5, 5),
-        (state.Invalid(5), 5),
-        (state.Valid(5), 5),
-    ],
-)
-def test_unpack(value: Any, monad: state.State[Any]):
-    assert state.unpack(value) == monad
-
-
-@pytest.mark.parametrize(
-    "input,output",
-    [
-        (1, state.Valid(2)),
-        (state.Valid(1), state.Valid(2)),
-        (state.Invalid(1), state.Invalid(1)),
-    ],
-)
-def test_bind(input, output):
-    assert state.bind(lambda x: x + 1, input) == output
-
-
-@pytest.mark.parametrize(
-    "input,output",
-    [
-        (1, state.Valid(7)),
-        (state.Valid(1), state.Valid(7)),
-        (state.Invalid(1), state.Invalid(1)),
-    ],
-)
-def test_compose_simple(input, output):
-
-    func = state.compose(
-        lambda x: x + 1,
-        lambda x: x**2,
-        lambda x: x + 3,
-    )
-
-    assert func(input) == output
-
-
-@pytest.mark.parametrize(
-    "input,output",
-    [
-        (1, state.Invalid(4)),
-        (state.Valid(1), state.Invalid(4)),
-        (state.Invalid(1), state.Invalid(1)),
-        (2, state.Valid(12)),
-        (state.Valid(2), state.Valid(12)),
-        (state.Invalid(2), state.Invalid(2)),
-    ],
-)
-def test_compose_with_invalid(input, output):
-
-    func = state.compose(
-        lambda x: x + 1,
-        lambda x: x**2,
-        lambda x: state.valid(x) if x > 5 else state.invalid(x),
-        lambda x: x + 3,
-    )
-
-    assert func(input) == output
-
-
-@pytest.mark.parametrize(
-    "input,output",
-    [
-        (1, state.Valid(1)),
-        (state.Invalid(1), state.Invalid(1)),
-        (4, state.Valid(5)),
-        (state.Valid(4), state.Valid(5)),
-        (state.Invalid(4), state.Invalid(4)),
-    ],
-)
-def test_choose(input, output):
-
-    func = state.choose(
-        lambda x: state.invalid(x),
-        state.compose(
-            lambda x: state.valid(x) if x > 3 else state.invalid(x),
-            lambda x: x + 1,
-        ),
-    )
-    result = func(input)
-
-    assert result == output
+    assert ctx.state == target_state
