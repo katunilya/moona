@@ -7,10 +7,7 @@
     "python.testing.pytestArgs": [
         "tests"
     ],
-    "restructuredtext.confPath": "",
     "vscodeGitCommit.template": [
         "{message}"
-    ],
-    "esbonio.server.enabled": true,
-    "esbonio.sphinx.confDir": ""
+    ]
 }
