@@ -1,6 +1,6 @@
-from toolz import pipe
+import toolz
 
-from mona import context, future, handler
+from mona import context, future, handler, state
 
 
 def create(*handlers: handler.Handler) -> context.ASGIServer:
@@ -9,19 +9,20 @@ def create(*handlers: handler.Handler) -> context.ASGIServer:
     Returns:
         context.ASGIServer: ASGI function
     """
-    _handler = handler.compose(*handlers)
+    _handler = future.compose(*handlers)
 
     async def _asgi(
         scope: context.Scope,
         receive: context.Receive,
         send: context.Send,
     ) -> None:
-        ctx: context.FutureStateContext = pipe(
+        ctx = toolz.pipe(
             context.from_asgi(scope, receive, send),
-            context.right,
+            state.right,
             future.from_value,
+            future.bind(_handler),
         )
 
-        await ctx >> _handler
+        await ctx
 
     return _asgi
