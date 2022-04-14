@@ -1,6 +1,6 @@
 # Events
 
-> Auto-generated documentation for [mona.res.events](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/events.py) module.
+> Auto-generated documentation for [mona.res.events](https://github.com/katunilya/mona/blob/main/mona/res/events.py) module.
 
 - [Mona](../../README.md#mona) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / [Res](index.md#res) / Events
     - [send_body](#send_body)
@@ -8,7 +8,7 @@
 
 ## send_body
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/events.py#L20)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/events.py#L20)
 
 ```python
 @state.accepts_right
@@ -19,7 +19,7 @@ Send response body event, which closes connection between server and client.
 
 ## send_start
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/events.py#L4)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/events.py#L4)
 
 ```python
 @state.accepts_right

@@ -1,6 +1,6 @@
 # State
 
-> Auto-generated documentation for [mona.state](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py) module.
+> Auto-generated documentation for [mona.state](https://github.com/katunilya/mona/blob/main/mona/state.py) module.
 
 - [Mona](../README.md#mona) / [Modules](../MODULES.md#mona-modules) / [Mona](index.md#mona) / State
     - [State](#state)
@@ -27,7 +27,7 @@
 
 ## State
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L15)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L15)
 
 ```python
 dataclasses.dataclass(frozen=True)
@@ -42,7 +42,7 @@ Container for [State](#state)ful values.
 
 ## accepts_error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L228)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L228)
 
 ```python
 def accepts_error(
@@ -59,7 +59,7 @@ Function will be executed only on ERROR state.
 
 ## accepts_final
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L240)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L240)
 
 ```python
 def accepts_final(
@@ -76,7 +76,7 @@ Function will be executed only on ERROR state.
 
 ## accepts_right
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L204)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L204)
 
 ```python
 def accepts_right(
@@ -93,7 +93,7 @@ Function will be executed only on RIGHT state.
 
 ## accepts_wrong
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L216)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L216)
 
 ```python
 def accepts_wrong(
@@ -110,7 +110,7 @@ Function will be executed only on WRONG state.
 
 ## accpets
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L48)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L48)
 
 ```python
 def accpets(
@@ -152,7 +152,7 @@ typing.Callable[
 
 ## error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L132)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L132)
 
 ```python
 def error(value: T) -> State[T]:
@@ -174,7 +174,7 @@ Wraps value into State container in ERROR state.
 
 ## final
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L144)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L144)
 
 ```python
 def final(value: T) -> State[T]:
@@ -196,7 +196,7 @@ Wraps value into State container in FINAL state.
 
 ## pack
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L22)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L22)
 
 ```python
 @toolz.curry
@@ -220,7 +220,7 @@ Curried way of packing value into State container.
 
 ## rejects
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L74)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L74)
 
 ```python
 def rejects(
@@ -262,7 +262,7 @@ typing.Callable[
 
 ## rejects_error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L276)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L276)
 
 ```python
 def rejects_error(
@@ -279,7 +279,7 @@ Function will be executed only on not ERROR state.
 
 ## rejects_final
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L288)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L288)
 
 ```python
 def rejects_final(
@@ -296,7 +296,7 @@ Function will be executed only on not ERROR state.
 
 ## rejects_right
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L252)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L252)
 
 ```python
 def rejects_right(
@@ -313,7 +313,7 @@ Function will be executed only on not RIGHT state.
 
 ## rejects_wrong
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L264)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L264)
 
 ```python
 def rejects_wrong(
@@ -330,7 +330,7 @@ Function will be executed only on not WRONG state.
 
 ## right
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L108)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L108)
 
 ```python
 def right(value: T) -> State[T]:
@@ -352,7 +352,7 @@ Wraps value into State container in RIGHT state.
 
 ## switch_error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L180)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L180)
 
 ```python
 def switch_error(cnt: State[T]) -> State[T]:
@@ -374,7 +374,7 @@ Changes state of some container to ERROR.
 
 ## switch_final
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L192)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L192)
 
 ```python
 def switch_final(cnt: State[T]) -> State[T]:
@@ -396,7 +396,7 @@ Changes state of some container to FINAL.
 
 ## switch_right
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L156)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L156)
 
 ```python
 def switch_right(cnt: State[T]) -> State[T]:
@@ -418,7 +418,7 @@ Changes state of some container to RIGHT.
 
 ## switch_wrong
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L168)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L168)
 
 ```python
 def switch_wrong(cnt: State[T]) -> State[T]:
@@ -440,7 +440,7 @@ Changes state of some container to WRONG.
 
 ## unpack
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L36)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L36)
 
 ```python
 def unpack(cnt: State[T]) -> T:
@@ -462,7 +462,7 @@ Extract value from State container.
 
 ## wrong
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/state.py#L120)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L120)
 
 ```python
 def wrong(value: T) -> State[T]:
