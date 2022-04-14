@@ -1,8 +1,6 @@
 from typing import Union
 
-from toolz.functoolz import pipe
-
-from mona import context, state
+from mona import context, handler, state
 
 GET = "GET"
 POST = "POST"
@@ -27,55 +25,95 @@ Method = Union[
 ]
 
 
-def on_method(method: Method) -> context.Handler:
-    """Continue executeion if request  method is passed method."""
+def on_method(method: Method) -> handler.Handler:
+    """Continue execution if request  method is passed method."""
 
+    @state.accepts_right
     def _handler(ctx: context.Context) -> context.StateContext:
-        return state.Valid(ctx) if ctx.method == method else state.Invalid(ctx)
+        if ctx.request.method == method:
+            return state.right(ctx)
+
+        return state.wrong(ctx)
 
     return _handler
 
 
+@state.accepts_right
 def on_get(ctx: context.Context) -> context.StateContext:
-    """Continue executeion if request  method is `GET`."""
-    return pipe(ctx, on_method(GET))
+    """Continue execution if request  method is `GET`."""
+    if ctx.request.method == GET:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_post(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `POST`."""
-    return pipe(ctx, on_method(POST))
+    if ctx.request.method == POST:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_patch(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `PATCH`."""
-    return pipe(ctx, on_method(PATCH))
+    if ctx.request.method == PATCH:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_put(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `PUT`."""
-    return pipe(ctx, on_method(PUT))
+    if ctx.request.method == PUT:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_delete(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `DELETE`."""
-    return pipe(ctx, on_method(DELETE))
+    if ctx.request.method == DELETE:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_options(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `OPTIONS`."""
-    return pipe(ctx, on_method(OPTIONS))
+    if ctx.request.method == OPTIONS:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_head(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `HEAD`."""
-    return pipe(ctx, on_method(HEAD))
+    if ctx.request.method == HEAD:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_trace(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `TRACE`."""
-    return pipe(ctx, on_method(TRACE))
+    if ctx.request.method == TRACE:
+        return state.right(ctx)
+
+    return state.wrong(ctx)
 
 
+@state.accepts_right
 def on_connect(ctx: context.Context) -> context.StateContext:
     """Continue execution if request method is `CONNECT`."""
-    return pipe(ctx, on_method(CONNECT))
+    if ctx.request.method == CONNECT:
+        return state.right(ctx)
+
+    return state.wrong(ctx)

@@ -1,106 +1,300 @@
-from dataclasses import dataclass
-from functools import reduce
-from typing import Callable, Generic, TypeVar, Union
+import dataclasses
+import functools
+import typing
 
-T = TypeVar("T")
-V = TypeVar("V")
+import toolz
 
+from mona import error as e
 
-@dataclass(frozen=True)
-class Valid(Generic[T]):
-    """Container for `Valid` `State` of `value`."""
-
-    __slots__ = "value"
-
-    value: T
+T = typing.TypeVar("T")
+V = typing.TypeVar("V")
+T_ERROR = typing.TypeVar("T_ERROR", bound=BaseException)
 
 
-@dataclass(frozen=True)
-class Invalid(Generic[T]):
-    """Container for `Invalid` `State` of `value`."""
-
-    __slots__ = "value"
+@dataclasses.dataclass(frozen=True)
+class State(typing.Generic[T]):
+    """Container for `State`ful values."""
 
     value: T
+    state: typing.Any
 
 
-State = Union[Valid[T], Invalid[T]]
-_State = Union[T, State[T]]
+@toolz.curry
+def pack(state: typing.Any, value: T) -> State[T]:
+    """Curried way of packing value into State container.
+
+    Args:
+        state (typing.Any): to assign container
+        value (T): to wrap in container
+
+    Returns:
+        State[T]: container
+    """
+    return State(value, state)
 
 
-def is_state(value: _State[T]) -> bool:
-    """`True` if `value` is `Valid` or `Invalid`."""
-    return isinstance(value, (Valid, Invalid))
+def unpack(cnt: State[T]) -> T:
+    """Extract value from State container.
+
+    Args:
+        cnt (State[T]): container
+
+    Returns:
+        T: value
+    """
+    return cnt.value
 
 
-def is_valid(value: _State[T]) -> bool:
-    """`True` if `value` is `Valid`."""
-    return isinstance(value, Valid)
+def accpets(
+    state: typing.Any,
+) -> typing.Callable[[typing.Callable[[T], V]], typing.Callable[[State[T]], State[V]]]:
+    """Decorator that executes function only if state of container is `state`.
+
+    Args:
+        state (typing.Any): target state
+
+    Returns:
+        typing.Callable[
+            [typing.Callable[[T], V]],
+            typing.Callable[[State[T]], State[V]]]: decorator
+    """
+
+    def _decorator(
+        function: typing.Callable[[T], V]
+    ) -> typing.Callable[[State[T]], State[V]]:
+        @functools.wraps(function)
+        def _wrapper(cnt: State[T]) -> State[V]:
+            return function(cnt.value) if cnt.state == state else cnt
+
+        return _wrapper
+
+    return _decorator
 
 
-def is_invalid(value: _State[T]) -> bool:
-    """`True` if `value` is `Invalid`."""
-    return isinstance(value, Invalid)
+def rejects(
+    state: typing.Any,
+) -> typing.Callable[
+    [typing.Callable[[T], State[V]]], typing.Callable[[State[T]], State[V]]
+]:
+    """Decorator that executes function only if state of container is not `state`.
+
+    Args:
+        state (typing.Any): target state
+
+    Returns:
+        typing.Callable[
+            [typing.Callable[[T], V]],
+            typing.Callable[[State[T]], State[V]]]: decorator
+    """
+
+    def _decorator(
+        function: typing.Callable[[T], State[V]]
+    ) -> typing.Callable[[State[T]], State[V]]:
+        @functools.wraps(function)
+        def _wrapper(cnt: State[T]) -> State[V]:
+            return function(cnt.value) if cnt.state != state else cnt
+
+        return _wrapper
+
+    return _decorator
 
 
-def valid(value: _State[T]) -> Valid[T]:
-    """Packs passed `value` into `Valid` container, even if it is `Invalid`."""
-    return Valid(value.value if isinstance(value, (Valid, Invalid)) else value)
+RIGHT = "RIGHT"  # calculation finished successfully
+WRONG = "WRONG"  # calculation finished, but result is not appropriate
+ERROR = "ERROR"  # calculation finished with error
+FINAL = "FINAL"  # calculation is complete and should not be continued
 
 
-def invalid(value: _State[T]) -> Invalid[T]:
-    """Packs passed `value` into `Invalid` container, even if it is `Valid`."""
-    return Invalid(value.value if isinstance(value, (Valid, Invalid)) else value)
+def right(value: T) -> State[T]:
+    """Wraps value into State container in RIGHT state.
+
+    Args:
+        value (T): to wrap
+
+    Returns:
+        State[T]: container
+    """
+    return State(value, RIGHT)
 
 
-def pack(value: _State[T]) -> State[T]:
-    """Packs `value` into `Valid` container if one is not container already."""
-    return value if isinstance(value, (Valid, Invalid)) else Valid(value)
+def wrong(value: T) -> State[T]:
+    """Wraps value into State container in WRONG state.
+
+    Args:
+        value (T): to wrap
+
+    Returns:
+        State[T]: container
+    """
+    return State(value, WRONG)
 
 
-def unpack(monad: _State[T]) -> T:
-    """Returns `value` of `monad` if one is `State`, else returns `monad` itself."""
-    return monad.value if isinstance(monad, (Valid, Invalid)) else monad
+def error(value: T) -> State[T]:
+    """Wraps value into State container in ERROR state.
+
+    Args:
+        value (T): to wrap
+
+    Returns:
+        State[T]: container
+    """
+    return State(value, ERROR)
 
 
-def bind(function: Callable[[T], _State[V]], monad: _State[T]) -> State[V]:
-    """Executes `function` only if `monad` is not in `Invalid`."""
-    if isinstance(monad, Invalid):
-        return monad
+def final(value: T) -> State[T]:
+    """Wraps value into State container in FINAL state.
 
-    return pack(function(unpack(monad)))
+    Args:
+        value (T): to wrap
 
-
-def compose(*functions: Callable[[T], _State[V]]) -> Callable[[_State[T]], State[V]]:
-    """Composition of multiple `functions` with `State` monad binding."""
-
-    def _compose(monad: _State[T]) -> State[V]:
-        monad = pack(monad)
-
-        if isinstance(monad, Invalid):
-            return monad
-
-        return reduce(lambda m, f: bind(f, m), functions, monad)
-
-    return _compose
+    Returns:
+        State[T]: container
+    """
+    return State(value, FINAL)
 
 
-def choose(*functions: Callable[[T], _State[V]]) -> Callable[[_State[T]], State[V]]:
-    """Composition that returns first `Valid` result of `functions` execution."""
+def switch_right(cnt: State[T]) -> State[T]:
+    """Changes state of some container to RIGHT.
 
-    def _choose(monad: _State[T]) -> State[V]:
-        monad = pack(monad)
+    Args:
+        cnt (State[T]): to switch state
 
-        if isinstance(monad, Invalid):
-            return monad
+    Returns:
+        State[T]: resulting state
+    """
+    return State(cnt.value, RIGHT)
 
-        return next(
-            (
-                monad_
-                for monad_ in (bind(func, monad) for func in functions)
-                if isinstance(monad_, Valid)
-            ),
-            monad,
-        )
 
-    return _choose
+def switch_wrong(cnt: State[T]) -> State[T]:
+    """Changes state of some container to WRONG.
+
+    Args:
+        cnt (State[T]): to switch state
+
+    Returns:
+        State[T]: resulting state
+    """
+    return State(cnt.value, WRONG)
+
+
+def switch_error(cnt: State[T]) -> State[T]:
+    """Changes state of some container to ERROR.
+
+    Args:
+        cnt (State[T]): to switch state
+
+    Returns:
+        State[T]: resulting state
+    """
+    return State(cnt.value, ERROR)
+
+
+def switch_final(cnt: State[T]) -> State[T]:
+    """Changes state of some container to FINAL.
+
+    Args:
+        cnt (State[T]): to switch state
+
+    Returns:
+        State[T]: resulting state
+    """
+    return State(cnt.value, FINAL)
+
+
+def accepts_right(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on RIGHT state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state == RIGHT else cnt
+
+    return _wrapper
+
+
+def accepts_wrong(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on WRONG state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state == WRONG else cnt
+
+    return _wrapper
+
+
+def accepts_error(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on ERROR state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state == ERROR else cnt
+
+    return _wrapper
+
+
+def accepts_final(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on ERROR state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state == FINAL else cnt
+
+    return _wrapper
+
+
+def rejects_right(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on not RIGHT state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state != RIGHT else cnt
+
+    return _wrapper
+
+
+def rejects_wrong(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on not WRONG state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state != WRONG else cnt
+
+    return _wrapper
+
+
+def rejects_error(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on not ERROR state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state != ERROR else cnt
+
+    return _wrapper
+
+
+def rejects_final(
+    function: typing.Callable[[T], State[V]]
+) -> typing.Callable[[State[T]], State[V]]:
+    """Function will be executed only on not ERROR state."""
+
+    @functools.wraps(function)
+    def _wrapper(cnt: State[T]) -> State[V]:
+        return function(cnt.value) if cnt.state != FINAL else cnt
+
+    return _wrapper
+
+
+RE = typing.Union[State[T], State[e.Error]]

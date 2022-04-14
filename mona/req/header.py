@@ -1,36 +1,46 @@
-from toolz import curried
-from toolz import functoolz as ft
+from toolz import curried, pipe
 
-from mona import context, state
+from mona import context, handler, state
 
 
-def parse_headers(ctx: context.Context) -> context.Context:
-    """Converts raw request headers into dict[str, str]."""
-    if ctx.request_headers is not None:
-        return
+def has_header(key: str, value: str, required: bool = False) -> handler.Handler:
+    """Continue execution if request has header `key` of `value`.
 
-    ctx.request_headers = ft.pipe(
-        ctx.raw_headers,
-        curried.map(lambda header: (header[0].decode("utf-8").casefold(), header[1])),
+    Accpts only context in RIGHT state. Returns context in RIGHT state if header with
+    required value is present in request headers. Returns context in WRONG state if not.
+
+    Args:
+        key (str): of header
+        value (str): of header
+
+    Returns:
+        handler3.Handler: handler
+    """
+    key = key.lower()
+    value = value.encode("UTF-8")
+
+    @state.accepts_right
+    def _handler(cnt: context.Context) -> state.State[context.Context]:
+        if header := cnt.request.headers.get(key, None):
+            return state.right(cnt) if header == value else state.wrong(cnt)
+
+        return state.wrong(cnt)
+
+    return _handler
+
+
+def take_headers(ctx: context.Context) -> state.State[dict[str, str]]:
+    """Extracts request header as dict of strings.
+
+    Args:
+        ctx (context.Context): source
+
+    Returns:
+        state.State[dict[str, str]]: headers
+    """
+    return pipe(
+        ctx.request.headers,
+        curried.valmap(lambda value: value.decode("UTF-8")),
         dict,
-    )
-
-    return ctx
-
-
-def on_header(key: str, value: str) -> context.Handler:
-    """Continue execution if request has header `key` of `value`."""
-    key = key.casefold()
-    value = value.encode("utf-8")
-
-    def _handler(ctx: context.Context) -> context.StateContext:
-        return (
-            state.Valid(ctx)
-            if ctx.request_headers.get(key, None) == value
-            else state.Invalid(ctx)
-        )
-
-    return state.compose(
-        parse_headers,
-        _handler,
+        state.right,
     )

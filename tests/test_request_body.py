@@ -4,88 +4,169 @@ from typing import ByteString
 import pytest
 from pydantic import BaseModel
 
-from mona import context, req
+from mona import req, state
+from mona.context import Context
+from mona.req.body import RequestBodyIsNotReceivedError
 
 
 @pytest.mark.parametrize(
-    "raw_body,parsed_body",
+    "raw_body,target_state,target_value,error_type",
     [
-        (b'{"abc": 3}', {"abc": 3}),
-        (b'{"abc": "some_str"}', {"abc": "some_str"}),
-        (b"{}", {}),
+        (b"", state.RIGHT, b"", None),
+        (b"Hello", state.RIGHT, b"Hello", None),
+        (None, state.ERROR, None, RequestBodyIsNotReceivedError),
     ],
 )
-def test_parse_json_to_dict(
-    asgi_context: context.Context, raw_body: ByteString, parsed_body: dict
+def test_take_body(
+    mock_context: Context, raw_body, target_state, target_value, error_type
 ):
-    asgi_context.raw_request_body = raw_body
-    ctx = req.parse_json_to_dict(asgi_context)
+    mock_context.request.body = raw_body
 
-    assert ctx.request_body == parsed_body
+    body: state.RE[ByteString] = req.take_body(mock_context)
+
+    assert body.state == target_state
+
+    if body.state == state.ERROR:
+        assert isinstance(body.value, error_type)
+    else:
+        assert body.value == target_value
+
+
+@pytest.mark.parametrize(
+    "raw_body,target_state,target_value,error_type",
+    [
+        (b'{"abc": 3}', state.RIGHT, {"abc": 3}, None),
+        (b'{"abc": "some_str"}', state.RIGHT, {"abc": "some_str"}, None),
+        (b"{}", state.RIGHT, {}, None),  # noqa
+        (None, state.ERROR, None, RequestBodyIsNotReceivedError),
+    ],
+)
+def test_take_body_as_dict(
+    mock_context: Context, raw_body, target_state, target_value, error_type
+):
+    mock_context.request.body = raw_body
+
+    body: state.RE[dict] = req.take_body_as_dict(mock_context)
+
+    assert body.state == target_state
+
+    if body.state == state.ERROR:
+        assert isinstance(body.value, error_type)
+    else:
+        assert body.value == target_value
 
 
 @dataclass
-class User:
+class DataclassUser:  # noqa
 
     name: str
     age: int
 
 
 @pytest.mark.parametrize(
-    "raw_body,parsed_body",
+    "raw_body,target_state,target_value,error_type",
     [
-        (b'{"name": "Ilya", "age": 21}', User(name="Ilya", age=21)),
-        (b'{"name": "Marina", "age": 23}', User(name="Marina", age=23)),
+        (
+            b'{"name": "Ilya", "age": 21}',
+            state.RIGHT,
+            DataclassUser(name="Ilya", age=21),
+            None,
+        ),
+        (
+            b'{"name": "Marina", "age": 23}',
+            state.RIGHT,
+            DataclassUser(name="Marina", age=23),
+            None,
+        ),
+        (None, state.ERROR, None, RequestBodyIsNotReceivedError),
     ],
 )
-def test_parse_json_to_dataclass(
-    asgi_context: context.Context, raw_body: ByteString, parsed_body: object
+def test_take_body_as_dataclass(
+    mock_context: Context, raw_body, target_state, target_value, error_type
 ):
-    asgi_context.raw_request_body = raw_body
-    handler_ = req.parse_json_to_dataclass(User)
+    mock_context.request.body = raw_body
+    _handler = req.take_body_as_dataclass(DataclassUser)
 
-    ctx: context.Context = handler_(asgi_context)
+    body: state.RE[dict] = _handler(mock_context)
 
-    assert ctx.request_body == parsed_body
+    assert body.state == target_state
+
+    if body.state == state.ERROR:
+        assert isinstance(body.value, error_type)
+    else:
+        assert body.value == target_value
 
 
-class PydanticUser(BaseModel):
+class PydanticUser(BaseModel):  # noqa
 
     name: str
     age: int
 
 
 @pytest.mark.parametrize(
-    "raw_body,parsed_body",
+    "raw_body,target_state,target_value,error_type",
     [
-        (b'{"name": "Ilya", "age": 21}', PydanticUser(name="Ilya", age=21)),
-        (b'{"name": "Marina", "age": 23}', PydanticUser(name="Marina", age=23)),
+        (
+            b'{"name": "Ilya", "age": 21}',
+            state.RIGHT,
+            PydanticUser(name="Ilya", age=21),
+            None,
+        ),
+        (
+            b'{"name": "Marina", "age": 23}',
+            state.RIGHT,
+            PydanticUser(name="Marina", age=23),
+            None,
+        ),
+        (None, state.ERROR, None, RequestBodyIsNotReceivedError),
     ],
 )
-def test_parse_json_to_pydantic(
-    asgi_context: context.Context, raw_body: ByteString, parsed_body: object
+def test_take_body_as_pydantic(
+    mock_context: Context, raw_body, target_state, target_value, error_type
 ):
-    asgi_context.raw_request_body = raw_body
-    handler_ = req.parse_json_to_pydantic(PydanticUser)
+    mock_context.request.body = raw_body
+    _handler = req.take_body_as_pydantic(PydanticUser)
 
-    ctx: context.Context = handler_(asgi_context)
+    body: state.RE[dict] = _handler(mock_context)
 
-    assert ctx.request_body == parsed_body
+    assert body.state == target_state
+
+    if body.state == state.ERROR:
+        assert isinstance(body.value, error_type)
+    else:
+        assert body.value == target_value
 
 
 @pytest.mark.parametrize(
-    "raw_body,parsed_body",
+    "raw_body,target_state,target_value,error_type",
     [
-        (b'{"name": "Ilya", "age": 21}', """{"name": "Ilya", "age": 21}"""),
-        (b'{"name": "Marina", "age": 23}', """{"name": "Marina", "age": 23}"""),
-        (b"", ""),
-        (b"Hello, Tests!", "Hello, Tests!"),
+        (b"", state.RIGHT, "", None),
+        (b"Hello", state.RIGHT, "Hello", None),
+        (
+            b'{"name": "Ilya", "age": 21}',
+            state.RIGHT,
+            """{"name": "Ilya", "age": 21}""",
+            None,
+        ),
+        (
+            b'{"name": "Marina", "age": 23}',
+            state.RIGHT,
+            """{"name": "Marina", "age": 23}""",
+            None,
+        ),
+        (None, state.ERROR, None, RequestBodyIsNotReceivedError),
     ],
 )
-def test_parse_to_string(
-    asgi_context: context.Context, raw_body: ByteString, parsed_body: str
+def test_take_body_as_str(
+    mock_context: Context, raw_body, target_state, target_value, error_type
 ):
-    asgi_context.raw_request_body = raw_body
-    ctx = req.parse_to_string(asgi_context)
+    mock_context.request.body = raw_body
 
-    assert ctx.request_body == parsed_body
+    body: state.RE[ByteString] = req.take_body_as_str(mock_context)
+
+    assert body.state == target_state
+
+    if body.state == state.ERROR:
+        assert isinstance(body.value, error_type)
+    else:
+        assert body.value == target_value

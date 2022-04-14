@@ -1,6 +1,7 @@
 from mona import context, state
 
 
+@state.accepts_right
 def on_http(ctx: context.Context) -> context.StateContext:
-    """Returns valid `Context` when request type is `http`."""
-    return state.valid(ctx) if ctx.type == "http" else state.invalid(ctx)
+    """Returns right `Context` when request type is "http"."""
+    return state.right(ctx) if ctx.request.type_ == "http" else state.wrong(ctx)

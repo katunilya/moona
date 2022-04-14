@@ -1,103 +1,183 @@
-from typing import Any, Awaitable, ByteString, Dict, Iterable, Optional
+import dataclasses
+import typing
 
-from mona import future, state, types
+import toolz
+
+from mona import state
+
+Message = dict[str, typing.Any]
+Scope = Message
+Receive = typing.Callable[[], typing.Awaitable[Message]]
+Send = typing.Callable[[Message], typing.Awaitable[None]]
+ASGIServer = typing.Callable[[Scope, Receive, Send], typing.Awaitable[None]]
 
 
-class Context:
-    """Request handling context that stores all the required for computation info."""
+@dataclasses.dataclass
+class Client:
+    """Information about request client."""
+
+    __slots__ = "host", "port"
+    host: str
+    port: int
+
+
+@dataclasses.dataclass
+class Server:
+    """Information about server excepted request."""
+
+    __slots__ = "host", "port"
+    host: str
+    port: typing.Optional[int]
+
+
+@dataclasses.dataclass
+class Request:
+    """Immutable request data."""
 
     __slots__ = (
-        "type",
+        "type_",
+        "method",
+        "subprotocols",
         "asgi_version",
         "asgi_spec_version",
         "http_version",
-        "method",
         "scheme",
         "path",
-        "raw_path",
         "query_string",
-        "root_path",
-        "raw_headers",
-        "client_host",
-        "client_port",
-        "server_host",
-        "server_port",
-        "raw_subprotocols",
-        "receive",
-        "send",
-        "subprotocols",
-        "raw_request_body",
-        "request_body",
-        "request_headers",
-        "query",
-        "params",
-        "response_status",
-        "response_body",
-        "response_headers",
+        "headers",
+        "body",
+        "server",
+        "client",
     )
 
-    def __init__(
-        self,
-        scope: types.Scope,
-        receive: types.Receive,
-        send: types.Send,
-    ) -> None:
-        """Request handling context that stores all the required for computation info.
+    type_: str
+    method: typing.Optional[str]
+    subprotocols: typing.Optional[typing.Iterable[str]]
+    asgi_version: str
+    asgi_spec_version: str
+    http_version: str
+    scheme: str
+    path: str
+    query_string: typing.ByteString
+    headers: dict[str, typing.ByteString]
+    body: typing.Optional[typing.ByteString]
+    server: Server
+    client: Client
 
-        Instance of `Context` is constructed every time request is received by ASGI.
-        Initially it takes and parses `scope` information, `receive` and `send`
-        functions. It is suitable for both HTTP and WebSocket connections. To be minimal
-        in terms of weight and efficiency it has a strict set of predefined `__slots__`.
 
-        Args:
-            scope (types.Scope): ASGI scope object passed on request
-            receive (types.Receive): function for receiving info from client
-            send (types.Send): function for sending info to client
-        """
-        self.type: str = scope["type"]
-        self.asgi_version: str = scope["asgi"]["version"]
-        self.asgi_spec_version: str = scope["asgi"]["spec_version"]
-        self.http_version: str = scope["http_version"]
-        self.method: Optional[str] = scope.get("method", None)
-        self.scheme: str = scope["scheme"]
-        self.path: str = scope["path"].strip("/")
-        self.raw_path: ByteString = scope["raw_path"]
-        self.query_string: ByteString = scope["query_string"]
-        self.root_path: str = scope["root_path"]
-        self.raw_headers: Iterable[ByteString, ByteString] = scope["headers"]
-        self.client_host: str = scope["client"][0]
-        self.client_port: int = scope["client"][1]
-        self.server_host: str = scope["server"][0]
-        self.server_port: Optional[int] = scope["server"][1]
-        self.raw_subprotocols: Optional[Iterable[str]] = scope.get("subprotocols", None)
-        # functions
-        self.receive: types.Receive = receive
-        self.send: types.Send = send
-        # custom
-        self.subprotocols: Iterable[str] = []
-        self.raw_request_body: ByteString = None
-        self.request_body: Any = None
-        self.request_headers: Dict[str, str] = None
-        self.query: Dict[str, str] = None
-        self.params: Dict[str, str] = None
-        # response
-        self.response_status: int = 200
-        self.response_body: ByteString = b""
-        self.response_headers: Dict[str, str] = {}
+def __request_from_scope(scope: Scope) -> Request:
+    method, subprotocols = (
+        (scope["method"], None)
+        if scope["type"] == "http"
+        else (None, scope["subprotocols"])
+    )
+    headers = toolz.keymap(
+        lambda key: key.decode("UTF-8").lower(),
+        dict(header for header in scope["headers"]),
+    )
+    return Request(
+        type_=scope["type"],
+        method=method,
+        subprotocols=subprotocols,
+        asgi_version=scope["asgi"]["version"],
+        asgi_spec_version=scope["asgi"]["spec_version"],
+        http_version=scope["http_version"],
+        scheme=scope["scheme"],
+        path=scope["path"].strip("/"),
+        query_string=scope["query_string"],
+        headers=headers,
+        body=None,
+        client=Client(host=scope["client"][0], port=scope["client"][1]),
+        server=Server(host=scope["server"][0], port=scope["server"][1]),
+    )
+
+
+def __request_copy(request: Request) -> Request:
+    return Request(
+        type_=request.type_,
+        method=request.method,
+        subprotocols=request.subprotocols,
+        asgi_version=request.asgi_version,
+        asgi_spec_version=request.asgi_spec_version,
+        http_version=request.http_version,
+        scheme=request.scheme,
+        path=request.path,
+        query_string=request.query_string,
+        headers=request.headers,
+        body=request.body,
+        client=request.client,
+        server=request.server,
+    )
+
+
+@dataclasses.dataclass
+class Response:
+    """Request response data."""
+
+    __slots__ = ("body", "headers", "status")
+    body: typing.Any
+    headers: dict[typing.ByteString, typing.ByteString]
+    status: int
+
+
+def __empty_response() -> Response:
+    return Response(None, {}, 200)
+
+
+def __response_copy(response: Response) -> Response:
+    return Response(
+        body=response.body,
+        headers=response.headers,
+        status=response.status,
+    )
+
+
+@dataclasses.dataclass
+class Context:
+    """Wrapper for request data processing."""
+
+    request: Request
+    response: Response
+    receive: Receive
+    send: Send
+    error: typing.Optional[BaseException] = None
+
+
+def from_asgi(scope: Scope, receive: Receive, send: Send) -> Context:
+    """Create context from ASGI function args.
+
+    Args:
+        scope (Scope): ASGI scope
+        receive (Receive): ASGI receive
+        send (Send): ASGI send
+
+    Returns:
+        Context: for storing info about request
+    """
+    return Context(
+        __request_from_scope(scope),
+        __empty_response(),
+        receive,
+        send,
+    )
+
+
+def copy(ctx: Context) -> Context:
+    """Create `Context` from another `Context` as a copy.
+
+    Args:
+        context (Context): to copy
+
+    Returns:
+        Context: copy
+    """
+    return Context(
+        __request_copy(ctx.request),
+        __response_copy(ctx.response),
+        ctx.receive,
+        ctx.send,
+        ctx.error,
+    )
 
 
 StateContext = state.State[Context]
-FutureStateContext = Awaitable[StateContext]
-Handler = types.Transform[StateContext, FutureStateContext]
-
-
-async def pack(ctx: Context) -> StateContext:
-    """Wraps `context.Context` into `State` and `Future` monad."""
-    return state.pack(await future.pack(ctx))
-
-
-async def bind(handler: Handler, ctx: FutureStateContext) -> StateContext:
-    """Executes `context.Handler` considering `State` and `Future`."""
-    ctx: StateContext = await pack(ctx)
-
-    return await pack(handler(ctx) if isinstance(ctx, state.Valid) else ctx)
