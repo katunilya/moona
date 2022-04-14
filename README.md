@@ -1,0 +1,116 @@
+# mona
+
+`mona` is an ASGI server framework that provides a set of guidelines on software
+development inspired by functional programming and monads. It's core design is
+hugely inspired by Finite State Machines and Railroad Architecture approach.
+
+## ✨ Overview
+
+`mona` provides abstractions for so called `State` monad and `Future` monad.
+`State` monad provides functionality of FSM with a few pre-defined states:
+
+- `RIGHT` for processing going right way;
+- `WRONG` for processing going wrong way;
+- `ERROR` for processing stopped due to error;
+- `FINAL` for processing that should not be continued;
+
+`Future` core feature is composition of sync and async function into one async:
+
+```python
+import asyncio
+
+from mona import future
+
+
+async def async_inc(x: int) -> int:
+    return x + 1
+
+
+def sync_square(x: int) -> int:
+    return x**2
+
+
+async def main():
+    f = future.from_value(3)  # create some Future from sync value
+
+    composition = future.compose(async_inc, async_inc, sync_square)  # (x + 1 + 1)^2
+
+    result = await future.bind(composition, f)
+
+    print(result)  # 25
+
+    # there is another syntax for exactly the same thing
+    result = await (future.from_value(3) >> async_inc >> async_inc >> sync_square)
+
+    print(result)  # 25
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+# can be run as-is
+```
+
+This are core concepts of `mona`. Based on them entire application is just a so
+called `Handler` - sync or async function that takes `Context` of some state and
+return `Context` of some state. The simples server written in `mona`:
+
+```python
+from mona import asgi, future, req, res
+
+app = asgi.create(
+    future.compose(
+        req.on_http,
+        res.set_body_text("Hello!"),
+        res.send_start,
+        res.send_body,
+    )
+)
+
+# run with unicorn
+# 
+# $ curl http://localhost:8000/
+# Hello!%
+```
+
+This example provides server that return `Hello!` for any request. See more
+examples in [examples folder](/examples/). Also check out full API specification
+on official [Documentation Page](https://katunilya.github.io/mona/).
+
+> Documentation is generated via [handsdown](https://github.com/vemel/handsdown)
+
+## ⬇️ Install
+
+`mona` is currently at a very dynamic and stormy development stage and lacks
+multiple important features, so it is not published in PyPi currently and can be
+installed as raw package from GitHub directly.
+
+I suggest using [poetry](https://github.com/python-poetry/poetry) for package
+management. Having project environment setup execute:
+
+```sh
+poetry add git+https://github.com/katunilya/mona
+```
+
+Another way is to build package from source:
+
+```sh
+git clone https://github.com/katunilya/mona
+cd mona
+poetry build
+pip install dist/mona-0.2.0.tar.gz
+```
+
+## 🏗️ Develop
+
+Fork repository and setup [poetry](https://github.com/python-poetry/poetry)
+environment:
+
+```sh
+poetry shell        # create poetry environment and activate in current shell
+poetry install      # install dependencies
+```
+
+Now you are ready to bring your ideas to the project. Check out
+[Contribution Guidelines](/CONTRIBUTING.md) for more information on project
+development.
