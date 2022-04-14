@@ -1,6 +1,6 @@
 # Header
 
-> Auto-generated documentation for [mona.req.header](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/header.py) module.
+> Auto-generated documentation for [mona.req.header](https://github.com/katunilya/mona/blob/main/mona/req/header.py) module.
 
 - [Mona](../../README.md#mona) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / [Req](index.md#req) / Header
     - [has_header](#has_header)
@@ -8,7 +8,7 @@
 
 ## has_header
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/header.py#L6)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/header.py#L6)
 
 ```python
 def has_header(
@@ -34,7 +34,7 @@ required value is present in request headers. Returns context in WRONG state if 
 
 ## take_headers
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/header.py#L32)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/header.py#L32)
 
 ```python
 def take_headers(ctx: context.Context) -> state.State[dict[str, str]]:
