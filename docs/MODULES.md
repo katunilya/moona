@@ -2,9 +2,9 @@
 
 > Auto-generated documentation modules index.
 
-Full list of [Mona](README.md#mona-index) project modules.
+Full list of [Mona](README.md#mona) project modules.
 
-- [Mona Index](README.md#mona-index)
+- [mona](README.md#mona)
 - [Mona](mona/index.md#mona)
     - [Asgi](mona/asgi.md#asgi)
     - [Context](mona/context.md#context)

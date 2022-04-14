@@ -1,8 +1,8 @@
 # Req
 
-> Auto-generated documentation for [mona.req](https://github.com/katunilya/mona/blob/main/mona/req/__init__.py) module.
+> Auto-generated documentation for [mona.req](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/__init__.py) module.
 
-- [Mona](../../README.md#mona-index) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / Req
+- [Mona](../../README.md#mona) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / Req
     - Modules
         - [Body](body.md#body)
         - [Events](events.md#events)

@@ -1,8 +1,8 @@
 # Res
 
-> Auto-generated documentation for [mona.res](https://github.com/katunilya/mona/blob/main/mona/res/__init__.py) module.
+> Auto-generated documentation for [mona.res](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/__init__.py) module.
 
-- [Mona](../../README.md#mona-index) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / Res
+- [Mona](../../README.md#mona) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / Res
     - Modules
         - [Body](body.md#body)
         - [Events](events.md#events)

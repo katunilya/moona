@@ -1,14 +1,14 @@
 # Error
 
-> Auto-generated documentation for [mona.error](https://github.com/katunilya/mona/blob/main/mona/error.py) module.
+> Auto-generated documentation for [mona.error](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/error.py) module.
 
-- [Mona](../README.md#mona-index) / [Modules](../MODULES.md#mona-modules) / [Mona](index.md#mona) / Error
+- [Mona](../README.md#mona) / [Modules](../MODULES.md#mona-modules) / [Mona](index.md#mona) / Error
     - [Error](#error)
     - [HttpError](#httperror)
 
 ## Error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/error.py#L5)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/error.py#L5)
 
 ```python
 dataclass
@@ -19,7 +19,7 @@ Base class for exception.
 
 ## HttpError
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/error.py#L12)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/error.py#L12)
 
 ```python
 dataclass

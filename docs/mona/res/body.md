@@ -1,8 +1,8 @@
 # Body
 
-> Auto-generated documentation for [mona.res.body](https://github.com/katunilya/mona/blob/main/mona/res/body.py) module.
+> Auto-generated documentation for [mona.res.body](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/body.py) module.
 
-- [Mona](../../README.md#mona-index) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / [Res](index.md#res) / Body
+- [Mona](../../README.md#mona) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / [Res](index.md#res) / Body
     - [set_body_bytes](#set_body_bytes)
     - [set_body_from_bytes](#set_body_from_bytes)
     - [set_body_from_dict](#set_body_from_dict)
@@ -11,7 +11,7 @@
 
 ## set_body_bytes
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L12)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/body.py#L12)
 
 ```python
 def set_body_bytes(body: typing.ByteString) -> handler.Handler:
@@ -21,7 +21,7 @@ Set response body from byte string.
 
 ## set_body_from_bytes
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L35)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/body.py#L35)
 
 ```python
 def set_body_from_bytes(
@@ -38,7 +38,7 @@ Set body from function calculation result.
 
 ## set_body_from_dict
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L66)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/body.py#L66)
 
 ```python
 def set_body_from_dict(
@@ -50,7 +50,7 @@ Set body from function calculation result.
 
 ## set_body_from_pydantic
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L97)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/body.py#L97)
 
 ```python
 def set_body_from_pydantic(
@@ -67,7 +67,7 @@ Set body from function calculation result.
 
 ## set_body_text
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L23)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/res/body.py#L23)
 
 ```python
 def set_body_text(body: str) -> handler.Handler:
