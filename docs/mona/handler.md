@@ -1,13 +1,13 @@
 # Handler
 
-> Auto-generated documentation for [mona.handler](https://github.com/katunilya/mona/blob/main/mona/handler.py) module.
+> Auto-generated documentation for [mona.handler](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/handler.py) module.
 
-- [Mona](../README.md#mona-index) / [Modules](../MODULES.md#mona-modules) / [Mona](index.md#mona) / Handler
+- [Mona](../README.md#mona) / [Modules](../MODULES.md#mona-modules) / [Mona](index.md#mona) / Handler
     - [choose](#choose)
 
 ## choose
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/handler.py#L30)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/handler.py#L30)
 
 ```python
 def choose(*handlers: Handler) -> Handler:

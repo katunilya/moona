@@ -1,18 +1,8 @@
 # mona
 
-> Auto-generated documentation index.
-
 `mona` is an ASGI server framework that provides a set of guidelines on software
 development inspired by functional programming and monads. It's core design is
 hugely inspired by Finite State Machines and Railroad Architecture approach.
-
-Full Mona project documentation can be found in [Modules](MODULES.md#mona-modules)
-
-- [mona](#mona)
-    - [✨ Overview](#-overview)
-    - [⬇️ Install](#-install)
-    - [🏗️ Develop](#-develop)
-  - [Mona Modules](MODULES.md#mona-modules)
 
 ## ✨ Overview
 
@@ -31,11 +21,14 @@ import asyncio
 
 from mona import future
 
+
 async def async_inc(x: int) -> int:
     return x + 1
 
+
 def sync_square(x: int) -> int:
     return x**2
+
 
 async def main():
     f = future.from_value(3)  # create some Future from sync value
@@ -50,6 +43,7 @@ async def main():
     result = await (future.from_value(3) >> async_inc >> async_inc >> sync_square)
 
     print(result)  # 25
+
 
 if __name__ == "__main__":
     asyncio.run(main())

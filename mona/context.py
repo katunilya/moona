@@ -66,14 +66,22 @@ class Request:
 
 
 def __request_from_scope(scope: Scope) -> Request:
-    method, subprotocols = (
-        (scope["method"], None)
-        if scope["type"] == "http"
-        else (None, scope["subprotocols"])
-    )
+    method, subprotocols = scope.get("method", None), scope.get("subprotocols", None)
     headers = toolz.keymap(
         lambda key: key.decode("UTF-8").lower(),
-        dict(header for header in scope["headers"]),
+        dict(header for header in scope.get("headers", [])),
+    )
+    scheme = scope.get("scheme", None)
+    path = scope["path"].strip("/") if "path" in scope else None
+    client = (
+        Client(host=scope["client"][0], port=scope["client"][1])
+        if "client" in scope
+        else None
+    )
+    server = (
+        Server(host=scope["server"][0], port=scope["server"][1])
+        if "server" in scope
+        else None
     )
     return Request(
         type_=scope["type"],
@@ -81,14 +89,14 @@ def __request_from_scope(scope: Scope) -> Request:
         subprotocols=subprotocols,
         asgi_version=scope["asgi"]["version"],
         asgi_spec_version=scope["asgi"]["spec_version"],
-        http_version=scope["http_version"],
-        scheme=scope["scheme"],
-        path=scope["path"].strip("/"),
-        query_string=scope["query_string"],
+        http_version=scope.get("http_version", None),
+        scheme=scheme,
+        path=path,
+        query_string=scope.get("query_string", None),
         headers=headers,
         body=None,
-        client=Client(host=scope["client"][0], port=scope["client"][1]),
-        server=Server(host=scope["server"][0], port=scope["server"][1]),
+        client=client,
+        server=server,
     )
 
 

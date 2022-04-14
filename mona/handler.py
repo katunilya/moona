@@ -19,7 +19,7 @@ def __continue_on_fail(current_handler: Handler, next_handler: Handler) -> Handl
             future.from_value(ctx_copy) >> current_handler
         )
 
-        if ctx_copy.state != state.RIGHT:
+        if ctx_copy.state == state.WRONG:
             return await (future.from_value(state.right(ctx)) >> next_handler)
 
         return ctx_copy
@@ -33,8 +33,7 @@ def choose(*handlers: Handler) -> Handler:
     Returns:
         Handler: choose composition handler
     """
-    return (
-        functools.reduce(__continue_on_fail, handlers)
-        if len(handlers) > 0
-        else future.identity
-    )
+    if len(handlers) > 0:
+        return functools.reduce(__continue_on_fail, handlers)
+    else:
+        return future.identity
