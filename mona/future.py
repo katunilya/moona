@@ -2,6 +2,8 @@ import dataclasses
 import inspect
 import typing
 
+import toolz
+
 T = typing.TypeVar("T")
 V = typing.TypeVar("V")
 
@@ -56,6 +58,7 @@ async def __bind(
     return await result if inspect.isawaitable(result) else result
 
 
+@toolz.curry
 def bind(
     function: typing.Callable[[T], typing.Union[typing.Awaitable[V], V]], cnt: Future[T]
 ) -> Future[V]:
