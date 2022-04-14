@@ -26,32 +26,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install \
-            poetry \
-            flake8 \
-            isort \
-            pytest \
-            pytest-asyncio \
-            flake8-bugbear \
-            flake8-comprehensions \
-            flake8-docstrings \
-            flake8-eradicate \
-            flake8-isort \
-            pep8-naming \
-            flake8-string-format \
-            flake8-bandit \
-            flake8-builtins \
-            flake8-black \
-            flake8-expression-complexity \
-            flake8-annotations-complexity \
-            flake8-requirements
+          python -m pip install poetry
           poetry install
       - name: Check flake8
         run: |
-          flake8 . --count --show-source --statistics --exit-zero
+          poetry run flake8 . --count --show-source --statistics
       - name: Check isort
         run: |
-          isort **/*.py --check-only --verbose
+          poetry run isort **/*.py --check-only --verbose
       - name: Test with pytest
         run: |
-          pytest
+          poetry run pytest
