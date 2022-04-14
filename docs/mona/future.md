@@ -1,6 +1,6 @@
 # Future
 
-> Auto-generated documentation for [mona.future](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py) module.
+> Auto-generated documentation for [mona.future](https://github.com/katunilya/mona/blob/main/mona/future.py) module.
 
 - [Mona](../README.md#mona) / [Modules](../MODULES.md#mona-modules) / [Mona](index.md#mona) / Future
     - [Future](#future)
@@ -14,7 +14,7 @@
 
 ## Future
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L12)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L12)
 
 ```python
 dataclasses.dataclass(frozen=True)
@@ -29,7 +29,7 @@ Container for awaitable values.
 
 ### Future().\_\_await\_\_
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L17)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L17)
 
 ```python
 def __await__() -> typing.Generator[None, None, T]:
@@ -43,7 +43,7 @@ Dunder function that makes [Future](#future) awaitable.
 
 ### Future().\_\_rshift\_\_
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L21)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L21)
 
 ```python
 def __rshift__(
@@ -55,7 +55,7 @@ Dunder function for >> syntax of executing futures.
 
 ## bind
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L61)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L61)
 
 ```python
 @toolz.curry
@@ -83,7 +83,7 @@ function (typing.Callable[[T], typing.Union[V, typing.Awaitable[V]]]): to bind
 
 ## compose
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L77)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L77)
 
 ```python
 def compose(
@@ -104,7 +104,7 @@ Converts sequence of functions into sequenced pipeline for [Future](#future) con
 
 ## from_value
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L40)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L40)
 
 ```python
 def from_value(value: T) -> Future[T]:
@@ -128,7 +128,7 @@ Do not pass here another `Awaitable`.
 
 ## identity
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L28)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L28)
 
 ```python
 async def identity(value: T) -> T:
@@ -150,7 +150,7 @@ Converts some value into Awaitable.
 
 ## pipe
 
-[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/future.py#L97)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L97)
 
 ```python
 def pipe(
