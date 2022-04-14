@@ -33,6 +33,7 @@ flake8-expression-complexity = "^0.0.11"
 flake8-annotations-complexity = "^0.0.7"
 flake8-requirements = "^1.5.3"
 uvicorn = "^0.17.6"
+handsdown = "^1.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
