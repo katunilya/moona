@@ -1,8 +1,8 @@
 # Body
 
-> Auto-generated documentation for [mona.req.body](https://github.com/katunilya/mona/blob/main/mona/req/body.py) module.
+> Auto-generated documentation for [mona.req.body](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py) module.
 
-- [Mona](../../README.md#mona-index) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / [Req](index.md#req) / Body
+- [Mona](../../README.md#mona) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / [Req](index.md#req) / Body
     - [RequestBodyIsNotReceivedError](#requestbodyisnotreceivederror)
     - [TypeIsNotDataclassError](#typeisnotdataclasserror)
     - [TypeIsNotPydanticBaseModel](#typeisnotpydanticbasemodel)
@@ -14,7 +14,7 @@
 
 ## RequestBodyIsNotReceivedError
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L13)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L13)
 
 ```python
 dataclass
@@ -30,7 +30,7 @@ Request body is None and cannot be taken.
 
 ## TypeIsNotDataclassError
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L24)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L24)
 
 ```python
 dataclass
@@ -46,7 +46,7 @@ Passed type is not dataclass.
 
 ## TypeIsNotPydanticBaseModel
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L38)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L38)
 
 ```python
 dataclass
@@ -62,7 +62,7 @@ Passed type is not `pydantic.BaseModel`.
 
 ## take_body
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L51)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L51)
 
 ```python
 def take_body(ctx: Context) -> RE[ByteString]:
@@ -76,7 +76,7 @@ Take request body as byte string.
 
 ## take_body_as_dataclass
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L67)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L67)
 
 ```python
 def take_body_as_dataclass(dataclass_type: Type) -> Callable[[Context], RE]:
@@ -91,7 +91,7 @@ Take request body as dataclass.
 
 ## take_body_as_dict
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L59)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L59)
 
 ```python
 def take_body_as_dict(ctx: Context) -> RE[dict]:
@@ -105,7 +105,7 @@ Take request body as dict.
 
 ## take_body_as_pydantic
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L81)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L81)
 
 ```python
 def take_body_as_pydantic(
@@ -121,7 +121,7 @@ Take request body as pydantic BaseModel.
 
 ## take_body_as_str
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L97)
+[[find in source code]](https://github.com/katunilya/mona/blob/2-provide-multiple-examples-of-using-library/mona/req/body.py#L97)
 
 ```python
 def take_body_as_str(ctx: Context) -> RE[str]:

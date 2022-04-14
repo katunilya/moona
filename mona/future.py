@@ -75,9 +75,7 @@ def bind(
 
 
 def compose(
-    *functions: typing.Union[
-        typing.Callable[[T], typing.Awaitable[V]], typing.Callable[[T], V]
-    ]
+    *functions: typing.Callable[[T], typing.Union[V, typing.Awaitable[V]]]
 ) -> typing.Callable[[T], typing.Awaitable[V]]:
     """Converts sequence of functions into sequenced pipeline for `Future` container.
 
@@ -86,11 +84,12 @@ def compose(
     """
 
     async def _composition(cnt: T) -> V:
-        for func in functions:
-            cnt = func(cnt)
-            cnt = await cnt if inspect.isawaitable(cnt) else cnt
+        cnt = from_value(cnt)
 
-        return cnt
+        for func in functions:
+            cnt = bind(func, cnt)
+
+        return await cnt
 
     return _composition
 
