@@ -2,68 +2,46 @@ import inspect
 
 import pytest
 
-from mona import context, handler, state
+from mona import context, future, handler, state
 
 
-def sync_handler(context_: context.Context) -> context.Context:
-    return context_
+def sync_handler(cnt: context.StateContext) -> context.StateContext:
+    return cnt
 
 
-async def async_handler(context_: context.Context) -> context.Context:
-    return context_
+async def async_handler(cnt: context.StateContext) -> context.StateContext:
+    return cnt
 
 
-def invalid_handler(x):
-    return state.invalid(x)
-
-
-@pytest.mark.asyncio
-async def test_compose(asgi_context):
-    _handler = handler.compose(
-        sync_handler,
-        async_handler,
-        sync_handler,
-        async_handler,
-        invalid_handler,
-        async_handler,
-        async_handler,
-        async_handler,
-    )
-
-    ctx = _handler(asgi_context)
-
-    assert inspect.isawaitable(ctx)
-
-    ctx = await ctx
-
-    assert state.is_state(ctx)
-    assert state.is_invalid(ctx)
+def wrong_handler(cnt: context.StateContext) -> context.StateContext:
+    return state.wrong(cnt.value)
 
 
 @pytest.mark.asyncio
-async def test_choose(asgi_context):
-    def invalid_handler(x):
-        return state.invalid(x)
+@pytest.mark.parametrize(
+    "st, handlers, target_state",
+    [
+        (state.WRONG, [], state.WRONG),
+        (state.WRONG, [wrong_handler], state.WRONG),
+        (state.RIGHT, [wrong_handler], state.WRONG),
+        (state.RIGHT, [wrong_handler, sync_handler], state.RIGHT),
+        (state.RIGHT, [wrong_handler, async_handler], state.RIGHT),
+        (state.RIGHT, [wrong_handler, sync_handler], state.RIGHT),
+    ],
+)
+async def test_choose(
+    mock_context: context.Context,
+    st,
+    handlers,
+    target_state,
+):
+    ctx = future.from_value(state.State(mock_context, st))
 
-    def valid_handler(x):
-        return state.valid(x)
+    handler_ = handler.choose(*handlers)
+    cnt = ctx >> handler_
 
-    def simple_handler(x):
-        return x
+    assert inspect.isawaitable(cnt)
 
-    _handler = handler.choose(
-        invalid_handler,
-        handler.compose(
-            valid_handler,
-            simple_handler,
-        ),
-    )
+    cnt: context.StateContext = await cnt
 
-    ctx = context.bind(_handler, asgi_context)
-
-    assert inspect.isawaitable(ctx)
-
-    ctx = await ctx
-
-    assert state.is_state(ctx)
-    assert state.is_valid(ctx)
+    assert cnt.state == target_state

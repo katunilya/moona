@@ -1,39 +1,110 @@
+import dataclasses
 import inspect
-from functools import reduce
-from typing import Awaitable, Callable, TypeVar, Union
+import typing
 
-from typing_extensions import TypeAlias
-
-T = TypeVar("T")
-V = TypeVar("V")
-
-_Awaitable: TypeAlias = Union[T, Awaitable[T]]
+T = typing.TypeVar("T")
+V = typing.TypeVar("V")
 
 
-async def pack_value(value: T) -> T:
-    """Simple async identity functions that pack `value` into `Awaitable`."""
+@dataclasses.dataclass(frozen=True)
+class Future(typing.Generic[T]):
+    """Container for awaitable values."""
+
+    value: typing.Awaitable[T]
+
+    def __await__(self) -> typing.Generator[None, None, T]:
+        """Dunder function that makes `Future` awaitable."""
+        return self.value.__await__()
+
+    def __rshift__(
+        self, function: typing.Callable[["Future[T]"], "Future[V]"]
+    ) -> "Future[V]":
+        """Dunder function for >> syntax of executing futures."""
+        return bind(function, self)
+
+
+async def identity(value: T) -> T:
+    """Converts some value into Awaitable.
+
+    Args:
+        value (T): to be converted to awaitable.
+
+    Returns:
+        T: awaitable value
+    """
     return value
 
 
-async def pack(value: _Awaitable[T]) -> T:
-    """Wraps passed value into Awaitable if one is not already."""
-    return await value if inspect.isawaitable(value) else value
+def from_value(value: T) -> Future[T]:
+    """Create `Future` from value.
+
+    Do not pass here another `Awaitable`.
+
+    Args:
+        value (T): value to create awaitable.
+
+    Returns:
+        Future[T]: ready-to-use future
+    """
+    return Future(identity(value))
 
 
-async def bind(function: Callable[[T], _Awaitable[V]], monad: _Awaitable[T]) -> V:
-    """Executes function waiting for passed Awaitable monad."""
-    if inspect.isawaitable(monad):
-        monad = await monad
+async def __bind(
+    function: typing.Callable[[T], typing.Union[typing.Awaitable[V], V]], cnt: Future[T]
+) -> V:
+    result = function(await cnt)
+    return await result if inspect.isawaitable(result) else result
 
-    return await pack(function(monad))
+
+def bind(
+    function: typing.Callable[[T], typing.Union[typing.Awaitable[V], V]], cnt: Future[T]
+) -> Future[V]:
+    """Bind sync or async function to Future.
+
+    Args:
+        function (typing.Callable[[T], typing.Union[V, typing.Awaitable[V]]]): to bind
+        cnt (Future[T]): container
+
+    Returns:
+        Future[V]: result of running `function` on `cnt` value
+    """
+    return Future(__bind(function, cnt))
 
 
 def compose(
-    *functions: Callable[[T], _Awaitable[V]]
-) -> Callable[[_Awaitable[T]], Awaitable[V]]:
-    """Composes multiple sync and async functions to work with Future values."""
+    *functions: typing.Union[
+        typing.Callable[[T], typing.Awaitable[V]], typing.Callable[[T], V]
+    ]
+) -> typing.Callable[[T], typing.Awaitable[V]]:
+    """Converts sequence of functions into sequenced pipeline for `Future` container.
 
-    def _compose(monad: _Awaitable[T]) -> Awaitable[V]:
-        return reduce(lambda m, f: bind(f, m), functions, monad)
+    Returns:
+        typing.Callable[[Future[T]], Future[V]]: function composition
+    """
 
-    return _compose
+    async def _composition(cnt: T) -> V:
+        for func in functions:
+            cnt = func(cnt)
+            cnt = await cnt if inspect.isawaitable(cnt) else cnt
+
+        return cnt
+
+    return _composition
+
+
+def pipe(
+    cnt: Future[T],
+    *functions: typing.Union[
+        typing.Callable[[T], typing.Awaitable[V]], typing.Callable[[T], V]
+    ],
+) -> Future[V]:
+    """Composes `functions` and executes on `cnt`.
+
+    Args:
+        cnt (Future[T]): to execute
+
+    Returns:
+        Future[V]: result future
+    """
+    composition = compose(*functions)
+    return cnt >> composition

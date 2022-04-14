@@ -1,39 +1,40 @@
-from functools import reduce, wraps
+import functools
+import typing
 
-from mona import context, state, types
+from mona import context, future, state
 
-
-def wrap(handler: types.Transform[context.Context, context.Context]) -> context.Handler:
-    """Decorates function so that it operates as `context.Handler`."""
-
-    @wraps(handler)
-    def _wrapper(ctx: context.Context) -> context.StateContext:
-        return context.bind(handler, ctx)
-
-    return _wrapper
+SyncHandler = typing.Callable[[context.StateContext], context.StateContext]
+AsyncHandler = typing.Callable[
+    [context.StateContext], typing.Awaitable[context.StateContext]
+]
+Handler = typing.Union[SyncHandler, AsyncHandler]
 
 
-def compose(*handlers: context.Handler) -> context.Handler:
-    """Commposes multiple `context.Handler`s into one."""
+def __continue_on_fail(current_handler: Handler, next_handler: Handler) -> Handler:
+    @state.accepts_right
+    async def __continuation(ctx: context.Context) -> context.StateContext:
+        ctx_copy = state.right(context.copy(ctx))
 
-    @wrap
-    def _compose(ctx: context.FutureStateContext) -> context.StateContext:
-        return reduce(lambda c, h: context.bind(h, c), handlers, ctx)
+        ctx_copy: context.StateContext = await (
+            future.from_value(ctx_copy) >> current_handler
+        )
 
-    return _compose
+        if ctx_copy.state != state.RIGHT:
+            return await (future.from_value(state.right(ctx)) >> next_handler)
+
+        return ctx_copy
+
+    return __continuation
 
 
-def choose(*handlers: context.Handler) -> context.Handler:
-    """First `context.Handler` to return valid result is executed."""
+def choose(*handlers: Handler) -> Handler:
+    """Chooses the first handler to return ctx in right state.
 
-    @wrap
-    async def _choose(ctx: context.FutureStateContext) -> context.StateContext:
-        for handler in handlers:
-            _ctx: context.StateContext = await context.bind(handler, ctx)
-
-            if isinstance(_ctx, state.Valid):
-                return _ctx
-
-        return ctx
-
-    return _choose
+    Returns:
+        Handler: choose composition handler
+    """
+    return (
+        functools.reduce(__continue_on_fail, handlers)
+        if len(handlers) > 0
+        else future.identity
+    )
