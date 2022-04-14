@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Example 1",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "examples.example_1:app"
+            ],
+            "jinja": true
+        },
+        {
             "name": "Example 2",
             "type": "python",
             "request": "launch",
