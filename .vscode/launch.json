@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: FastAPI",
+            "name": "Example 2",
             "type": "python",
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "examples.main:app"
+                "examples.example_2:app"
             ],
             "jinja": true
         }
