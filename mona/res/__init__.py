@@ -3,6 +3,7 @@ from .body import (
     set_body_from_bytes,
     set_body_from_dict,
     set_body_from_pydantic,
+    set_body_from_text,
     set_body_text,
 )
 from .events import send_body, send_start
