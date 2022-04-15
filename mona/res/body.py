@@ -63,6 +63,35 @@ def set_body_from_bytes(
     return _handler
 
 
+def set_body_from_text(
+    function: typing.Callable[[context.Context], future.Future[state.RE[str]]]
+) -> handler.Handler:
+    """Set body from function calculation result (str)."""
+
+    @state.accepts_right
+    async def _handler(ctx: context.Context) -> context.StateContext:
+        body: state.RE[str] = await (future.from_value(ctx) >> function)
+
+        if body.state == state.ERROR:
+            err: error.Error = body.value
+
+            return toolz.pipe(
+                ctx,
+                state.right,
+                set_body_text(err.message),
+                status.set_status_bad_request,
+                state.switch_error,
+            )
+
+        return toolz.pipe(
+            ctx,
+            state.right,
+            set_body_bytes(body.value.encode("UTF-8")),
+        )
+
+    return _handler
+
+
 def set_body_from_dict(
     function: typing.Callable[[context.Context], future.Future[state.RE[dict]]]
 ) -> handler.Handler:
