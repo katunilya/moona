@@ -1,4 +1,4 @@
-from toolz import curried, pipe
+import toolz
 
 from mona import context, handler, state
 
@@ -21,10 +21,10 @@ def has_header(key: str, value: str, required: bool = False) -> handler.Handler:
 
     @state.accepts_right
     def _handler(cnt: context.Context) -> state.State[context.Context]:
-        if header := cnt.request.headers.get(key, None):
-            return state.right(cnt) if header == value else state.wrong(cnt)
+        if actual_value := cnt.request.headers.get(key, None):
+            return state.Right(cnt) if actual_value == value else state.Wrong(cnt)
 
-        return state.wrong(cnt)
+        return state.Wrong(cnt)
 
     return _handler
 
@@ -38,9 +38,9 @@ def take_headers(ctx: context.Context) -> state.State[dict[str, str]]:
     Returns:
         state.State[dict[str, str]]: headers
     """
-    return pipe(
+    return toolz.pipe(
         ctx.request.headers,
-        curried.valmap(lambda value: value.decode("UTF-8")),
+        toolz.curried.valmap(lambda value: value.decode("UTF-8")),
         dict,
-        state.right,
+        state.Right,
     )

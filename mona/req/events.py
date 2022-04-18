@@ -14,4 +14,4 @@ async def receive_body(ctx: context.Context) -> context.Context:
 
     ctx.request.body = body
 
-    return state.right(ctx)
+    return state.Right(ctx)

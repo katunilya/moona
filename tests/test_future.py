@@ -1,5 +1,4 @@
 import inspect
-import typing
 
 import pytest
 
@@ -8,7 +7,7 @@ from mona import future
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "value",
+    "arrange_value",
     [
         1,
         2,
@@ -18,19 +17,23 @@ from mona import future
         b"some_byte_str",
     ],
 )
-async def test_identity(value: typing.Any):
-    value_ = future.identity(value)
+async def test_identity(arrange_value):
+    # act
+    act_value = future.identity(arrange_value)
 
-    assert inspect.isawaitable(value_)
+    # assert
+    assert inspect.isawaitable(act_value)
 
-    value_ = await value_
+    # act
+    act_value = await act_value
 
-    assert value_ == value
+    # assert
+    assert act_value == arrange_value
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "value",
+    "arrange_value",
     [
         1,
         2,
@@ -40,15 +43,19 @@ async def test_identity(value: typing.Any):
         b"some_byte_str",
     ],
 )
-async def test_from_value(value: typing.Any):
-    future_ = future.from_value(value)
+async def test_from_value(arrange_value):
+    # act
+    act_value = future.from_value(arrange_value)
 
-    assert inspect.isawaitable(future_)
-    assert isinstance(future_, future.Future)
+    # assert
+    assert inspect.isawaitable(act_value)
+    assert isinstance(act_value, future.Future)
 
-    future_ = await future_
+    # act
+    act_value = await act_value
 
-    assert future_ == value
+    # assert
+    assert act_value == arrange_value
 
 
 async def async_plus_1(x: int) -> int:
@@ -65,7 +72,7 @@ async def async_strip(x: str) -> str:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "value, function, result",
+    "arrange_value, arrange_function, assert_value",
     [
         (1, lambda x: x, 1),
         ("1", lambda x: x, "1"),
@@ -81,22 +88,27 @@ async def async_strip(x: str) -> str:
         ("   John Doe  ", async_strip, "John Doe"),
     ],
 )
-async def test_bind(value, function, result):
-    future_ = future.from_value(value)
+async def test_bind(arrange_value, arrange_function, assert_value):
+    # arrange
+    arrange_future = future.from_value(arrange_value)
 
-    result_ = future.bind(function, future_)
+    # act
+    act_value = future.bind(arrange_function, arrange_future)
 
-    assert inspect.isawaitable(result_)
-    assert isinstance(result_, future.Future)
+    # assert
+    assert inspect.isawaitable(act_value)
+    assert isinstance(act_value, future.Future)
 
-    result_ = await result_
+    # act
+    act_value = await act_value
 
-    assert result_ == result
+    # assert
+    assert act_value == assert_value
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "value, functions, result",
+    "arrange_value, arrange_functions, assert_value",
     [
         (1, [], 1),
         (1, [future.identity], 1),
@@ -117,23 +129,28 @@ async def test_bind(value, function, result):
         ("   John Doe  ", [lambda s: s.strip()], "John Doe"),
     ],
 )
-async def test_compose(value, functions, result):
-    future_ = future.from_value(value)
-    composition_ = future.compose(*functions)
+async def test_compose(arrange_value, arrange_functions, assert_value):
+    # assert
+    arrange_future = future.from_value(arrange_value)
+    arrange_composition = future.compose(*arrange_functions)
 
-    result_ = future_ >> composition_
+    # act
+    act_value = arrange_future >> arrange_composition
 
-    assert inspect.isawaitable(result_)
-    assert isinstance(result_, future.Future)
+    # assert
+    assert inspect.isawaitable(act_value)
+    assert isinstance(act_value, future.Future)
 
-    result_ = await result_
+    # act
+    act_value = await act_value
 
-    assert result_ == result
+    # assert
+    assert act_value == assert_value
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "value, functions, result",
+    "arrange_value, arrange_functions, assert_value",
     [
         (1, [], 1),
         (1, [future.identity], 1),
@@ -154,18 +171,22 @@ async def test_compose(value, functions, result):
         ("   John Doe  ", [lambda s: s.strip()], "John Doe"),
     ],
 )
-async def test_pipe(value, functions, result):
-    result_ = future.pipe(
-        future.from_value(value),
-        *functions,
+async def test_pipe(arrange_value, arrange_functions, assert_value):
+    # act
+    act_value = future.pipe(
+        future.from_value(arrange_value),
+        *arrange_functions,
     )
 
-    assert inspect.isawaitable(result_)
-    assert isinstance(result_, future.Future)
+    # assert
+    assert inspect.isawaitable(act_value)
+    assert isinstance(act_value, future.Future)
 
-    result_ = await result_
+    # act
+    act_value = await act_value
 
-    assert result_ == result
+    # assert
+    assert act_value == assert_value
 
 
 @pytest.mark.asyncio
