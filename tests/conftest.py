@@ -64,4 +64,4 @@ def send():
 
 @pytest.fixture
 def mock_context(scope, receive, send) -> context.Context:
-    return context.from_asgi(scope, receive, send)
+    return context.from_asgi((scope, receive, send))

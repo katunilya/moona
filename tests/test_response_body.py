@@ -1,28 +1,23 @@
 import pydantic
 import pytest
 
-from mona import context, error, future, res, state
+from mona import context, future, res, state
 
 
 @pytest.mark.parametrize(
     "arrange_state,arrange_body,assert_state,assert_body",
     [
-        (state.RIGHT, b"", state.RIGHT, b""),
-        (state.RIGHT, b"Hello, World!", state.RIGHT, b"Hello, World!"),
+        (state.Right, b"", state.Right, b""),
+        (state.Right, b"Hello, World!", state.Right, b"Hello, World!"),
         (
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe", "age": 25}',
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe", "age": 25}',
         ),
-        (state.WRONG, b"", state.WRONG, b""),
-        (state.WRONG, b"Hello, World!", state.WRONG, b"Hello, World!"),
-        (
-            state.WRONG,
-            b'{"name": "John Doe", "age": 25}',
-            state.WRONG,
-            b'{"name": "John Doe", "age": 25}',
-        ),
+        (state.Wrong, b"", state.Wrong, None),
+        (state.Wrong, b"Hello, World!", state.Wrong, None),
+        (state.Wrong, b'{"name": "John Doe", "age": 25}', state.Wrong, None),
     ],
 )
 def test_set_body_bytes(
@@ -33,38 +28,31 @@ def test_set_body_bytes(
     assert_body,
 ):
     # arrange
-    ctx = state.pack(arrange_state, mock_context)
-    handler = res.set_body_bytes(arrange_body)
+    arrange_ctx = arrange_state(mock_context)
+    arrange_handler = res.set_body_bytes(arrange_body)
 
     # act
-    ctx = handler(ctx)
+    act_ctx = arrange_handler(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
-    assert ctx.value.response.body == (
-        assert_body if ctx.state == state.RIGHT else None
-    )
+    assert isinstance(act_ctx, assert_state)
+    assert act_ctx.value.response.body == assert_body
 
 
 @pytest.mark.parametrize(
     "arrange_state,arrange_body,assert_state,assert_body",
     [
-        (state.RIGHT, "", state.RIGHT, b""),
-        (state.RIGHT, "Hello, World!", state.RIGHT, b"Hello, World!"),
+        (state.Right, "", state.Right, b""),
+        (state.Right, "Hello, World!", state.Right, b"Hello, World!"),
         (
-            state.RIGHT,
+            state.Right,
             '{"name": "John Doe", "age": 25}',
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe", "age": 25}',
         ),
-        (state.WRONG, "", state.WRONG, b""),
-        (state.WRONG, "Hello, World!", state.WRONG, b"Hello, World!"),
-        (
-            state.WRONG,
-            '{"name": "John Doe", "age": 25}',
-            state.WRONG,
-            b'{"name": "John Doe", "age": 25}',
-        ),
+        (state.Wrong, "", state.Wrong, None),
+        (state.Wrong, "Hello, World!", state.Wrong, None),
+        (state.Wrong, '{"name": "John Doe", "age": 25}', state.Wrong, None),
     ],
 )
 def test_set_body_text(
@@ -75,88 +63,86 @@ def test_set_body_text(
     assert_body,
 ):
     # arrange
-    ctx = state.pack(arrange_state, mock_context)
-    handler = res.set_body_text(arrange_body)
+    arrange_ctx = arrange_state(mock_context)
+    arrange_handler = res.set_body_text(arrange_body)
 
     # act
-    ctx = handler(ctx)
+    act_ctx = arrange_handler(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
-    assert ctx.value.response.body == (
-        assert_body if ctx.state == state.RIGHT else None
-    )
+    assert isinstance(act_ctx, assert_state)
+    assert act_ctx.value.response.body == assert_body
 
 
 # Common functions for dynamic body set
-ERROR_MESSAGE = "Error Message"
-BYTES_ERROR_MESSAGE = ERROR_MESSAGE.encode("UTF-8")
+ERROR = Exception("Error Message")
+BYTES_ERROR_MESSAGE = str(ERROR).encode("UTF-8")
 
 
 def sync_set_right_concrete_body(data):  # noqa
-    return lambda _: state.right(data)
+    return lambda _: state.Right(data)
 
 
 def sync_set_error_body(_):
-    return state.error(error.Error(ERROR_MESSAGE))
+    return state.Error(ERROR)
 
 
 def async_set_right_concrete_body(data):  # noqa
     async def _handler(_):
-        return state.right(data)
+        return state.Right(data)
 
     return _handler
 
 
 async def async_set_error_body(_):  # noqa
-    return state.error(error.Error(ERROR_MESSAGE))
+    return state.Error(ERROR)
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "arrange_state,act_function,assert_state,assert_body",
     [
-        (state.RIGHT, sync_set_right_concrete_body(b""), state.RIGHT, b""),
-        (state.RIGHT, sync_set_right_concrete_body(b"ABCD"), state.RIGHT, b"ABCD"),
+        (state.Right, sync_set_right_concrete_body(b""), state.Right, b""),
+        (state.Right, sync_set_right_concrete_body(b"ABCD"), state.Right, b"ABCD"),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body(b'{"name": "John Doe"}'),
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe"}',
         ),
-        (state.WRONG, sync_set_right_concrete_body(b""), state.WRONG, None),
-        (state.WRONG, sync_set_right_concrete_body(b"ABCD"), state.WRONG, None),
+        (state.Wrong, sync_set_right_concrete_body(b""), state.Wrong, None),
+        (state.Wrong, sync_set_right_concrete_body(b"ABCD"), state.Wrong, None),
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body(b'{"name": "John Doe"}'),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.RIGHT, async_set_right_concrete_body(b""), state.RIGHT, b""),
-        (state.RIGHT, async_set_right_concrete_body(b"ABCD"), state.RIGHT, b"ABCD"),
+        (state.Right, async_set_right_concrete_body(b""), state.Right, b""),
+        (state.Right, async_set_right_concrete_body(b"ABCD"), state.Right, b"ABCD"),
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body(b'{"name": "John Doe"}'),
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe"}',
         ),
-        (state.WRONG, async_set_right_concrete_body(b""), state.WRONG, None),
-        (state.WRONG, async_set_right_concrete_body(b"ABCD"), state.WRONG, None),
+        (state.Wrong, async_set_right_concrete_body(b""), state.Wrong, None),
+        (state.Wrong, async_set_right_concrete_body(b"ABCD"), state.Wrong, None),
         (
-            state.WRONG,
+            state.Wrong,
             async_set_right_concrete_body(b'{"name": "John Doe"}'),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_error_body,
-            state.ERROR,
+            state.Error,
             BYTES_ERROR_MESSAGE,
         ),
-        (state.RIGHT, async_set_error_body, state.ERROR, BYTES_ERROR_MESSAGE),
-        (state.WRONG, sync_set_error_body, state.WRONG, None),
-        (state.WRONG, async_set_error_body, state.WRONG, None),
+        (state.Right, async_set_error_body, state.Error, BYTES_ERROR_MESSAGE),
+        (state.Wrong, sync_set_error_body, state.Wrong, None),
+        (state.Wrong, async_set_error_body, state.Wrong, None),
     ],
 )
 async def test_set_body_from_bytes(
@@ -167,85 +153,85 @@ async def test_set_body_from_bytes(
     assert_body,
 ):
     # arrange
-    ctx = future.from_value(state.pack(arrange_state, mock_context))
-    handler = res.set_body_from_bytes(act_function)
+    arrange_ctx = future.from_value(arrange_state(mock_context))
+    arrange_handler = res.set_body_from_bytes(act_function)
 
     # act
-    ctx: context.StateContext = await (ctx >> handler)
+    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
-    assert ctx.state == assert_state
-    assert ctx.value.response.body == assert_body
+    assert isinstance(act_ctx, assert_state)
+    assert act_ctx.value.response.body == assert_body
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "arrange_state,act_function,assert_state,assert_body",
     [
-        (state.RIGHT, sync_set_right_concrete_body({}), state.RIGHT, b"{}"),  # noqa
+        (state.Right, sync_set_right_concrete_body({}), state.Right, b"{}"),  # noqa
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body({"name": "John Doe"}),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe"}',
         ),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body(
                 {"name": "John Doe", "info": {"age": 21, "city": "SPb"}}
             ),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe","info":{"age":21,"city":"SPb"}}',
         ),
-        (state.RIGHT, sync_set_error_body, state.ERROR, BYTES_ERROR_MESSAGE),
-        (state.RIGHT, async_set_right_concrete_body({}), state.RIGHT, b"{}"),  # noqa
+        (state.Right, sync_set_error_body, state.Error, BYTES_ERROR_MESSAGE),
+        (state.Right, async_set_right_concrete_body({}), state.Right, b"{}"),  # noqa
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body({"name": "John Doe"}),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe"}',
         ),
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body(
                 {"name": "John Doe", "info": {"age": 21, "city": "SPb"}}
             ),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe","info":{"age":21,"city":"SPb"}}',
         ),
-        (state.RIGHT, async_set_error_body, state.ERROR, BYTES_ERROR_MESSAGE),
-        (state.WRONG, sync_set_right_concrete_body({}), state.WRONG, None),  # noqa
+        (state.Right, async_set_error_body, state.Error, BYTES_ERROR_MESSAGE),
+        (state.Wrong, sync_set_right_concrete_body({}), state.Wrong, None),  # noqa
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body({"name": "John Doe"}),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body(
                 {"name": "John Doe", "info": {"age": 21, "city": "SPb"}}
             ),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, sync_set_error_body, state.WRONG, None),
-        (state.WRONG, async_set_right_concrete_body({}), state.WRONG, None),  # noqa
+        (state.Wrong, sync_set_error_body, state.Wrong, None),
+        (state.Wrong, async_set_right_concrete_body({}), state.Wrong, None),  # noqa
         (
-            state.WRONG,
+            state.Wrong,
             async_set_right_concrete_body({"name": "John Doe"}),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             async_set_right_concrete_body(
                 {"name": "John Doe", "info": {"age": 21, "city": "SPb"}}
             ),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, async_set_error_body, state.WRONG, None),
+        (state.Wrong, async_set_error_body, state.Wrong, None),
     ],
 )
 async def test_set_body_from_dict(
@@ -256,14 +242,15 @@ async def test_set_body_from_dict(
     assert_body,
 ):
     # arrange
-    ctx = future.from_value(state.pack(arrange_state, mock_context))
-    handler = res.set_body_from_dict(act_function)
+    arrange_ctx = future.from_value(arrange_state(mock_context))
+    arrange_handler = res.set_body_from_dict(act_function)
 
     # act
-    ctx: context.StateContext = await (ctx >> handler)
+    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
+
     # assert
-    assert ctx.state == assert_state
-    assert ctx.value.response.body == assert_body
+    assert isinstance(act_ctx, assert_state)
+    assert act_ctx.value.response.body == assert_body
 
 
 # Functions and classes for test-cases of `set_body_from_dict`
@@ -288,90 +275,90 @@ class ExtendedUser(pydantic.BaseModel):  # noqa
     "arrange_state,act_function,assert_state,assert_body",
     [
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body(pydantic.BaseModel()),
-            state.RIGHT,
+            state.Right,
             b"{}",  # noqa
         ),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body(User(name="John Doe")),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe"}',
         ),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body(
                 ExtendedUser(name="John Doe", info=UserInfo(age=21, city="SPb"))
             ),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe","info":{"age":21,"city":"SPb"}}',
         ),
-        (state.RIGHT, sync_set_error_body, state.ERROR, BYTES_ERROR_MESSAGE),
+        (state.Right, sync_set_error_body, state.Error, BYTES_ERROR_MESSAGE),
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body(pydantic.BaseModel()),
-            state.RIGHT,
+            state.Right,
             b"{}",  # noqa
         ),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body(User(name="John Doe")),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe"}',
         ),
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body(
                 ExtendedUser(name="John Doe", info=UserInfo(age=21, city="SPb"))
             ),
-            state.RIGHT,
+            state.Right,
             b'{"name":"John Doe","info":{"age":21,"city":"SPb"}}',
         ),
-        (state.RIGHT, async_set_error_body, state.ERROR, BYTES_ERROR_MESSAGE),
+        (state.Right, async_set_error_body, state.Error, BYTES_ERROR_MESSAGE),
         #
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body(pydantic.BaseModel()),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body(User(name="John Doe")),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body(
                 ExtendedUser(name="John Doe", info=UserInfo(age=21, city="SPb"))
             ),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, sync_set_error_body, state.WRONG, None),
+        (state.Wrong, sync_set_error_body, state.Wrong, None),
         (
-            state.WRONG,
+            state.Wrong,
             async_set_right_concrete_body(pydantic.BaseModel()),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body(User(name="John Doe")),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             async_set_right_concrete_body(
                 ExtendedUser(name="John Doe", info=UserInfo(age=21, city="SPb"))
             ),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, async_set_error_body, state.WRONG, None),
+        (state.Wrong, async_set_error_body, state.Wrong, None),
     ],
 )
 async def test_set_body_from_pydantic(
@@ -382,99 +369,99 @@ async def test_set_body_from_pydantic(
     assert_body,
 ):
     # arrange
-    ctx = future.from_value(state.pack(arrange_state, mock_context))
-    handler = res.set_body_from_pydantic(act_function)
+    arrange_ctx = future.from_value(arrange_state(mock_context))
+    arrange_handler = res.set_body_from_pydantic(act_function)
 
     # act
-    ctx: context.StateContext = await (ctx >> handler)
+    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
-    assert ctx.state == assert_state
-    assert ctx.value.response.body == assert_body
+    assert isinstance(act_ctx, assert_state)
+    assert act_ctx.value.response.body == assert_body
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "arrange_state,act_function,assert_state,assert_body",
     [
-        (state.RIGHT, sync_set_right_concrete_body(""), state.RIGHT, b""),
+        (state.Right, sync_set_right_concrete_body(""), state.Right, b""),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body("Hello, World"),
-            state.RIGHT,
+            state.Right,
             b"Hello, World",
         ),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body('{"name": "John Doe"}'),
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe"}',
         ),
         (
-            state.RIGHT,
+            state.Right,
             sync_set_right_concrete_body(
                 '{"name": "John Doe", "info": {"age": 21, "city": "SPb"}}'
             ),
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe", "info": {"age": 21, "city": "SPb"}}',
         ),
-        (state.RIGHT, sync_set_error_body, state.ERROR, BYTES_ERROR_MESSAGE),
-        (state.RIGHT, async_set_right_concrete_body(""), state.RIGHT, b""),
+        (state.Right, sync_set_error_body, state.Error, BYTES_ERROR_MESSAGE),
+        (state.Right, async_set_right_concrete_body(""), state.Right, b""),
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body("Hello, World"),
-            state.RIGHT,
+            state.Right,
             b"Hello, World",
         ),
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body('{"name": "John Doe"}'),
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe"}',
         ),
         (
-            state.RIGHT,
+            state.Right,
             async_set_right_concrete_body(
                 '{"name": "John Doe", "info": {"age": 21, "city": "SPb"}}'
             ),
-            state.RIGHT,
+            state.Right,
             b'{"name": "John Doe", "info": {"age": 21, "city": "SPb"}}',
         ),
-        (state.RIGHT, async_set_error_body, state.ERROR, BYTES_ERROR_MESSAGE),
-        (state.WRONG, sync_set_right_concrete_body(""), state.WRONG, None),
-        (state.WRONG, sync_set_right_concrete_body("Hello, World"), state.WRONG, None),
+        (state.Right, async_set_error_body, state.Error, BYTES_ERROR_MESSAGE),
+        (state.Wrong, sync_set_right_concrete_body(""), state.Wrong, None),
+        (state.Wrong, sync_set_right_concrete_body("Hello, World"), state.Wrong, None),
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body('{"name": "John Doe"}'),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             sync_set_right_concrete_body(
                 '{"name": "John Doe", "info": {"age": 21, "city": "SPb"}}'
             ),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, sync_set_error_body, state.WRONG, None),
-        (state.WRONG, async_set_right_concrete_body(""), state.WRONG, None),
-        (state.WRONG, async_set_right_concrete_body("Hello, World"), state.WRONG, None),
+        (state.Wrong, sync_set_error_body, state.Wrong, None),
+        (state.Wrong, async_set_right_concrete_body(""), state.Wrong, None),
+        (state.Wrong, async_set_right_concrete_body("Hello, World"), state.Wrong, None),
         (
-            state.WRONG,
+            state.Wrong,
             async_set_right_concrete_body('{"name": "John Doe"}'),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             async_set_right_concrete_body(
                 '{"name": "John Doe", "info": {"age": 21, "city": "SPb"}}'
             ),
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, async_set_error_body, state.WRONG, None),
+        (state.Wrong, async_set_error_body, state.Wrong, None),
     ],
 )
 async def test_set_body_from_text(
@@ -485,12 +472,12 @@ async def test_set_body_from_text(
     assert_body,
 ):
     # arrange
-    ctx = future.from_value(state.pack(arrange_state, mock_context))
-    handler = res.set_body_from_text(act_function)
+    arrange_ctx = future.from_value(arrange_state(mock_context))
+    arrange_handler = res.set_body_from_text(act_function)
 
     # act
-    ctx: context.StateContext = await (ctx >> handler)
+    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
-    assert ctx.state == assert_state
-    assert ctx.value.response.body == assert_body
+    assert isinstance(act_ctx, assert_state)
+    assert act_ctx.value.response.body == assert_body

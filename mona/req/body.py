@@ -1,16 +1,14 @@
-from dataclasses import dataclass, is_dataclass
-from typing import ByteString, Callable, Type
+import dataclasses
+import typing
 
 import orjson
-from pydantic import BaseModel
+import pydantic
 
-from mona.context import Context
-from mona.error import Error
-from mona.state import RE, error, right
+from mona import context, state
 
 
-@dataclass
-class RequestBodyIsNotReceivedError(Error):
+@dataclasses.dataclass
+class RequestBodyIsNotReceivedError(Exception):
     """Request body is None and cannot be taken."""
 
     message = "Request body is None and cannot be taken."
@@ -20,11 +18,11 @@ class RequestBodyIsNotReceivedError(Error):
         """Request body is None and cannot be taken."""
 
 
-@dataclass
-class TypeIsNotDataclassError(Error):
+@dataclasses.dataclass
+class TypeIsNotDataclassError(Exception):
     """Passed type is not dataclass."""
 
-    def __init__(self, t: Type):
+    def __init__(self, t: typing.Type):
         """Passed type is not dataclass.
 
         Args:
@@ -34,11 +32,11 @@ class TypeIsNotDataclassError(Error):
         self.code = 500
 
 
-@dataclass
-class TypeIsNotPydanticBaseModel(Error):
+@dataclasses.dataclass
+class TypeIsNotPydanticBaseModelError(Exception):
     """Passed type is not `pydantic.BaseModel`."""
 
-    def __init__(self, t: Type):
+    def __init__(self, t: typing.Type):
         """Passed type is not `pydantic.BaseModel`.
 
         Args:
@@ -48,55 +46,61 @@ class TypeIsNotPydanticBaseModel(Error):
         self.code = 500
 
 
-def take_body(ctx: Context) -> RE[ByteString]:
+def take_body(ctx: context.Context) -> state.ESafe[bytes]:
     """Take request body as byte string."""
     if ctx.request.body is None:
-        return error(RequestBodyIsNotReceivedError())
+        return state.Error(RequestBodyIsNotReceivedError())
 
-    return right(ctx.request.body)
+    return state.Right(ctx.request.body)
 
 
-def take_body_as_dict(ctx: Context) -> RE[dict]:
+def take_body_as_dict(ctx: context.Context) -> state.ESafe[dict]:
     """Take request body as dict."""
     if ctx.request.body is None:
-        return error(RequestBodyIsNotReceivedError())
+        return state.Error(RequestBodyIsNotReceivedError())
 
-    return right(orjson.loads(ctx.request.body))
+    return state.Right(orjson.loads(ctx.request.body))
 
 
-def take_body_as_dataclass(dataclass_type: Type) -> Callable[[Context], RE]:
+def take_body_as_dataclass(
+    dataclass_type: typing.Type,
+) -> typing.Callable[[context.Context], state.ESafe[object]]:
     """Take request body as dataclass."""
-    if not is_dataclass(dataclass_type):
+    # This exception can be raised as this is higher order function that will be
+    # executed at app construction stage
+    if not dataclasses.is_dataclass(dataclass_type):
         raise TypeIsNotDataclassError(dataclass_type)
 
-    def _handler(ctx: Context) -> dataclass_type:
+    def _handler(ctx: context.Context) -> dataclass_type:
         if ctx.request.body is None:
-            return error(RequestBodyIsNotReceivedError())
+            return state.Error(RequestBodyIsNotReceivedError())
 
-        return right(dataclass_type(**orjson.loads(ctx.request.body)))
+        return state.Right(dataclass_type(**orjson.loads(ctx.request.body)))
 
     return _handler
 
 
 def take_body_as_pydantic(
-    model_type: Type[BaseModel],
-) -> Callable[[Context], RE[BaseModel]]:
+    model_type: typing.Type[pydantic.BaseModel],
+) -> typing.Callable[[context.Context], state.ESafe[pydantic.BaseModel]]:
     """Take request body as pydantic BaseModel."""
-    if not issubclass(model_type, BaseModel):
-        raise TypeIsNotPydanticBaseModel(model_type)
+    # This exception can be raised as this is higher order function that will be
+    # executed at app construction stage
+    if not issubclass(model_type, pydantic.BaseModel):
+        raise TypeIsNotPydanticBaseModelError(model_type)
 
-    def _handler(ctx: Context) -> RE[model_type]:
+    def _handler(ctx: context.Context) -> state.ESafe[model_type]:
         if ctx.request.body is None:
-            return error(RequestBodyIsNotReceivedError())
+            return state.Error(RequestBodyIsNotReceivedError())
 
-        return right(model_type.parse_raw(ctx.request.body))
+        return state.Right(model_type.parse_raw(ctx.request.body))
 
     return _handler
 
 
-def take_body_as_str(ctx: Context) -> RE[str]:
+def take_body_as_str(ctx: context.Context) -> state.ESafe[str]:
     """Take request body as str."""
     if ctx.request.body is None:
-        return error(RequestBodyIsNotReceivedError())
+        return state.Error(RequestBodyIsNotReceivedError())
 
-    return right(ctx.request.body.decode("UTF-8"))
+    return state.Right(ctx.request.body.decode("UTF-8"))

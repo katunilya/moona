@@ -9,10 +9,48 @@ hugely inspired by Finite State Machines and Railroad Architecture approach.
 `mona` provides abstractions for so called `State` monad and `Future` monad.
 `State` monad provides functionality of FSM with a few pre-defined states:
 
-- `RIGHT` for processing going right way;
-- `WRONG` for processing going wrong way;
-- `ERROR` for processing stopped due to error;
-- `FINAL` for processing that should not be continued;
+- `Right` for processing going right way;
+- `Wrong` for processing going wrong way;
+- `Error` for processing stopped due to error;
+- `Final` for processing that should not be continued;
+
+Example:
+
+```python
+import dataclasses
+
+from mona import state
+
+
+@dataclasses.dataclass
+class User:
+    name: str
+    age: int
+    role: str
+
+
+__users = [
+    User("John", 21, "admin"),
+    User("Maria", 40, "modetator"),
+    User("Ivan", 28, "user"),
+    User("Alex", 13, "user"),
+    User("Nicole", 19, "user"),
+]
+
+
+def get_admin(name: str) -> state.ESafe[User]:
+    match next((u for u in __users if u.name == name), None):
+        case User(role="admin") as user:
+            return state.Right(user)
+        case _:
+            return state.Error(Exception(f"User {name} is not admin!"))
+
+
+print(get_admin("John"))
+print(get_admin("Ivan"))
+
+# can be run as-is
+```
 
 `Future` core feature is composition of sync and async function into one async:
 

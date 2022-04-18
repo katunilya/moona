@@ -1,300 +1,242 @@
+import abc
 import dataclasses
 import functools
 import typing
 
-import toolz
-
-from mona import error as e
-
 T = typing.TypeVar("T")
 V = typing.TypeVar("V")
-T_ERROR = typing.TypeVar("T_ERROR", bound=BaseException)
+TError = typing.TypeVar("TError", bound=Exception)
 
 
 @dataclasses.dataclass(frozen=True)
-class State(typing.Generic[T]):
-    """Container for `State`ful values."""
+class State(abc.ABC, typing.Generic[T]):
+    """Base container for Statefull values."""
 
     value: T
-    state: typing.Any
+
+    def __rshift__(
+        self, function: typing.Callable[["State[T]"], "State[V]"]
+    ) -> "State[V]":
+        """Dunder function for >> syntax of executing statefull functions."""
+        return function(self)
 
 
-@toolz.curry
-def pack(state: typing.Any, value: T) -> State[T]:
-    """Curried way of packing value into State container.
-
-    Args:
-        state (typing.Any): to assign container
-        value (T): to wrap in container
-
-    Returns:
-        State[T]: container
-    """
-    return State(value, state)
+@dataclasses.dataclass(frozen=True)
+class Right(State[T]):
+    """Value should be processed next."""
 
 
-def unpack(cnt: State[T]) -> T:
-    """Extract value from State container.
-
-    Args:
-        cnt (State[T]): container
-
-    Returns:
-        T: value
-    """
-    return cnt.value
+@dataclasses.dataclass(frozen=True)
+class Wrong(State[T]):
+    """Value should not be processed next."""
 
 
-def accpets(
-    state: typing.Any,
-) -> typing.Callable[[typing.Callable[[T], V]], typing.Callable[[State[T]], State[V]]]:
-    """Decorator that executes function only if state of container is `state`.
-
-    Args:
-        state (typing.Any): target state
-
-    Returns:
-        typing.Callable[
-            [typing.Callable[[T], V]],
-            typing.Callable[[State[T]], State[V]]]: decorator
-    """
-
-    def _decorator(
-        function: typing.Callable[[T], V]
-    ) -> typing.Callable[[State[T]], State[V]]:
-        @functools.wraps(function)
-        def _wrapper(cnt: State[T]) -> State[V]:
-            return function(cnt.value) if cnt.state == state else cnt
-
-        return _wrapper
-
-    return _decorator
+@dataclasses.dataclass(frozen=True)
+class Error(State[TError]):
+    """Value should not be processed next due to error."""
 
 
-def rejects(
-    state: typing.Any,
-) -> typing.Callable[
-    [typing.Callable[[T], State[V]]], typing.Callable[[State[T]], State[V]]
-]:
-    """Decorator that executes function only if state of container is not `state`.
-
-    Args:
-        state (typing.Any): target state
-
-    Returns:
-        typing.Callable[
-            [typing.Callable[[T], V]],
-            typing.Callable[[State[T]], State[V]]]: decorator
-    """
-
-    def _decorator(
-        function: typing.Callable[[T], State[V]]
-    ) -> typing.Callable[[State[T]], State[V]]:
-        @functools.wraps(function)
-        def _wrapper(cnt: State[T]) -> State[V]:
-            return function(cnt.value) if cnt.state != state else cnt
-
-        return _wrapper
-
-    return _decorator
+@dataclasses.dataclass(frozen=True)
+class Final(State[T]):
+    """Value should not be processed next as processing finished."""
 
 
-RIGHT = "RIGHT"  # calculation finished successfully
-WRONG = "WRONG"  # calculation finished, but result is not appropriate
-ERROR = "ERROR"  # calculation finished with error
-FINAL = "FINAL"  # calculation is complete and should not be continued
-
-
-def right(value: T) -> State[T]:
-    """Wraps value into State container in RIGHT state.
-
-    Args:
-        value (T): to wrap
-
-    Returns:
-        State[T]: container
-    """
-    return State(value, RIGHT)
-
-
-def wrong(value: T) -> State[T]:
-    """Wraps value into State container in WRONG state.
-
-    Args:
-        value (T): to wrap
-
-    Returns:
-        State[T]: container
-    """
-    return State(value, WRONG)
-
-
-def error(value: T) -> State[T]:
-    """Wraps value into State container in ERROR state.
-
-    Args:
-        value (T): to wrap
-
-    Returns:
-        State[T]: container
-    """
-    return State(value, ERROR)
-
-
-def final(value: T) -> State[T]:
-    """Wraps value into State container in FINAL state.
-
-    Args:
-        value (T): to wrap
-
-    Returns:
-        State[T]: container
-    """
-    return State(value, FINAL)
-
-
-def switch_right(cnt: State[T]) -> State[T]:
-    """Changes state of some container to RIGHT.
-
-    Args:
-        cnt (State[T]): to switch state
-
-    Returns:
-        State[T]: resulting state
-    """
-    return State(cnt.value, RIGHT)
-
-
-def switch_wrong(cnt: State[T]) -> State[T]:
-    """Changes state of some container to WRONG.
-
-    Args:
-        cnt (State[T]): to switch state
-
-    Returns:
-        State[T]: resulting state
-    """
-    return State(cnt.value, WRONG)
-
-
-def switch_error(cnt: State[T]) -> State[T]:
-    """Changes state of some container to ERROR.
-
-    Args:
-        cnt (State[T]): to switch state
-
-    Returns:
-        State[T]: resulting state
-    """
-    return State(cnt.value, ERROR)
-
-
-def switch_final(cnt: State[T]) -> State[T]:
-    """Changes state of some container to FINAL.
-
-    Args:
-        cnt (State[T]): to switch state
-
-    Returns:
-        State[T]: resulting state
-    """
-    return State(cnt.value, FINAL)
-
-
-def accepts_right(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on RIGHT state."""
+def unpacks(function: typing.Callable[[T], State[V]]):
+    """Decorator for automatic unpacking of State for function execution."""
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state == RIGHT else cnt
+    def _wrapper(s: State[T]):
+        return function(s.value)
 
     return _wrapper
 
 
-def accepts_wrong(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on WRONG state."""
+def accepts_right(function: typing.Callable[[T], State[V]]):
+    """Decorator that executes guarded function only when monad is in RIGHT state.
+
+    This decorator also unpacks `State` container.
+    """
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state == WRONG else cnt
+    def _wrapper(s: State[T]):
+        match s:
+            case Right(value):
+                return function(value)
+            case _:
+                return s
 
     return _wrapper
 
 
-def accepts_error(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on ERROR state."""
+def accepts_wrong(function: typing.Callable[[T], State[V]]):
+    """Decorator that executes guarded function only when monad is in WRONG state.
+
+    This decorator also unpacks `State` container.
+    """
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state == ERROR else cnt
+    def _wrapper(s: State[T]):
+        match s:
+            case Wrong(value):
+                return function(value)
+            case _:
+                return s
 
     return _wrapper
 
 
-def accepts_final(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on ERROR state."""
+def accepts_error(function: typing.Callable[[T], State[V]]):
+    """Decorator that executes guarded function only when monad is in FINAL state.
+
+    This decorator also unpacks `State` container.
+    """
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state == FINAL else cnt
+    def _wrapper(s: State[T]):
+        match s:
+            case Error(value):
+                return function(value)
+            case _:
+                return s
 
     return _wrapper
 
 
-def rejects_right(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on not RIGHT state."""
+def accepts_final(function: typing.Callable[[T], State[V]]):
+    """Decorator that executes guarded function only when monad is in FINAL state.
+
+    This decorator also unpacks `State` container.
+    """
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state != RIGHT else cnt
+    def _wrapper(s: State[T]):
+        match s:
+            case Final(value):
+                return function(value)
+            case _:
+                return s
 
     return _wrapper
 
 
-def rejects_wrong(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on not WRONG state."""
+def rejects_right(function: typing.Callable[[T], State[V]]):
+    """Decorator that guards function from container in RIGHT state.
+
+    This decorator also unpacks `State` container.
+    """
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state != WRONG else cnt
+    def _wrapper(s: State[T]):
+        match s:
+            case Right(_):
+                return s
+            case other:
+                return function(other.value)
 
     return _wrapper
 
 
-def rejects_error(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on not ERROR state."""
+def rejects_wrong(function: typing.Callable[[T], State[V]]):
+    """Decorator that guards function from container in WRONG state.
+
+    This decorator also unpacks `State` container.
+    """
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state != ERROR else cnt
+    def _wrapper(s: State[T]):
+        match s:
+            case Wrong(_):
+                return s
+            case other:
+                return function(other.value)
 
     return _wrapper
 
 
-def rejects_final(
-    function: typing.Callable[[T], State[V]]
-) -> typing.Callable[[State[T]], State[V]]:
-    """Function will be executed only on not ERROR state."""
+def rejects_error(function: typing.Callable[[T], State[V]]):
+    """Decorator that guards function from container in ERROR state.
+
+    This decorator also unpacks `State` container.
+    """
 
     @functools.wraps(function)
-    def _wrapper(cnt: State[T]) -> State[V]:
-        return function(cnt.value) if cnt.state != FINAL else cnt
+    def _wrapper(s: State[T]):
+        match s:
+            case Error(_):
+                return s
+            case other:
+                return function(other.value)
 
     return _wrapper
 
 
-RE = typing.Union[State[T], State[e.Error]]
+def rejects_final(function: typing.Callable[[T], State[V]]):
+    """Decorator that guards function from container in FINAL state.
+
+    This decorator also unpacks `State` container.
+    """
+
+    @functools.wraps(function)
+    def _wrapper(s: State[T]):
+        match s:
+            case Final(_):
+                return s
+            case other:
+                return function(other.value)
+
+    return _wrapper
+
+
+def switch_to_right(s: State[T]) -> Right[T]:
+    """Changes container for Statefull value to Right.
+
+    Args:
+        s (State[T]): initial State container
+
+    Returns:
+        Right[T]: container
+    """
+    return Right(s.value)
+
+
+def switch_to_wrong(s: State[T]) -> Wrong[T]:
+    """Changes container for Statefull value to Wrong.
+
+    Args:
+        s (State[T]): initial State container
+
+    Returns:
+        Wrong[T]: container
+    """
+    return Wrong(s.value)
+
+
+def switch_to_error(s: State[T]) -> Error[T]:
+    """Changes container for Statefull value to Error.
+
+    Args:
+        s (State[T]): initial State container
+
+    Returns:
+        Error[T]: container
+    """
+    return Error(s.value)
+
+
+def switch_to_final(s: State[T]) -> Right[T]:
+    """Changes container for Statefull value to Final.
+
+    Args:
+        s (State[T]): initial State container
+
+    Returns:
+        Final[T]: container
+    """
+    return Final(s.value)
+
+
+Result = Right[T] | Wrong[V]
+Safe = Right[T] | Error[TError]
+ESafe = Safe[T, Exception]
+SafeResult = Right[T] | Wrong[V] | Error[TError]
+ESafeResult = SafeResult[T, V, Exception]

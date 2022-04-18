@@ -7,8 +7,8 @@ from mona import context, future, res, state
 @pytest.mark.parametrize(
     "arrange_state,arrange_status,assert_state,assert_status",
     [
-        (state.RIGHT, res.status.ACCEPTED, state.RIGHT, res.status.ACCEPTED),
-        (state.WRONG, res.status.ACCEPTED, state.WRONG, None),
+        (state.Right, res.status.ACCEPTED, state.Right, res.status.ACCEPTED),
+        (state.Wrong, res.status.ACCEPTED, state.Wrong, None),
     ],
 )
 async def test_set_status(
@@ -19,18 +19,18 @@ async def test_set_status(
     assert_status,
 ):
     # arrange
-    ctx = future.from_value(state.pack(arrange_state, mock_context))
+    ctx = future.from_value(arrange_state(mock_context))
     handler = res.set_status(arrange_status)
 
     # act
     ctx: context.StateContext = await (ctx >> handler)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(ctx, assert_state)
     try:
         assert ctx.value.response.status == assert_status
     except AssertionError as e:
-        if assert_state is state.RIGHT:
+        if assert_state is state.Right:
             raise e
 
 
@@ -38,66 +38,66 @@ async def test_set_status(
 @pytest.mark.parametrize(
     "arrange_state, act_setter, assert_state, assert_status",
     [
-        (state.RIGHT, res.set_status_ok, state.RIGHT, res.status.OK),
-        (state.RIGHT, res.set_status_created, state.RIGHT, res.status.CREATED),
-        (state.RIGHT, res.set_status_bad_request, state.RIGHT, res.status.BAD_REQUEST),
+        (state.Right, res.set_status_ok, state.Right, res.status.OK),
+        (state.Right, res.set_status_created, state.Right, res.status.CREATED),
+        (state.Right, res.set_status_bad_request, state.Right, res.status.BAD_REQUEST),
         (
-            state.RIGHT,
+            state.Right,
             res.set_status_unauthorized,
-            state.RIGHT,
+            state.Right,
             res.status.UNAUTHORIZED,
         ),
-        (state.RIGHT, res.set_status_forbidden, state.RIGHT, res.status.FORBIDDEN),
-        (state.RIGHT, res.set_status_not_found, state.RIGHT, res.status.NOT_FOUND),
+        (state.Right, res.set_status_forbidden, state.Right, res.status.FORBIDDEN),
+        (state.Right, res.set_status_not_found, state.Right, res.status.NOT_FOUND),
         (
-            state.RIGHT,
+            state.Right,
             res.set_status_method_not_allowed,
-            state.RIGHT,
+            state.Right,
             res.status.METHOD_NOT_ALLOWED,
         ),
         (
-            state.RIGHT,
+            state.Right,
             res.set_status_internal_server_error,
-            state.RIGHT,
+            state.Right,
             res.status.INTERNAL_SERVER_ERROR,
         ),
         (
-            state.RIGHT,
+            state.Right,
             res.set_status_not_implemented,
-            state.RIGHT,
+            state.Right,
             res.status.NOT_IMPLEMENTED,
         ),
-        (state.RIGHT, res.set_status_bad_gateway, state.RIGHT, res.status.BAD_GATEWAY),
-        (state.WRONG, res.set_status_ok, state.WRONG, None),
-        (state.WRONG, res.set_status_created, state.WRONG, None),
-        (state.WRONG, res.set_status_bad_request, state.WRONG, None),
+        (state.Right, res.set_status_bad_gateway, state.Right, res.status.BAD_GATEWAY),
+        (state.Wrong, res.set_status_ok, state.Wrong, None),
+        (state.Wrong, res.set_status_created, state.Wrong, None),
+        (state.Wrong, res.set_status_bad_request, state.Wrong, None),
         (
-            state.WRONG,
+            state.Wrong,
             res.set_status_unauthorized,
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, res.set_status_forbidden, state.WRONG, None),
-        (state.WRONG, res.set_status_not_found, state.WRONG, None),
+        (state.Wrong, res.set_status_forbidden, state.Wrong, None),
+        (state.Wrong, res.set_status_not_found, state.Wrong, None),
         (
-            state.WRONG,
+            state.Wrong,
             res.set_status_method_not_allowed,
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             res.set_status_internal_server_error,
-            state.WRONG,
+            state.Wrong,
             None,
         ),
         (
-            state.WRONG,
+            state.Wrong,
             res.set_status_not_implemented,
-            state.WRONG,
+            state.Wrong,
             None,
         ),
-        (state.WRONG, res.set_status_bad_gateway, state.WRONG, None),
+        (state.Wrong, res.set_status_bad_gateway, state.Wrong, None),
     ],
 )
 async def test_ready_setters(
@@ -108,16 +108,16 @@ async def test_ready_setters(
     assert_status,
 ):
     # arrange
-    ctx = future.from_value(state.pack(arrange_state, mock_context))
+    ctx = future.from_value(arrange_state(mock_context))
 
     # act
     ctx: context.StateContext = await (ctx >> act_setter)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(ctx, assert_state)
 
     try:
         assert ctx.value.response.status == assert_status
     except AssertionError as e:
-        if assert_state is state.RIGHT:
+        if assert_state is state.Right:
             raise e

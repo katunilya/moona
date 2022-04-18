@@ -6,10 +6,10 @@ from mona import context, req, state
 @pytest.mark.parametrize(
     "arrange_type,arrange_state,assert_state",
     [
-        ("http", state.RIGHT, state.RIGHT),
-        ("websocket", state.RIGHT, state.WRONG),
-        ("http", state.WRONG, state.WRONG),
-        ("websocket", state.WRONG, state.WRONG),
+        ("http", state.Right, state.Right),
+        ("websocket", state.Right, state.Wrong),
+        ("http", state.Wrong, state.Wrong),
+        ("websocket", state.Wrong, state.Wrong),
     ],
 )
 def test_reqest_on_type(
@@ -17,10 +17,10 @@ def test_reqest_on_type(
 ):
     # arrange
     mock_context.request.type_ = arrange_type
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_http(ctx)
+    act_ctx: context.StateContext = req.on_http(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)

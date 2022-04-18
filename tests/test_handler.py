@@ -14,34 +14,40 @@ async def async_handler(cnt: context.StateContext) -> context.StateContext:
 
 
 def wrong_handler(cnt: context.StateContext) -> context.StateContext:
-    return state.wrong(cnt.value)
+    return state.Wrong(cnt.value)
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "st, handlers, target_state",
+    "arrange_state,arrange_handlers,assert_state",
     [
-        (state.WRONG, [], state.WRONG),
-        (state.WRONG, [wrong_handler], state.WRONG),
-        (state.RIGHT, [wrong_handler], state.WRONG),
-        (state.RIGHT, [wrong_handler, sync_handler], state.RIGHT),
-        (state.RIGHT, [wrong_handler, async_handler], state.RIGHT),
-        (state.RIGHT, [wrong_handler, sync_handler], state.RIGHT),
+        (state.Wrong, [], state.Wrong),
+        (state.Right, [], state.Right),
+        (state.Wrong, [wrong_handler], state.Wrong),
+        (state.Right, [wrong_handler], state.Wrong),
+        (state.Right, [wrong_handler, sync_handler], state.Right),
+        (state.Right, [wrong_handler, async_handler], state.Right),
+        (state.Right, [wrong_handler, sync_handler], state.Right),
     ],
 )
 async def test_choose(
     mock_context: context.Context,
-    st,
-    handlers,
-    target_state,
+    arrange_state,
+    arrange_handlers,
+    assert_state,
 ):
-    ctx = future.from_value(state.State(mock_context, st))
+    # act
+    act_ctx = (
+        arrange_state(mock_context)
+        >> future.from_value
+        >> handler.choose(*arrange_handlers)
+    )
 
-    handler_ = handler.choose(*handlers)
-    cnt = ctx >> handler_
+    # asset
+    assert inspect.isawaitable(act_ctx)
 
-    assert inspect.isawaitable(cnt)
+    # act
+    act_ctx: context.StateContext = await act_ctx
 
-    cnt: context.StateContext = await cnt
-
-    assert cnt.state == target_state
+    # assert
+    assert isinstance(act_ctx, assert_state)
