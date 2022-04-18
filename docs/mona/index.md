@@ -6,7 +6,6 @@
     - Modules
         - [Asgi](asgi.md#asgi)
         - [Context](context.md#context)
-        - [Error](error.md#error)
         - [Future](future.md#future)
         - [Handler](handler.md#handler)
         - [Req](req/index.md#req)

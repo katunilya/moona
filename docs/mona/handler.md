@@ -7,7 +7,7 @@
 
 ## choose
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/handler.py#L30)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/handler.py#L27)
 
 ```python
 def choose(*handlers: Handler) -> Handler:
