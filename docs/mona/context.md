@@ -13,7 +13,7 @@
 
 ## Client
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L16)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L17)
 
 ```python
 dataclasses.dataclass
@@ -24,7 +24,7 @@ Information about request client.
 
 ## Context
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L144)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L145)
 
 ```python
 dataclasses.dataclass
@@ -35,7 +35,7 @@ Wrapper for request data processing.
 
 ## Request
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L34)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L35)
 
 ```python
 dataclasses.dataclass
@@ -46,7 +46,7 @@ Immutable request data.
 
 ## Response
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L122)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L123)
 
 ```python
 dataclasses.dataclass
@@ -57,7 +57,7 @@ Request response data.
 
 ## Server
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L25)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L26)
 
 ```python
 dataclasses.dataclass
@@ -68,7 +68,7 @@ Information about server excepted request.
 
 ## copy
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L173)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L175)
 
 ```python
 def copy(ctx: Context) -> Context:
@@ -90,10 +90,10 @@ Create [Context](#context) from another [Context](#context) as a copy.
 
 ## from_asgi
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L154)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/context.py#L155)
 
 ```python
-def from_asgi(scope: Scope, receive: Receive, send: Send) -> Context:
+def from_asgi(asgi: ASGIData) -> Context:
 ```
 
 Create context from ASGI function args.
@@ -110,7 +110,5 @@ Create context from ASGI function args.
 
 #### See also
 
+- [ASGIData](#asgidata)
 - [Context](#context)
-- [Receive](#receive)
-- [Scope](#scope)
-- [Send](#send)

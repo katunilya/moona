@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mona"
-version = "0.2.0"
+version = "0.2.1"
 description = "ASGI server with functional approach in mind"
 authors = ["Katun Ilya <katun.ilya@gmail.com>"]
 license = "MIT"
@@ -34,6 +34,7 @@ flake8-annotations-complexity = "^0.0.7"
 flake8-requirements = "^1.5.3"
 uvicorn = "^0.17.6"
 handsdown = "^1.1.0"
+pre-commit = "^2.18.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

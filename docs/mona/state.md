@@ -3,38 +3,108 @@
 > Auto-generated documentation for [mona.state](https://github.com/katunilya/mona/blob/main/mona/state.py) module.
 
 - [Mona](../README.md#mona) / [Modules](../MODULES.md#mona-modules) / [Mona](index.md#mona) / State
+    - [Error](#error)
+    - [Final](#final)
+    - [Right](#right)
     - [State](#state)
+        - [State().\_\_rshift\_\_](#state__rshift__)
+    - [Wrong](#wrong)
     - [accepts_error](#accepts_error)
     - [accepts_final](#accepts_final)
     - [accepts_right](#accepts_right)
     - [accepts_wrong](#accepts_wrong)
-    - [accpets](#accpets)
-    - [error](#error)
-    - [final](#final)
-    - [pack](#pack)
-    - [rejects](#rejects)
     - [rejects_error](#rejects_error)
     - [rejects_final](#rejects_final)
     - [rejects_right](#rejects_right)
     - [rejects_wrong](#rejects_wrong)
-    - [right](#right)
-    - [switch_error](#switch_error)
-    - [switch_final](#switch_final)
-    - [switch_right](#switch_right)
-    - [switch_wrong](#switch_wrong)
-    - [unpack](#unpack)
-    - [wrong](#wrong)
+    - [switch_to_error](#switch_to_error)
+    - [switch_to_final](#switch_to_final)
+    - [switch_to_right](#switch_to_right)
+    - [switch_to_wrong](#switch_to_wrong)
+    - [unpacks](#unpacks)
 
-## State
+## Error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L15)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L35)
 
 ```python
 dataclasses.dataclass(frozen=True)
-class State(typing.Generic[T]):
+class Error(State[TError]):
 ```
 
-Container for [State](#state)ful values.
+Value should not be processed next due to error.
+
+#### See also
+
+- [TError](#terror)
+
+## Final
+
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L40)
+
+```python
+dataclasses.dataclass(frozen=True)
+class Final(State[T]):
+```
+
+Value should not be processed next as processing finished.
+
+#### See also
+
+- [T](#t)
+
+## Right
+
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L25)
+
+```python
+dataclasses.dataclass(frozen=True)
+class Right(State[T]):
+```
+
+Value should be processed next.
+
+#### See also
+
+- [T](#t)
+
+## State
+
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L12)
+
+```python
+dataclasses.dataclass(frozen=True)
+class State(abc.ABC, typing.Generic[T]):
+```
+
+Base container for Statefull values.
+
+#### See also
+
+- [T](#t)
+
+### State().\_\_rshift\_\_
+
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L17)
+
+```python
+def __rshift__(
+    function: typing.Callable[['State[T]'], 'State[V]'],
+) -> 'State[V]':
+```
+
+Dunder function for >> syntax of executing statefull functions.
+
+## Wrong
+
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L30)
+
+```python
+dataclasses.dataclass(frozen=True)
+class Wrong(State[T]):
+```
+
+Value should not be processed next.
 
 #### See also
 
@@ -42,15 +112,15 @@ Container for [State](#state)ful values.
 
 ## accepts_error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L228)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L88)
 
 ```python
-def accepts_error(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def accepts_error(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on ERROR state.
+Decorator that executes guarded function only when monad is in FINAL state.
+
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
@@ -59,15 +129,15 @@ Function will be executed only on ERROR state.
 
 ## accepts_final
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L240)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L105)
 
 ```python
-def accepts_final(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def accepts_final(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on ERROR state.
+Decorator that executes guarded function only when monad is in FINAL state.
+
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
@@ -76,15 +146,15 @@ Function will be executed only on ERROR state.
 
 ## accepts_right
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L204)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L54)
 
 ```python
-def accepts_right(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def accepts_right(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on RIGHT state.
+Decorator that executes guarded function only when monad is in RIGHT state.
+
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
@@ -93,167 +163,15 @@ Function will be executed only on RIGHT state.
 
 ## accepts_wrong
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L216)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L71)
 
 ```python
-def accepts_wrong(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def accepts_wrong(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on WRONG state.
+Decorator that executes guarded function only when monad is in WRONG state.
 
-#### See also
-
-- [T](#t)
-- [V](#v)
-
-## accpets
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L48)
-
-```python
-def accpets(
-    state: typing.Any,
-) -> typing.Callable[
-    [
-        typing.Callable[
-            [
-                T,
-            ],
-            V,
-        ],
-    ],
-    typing.Callable[
-        [
-            State[T],
-        ],
-        State[V],
-    ],
-]:
-```
-
-Decorator that executes function only if state of container is `state`.
-
-#### Arguments
-
-- `state` *typing.Any* - target state
-
-#### Returns
-
-typing.Callable[
-    [typing.Callable[[T], V]],
-    - `typing.Callable[[State[T]],` *State[V]]]* - decorator
-
-#### See also
-
-- [T](#t)
-- [V](#v)
-
-## error
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L132)
-
-```python
-def error(value: T) -> State[T]:
-```
-
-Wraps value into State container in ERROR state.
-
-#### Arguments
-
-- `value` *T* - to wrap
-
-#### Returns
-
-- `State[T]` - container
-
-#### See also
-
-- [T](#t)
-
-## final
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L144)
-
-```python
-def final(value: T) -> State[T]:
-```
-
-Wraps value into State container in FINAL state.
-
-#### Arguments
-
-- `value` *T* - to wrap
-
-#### Returns
-
-- `State[T]` - container
-
-#### See also
-
-- [T](#t)
-
-## pack
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L22)
-
-```python
-@toolz.curry
-def pack(state: typing.Any, value: T) -> State[T]:
-```
-
-Curried way of packing value into State container.
-
-#### Arguments
-
-- `state` *typing.Any* - to assign container
-- `value` *T* - to wrap in container
-
-#### Returns
-
-- `State[T]` - container
-
-#### See also
-
-- [T](#t)
-
-## rejects
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L74)
-
-```python
-def rejects(
-    state: typing.Any,
-) -> typing.Callable[
-    [
-        typing.Callable[
-            [
-                T,
-            ],
-            State[V],
-        ],
-    ],
-    typing.Callable[
-        [
-            State[T],
-        ],
-        State[V],
-    ],
-]:
-```
-
-Decorator that executes function only if state of container is not `state`.
-
-#### Arguments
-
-- `state` *typing.Any* - target state
-
-#### Returns
-
-typing.Callable[
-    [typing.Callable[[T], V]],
-    - `typing.Callable[[State[T]],` *State[V]]]* - decorator
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
@@ -262,15 +180,15 @@ typing.Callable[
 
 ## rejects_error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L276)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L156)
 
 ```python
-def rejects_error(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def rejects_error(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on not ERROR state.
+Decorator that guards function from container in ERROR state.
+
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
@@ -279,15 +197,15 @@ Function will be executed only on not ERROR state.
 
 ## rejects_final
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L288)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L173)
 
 ```python
-def rejects_final(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def rejects_final(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on not ERROR state.
+Decorator that guards function from container in FINAL state.
+
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
@@ -296,15 +214,15 @@ Function will be executed only on not ERROR state.
 
 ## rejects_right
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L252)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L122)
 
 ```python
-def rejects_right(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def rejects_right(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on not RIGHT state.
+Decorator that guards function from container in RIGHT state.
+
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
@@ -313,171 +231,120 @@ Function will be executed only on not RIGHT state.
 
 ## rejects_wrong
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L264)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L139)
 
 ```python
-def rejects_wrong(
-    function: typing.Callable[[T], State[V]],
-) -> typing.Callable[[State[T]], State[V]]:
+def rejects_wrong(function: typing.Callable[[T], State[V]]):
 ```
 
-Function will be executed only on not WRONG state.
+Decorator that guards function from container in WRONG state.
+
+This decorator also unpacks [State](#state) container.
 
 #### See also
 
 - [T](#t)
 - [V](#v)
 
-## right
+## switch_to_error
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L108)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L214)
 
 ```python
-def right(value: T) -> State[T]:
+def switch_to_error(s: State[T]) -> Error[T]:
 ```
 
-Wraps value into State container in RIGHT state.
+Changes container for Statefull value to Error.
 
 #### Arguments
 
-- `value` *T* - to wrap
+- `s` *State[T]* - initial State container
 
 #### Returns
 
-- `State[T]` - container
+- `Error[T]` - container
 
 #### See also
 
 - [T](#t)
 
-## switch_error
+## switch_to_final
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L180)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L226)
 
 ```python
-def switch_error(cnt: State[T]) -> State[T]:
+def switch_to_final(s: State[T]) -> Right[T]:
 ```
 
-Changes state of some container to ERROR.
+Changes container for Statefull value to Final.
 
 #### Arguments
 
-- `cnt` *State[T]* - to switch state
+- `s` *State[T]* - initial State container
 
 #### Returns
 
-- `State[T]` - resulting state
+- `Final[T]` - container
 
 #### See also
 
 - [T](#t)
 
-## switch_final
+## switch_to_right
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L192)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L190)
 
 ```python
-def switch_final(cnt: State[T]) -> State[T]:
+def switch_to_right(s: State[T]) -> Right[T]:
 ```
 
-Changes state of some container to FINAL.
+Changes container for Statefull value to Right.
 
 #### Arguments
 
-- `cnt` *State[T]* - to switch state
+- `s` *State[T]* - initial State container
 
 #### Returns
 
-- `State[T]` - resulting state
+- `Right[T]` - container
 
 #### See also
 
 - [T](#t)
 
-## switch_right
+## switch_to_wrong
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L156)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L202)
 
 ```python
-def switch_right(cnt: State[T]) -> State[T]:
+def switch_to_wrong(s: State[T]) -> Wrong[T]:
 ```
 
-Changes state of some container to RIGHT.
+Changes container for Statefull value to Wrong.
 
 #### Arguments
 
-- `cnt` *State[T]* - to switch state
+- `s` *State[T]* - initial State container
 
 #### Returns
 
-- `State[T]` - resulting state
+- `Wrong[T]` - container
 
 #### See also
 
 - [T](#t)
 
-## switch_wrong
+## unpacks
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L168)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L44)
 
 ```python
-def switch_wrong(cnt: State[T]) -> State[T]:
+def unpacks(function: typing.Callable[[T], State[V]]):
 ```
 
-Changes state of some container to WRONG.
-
-#### Arguments
-
-- `cnt` *State[T]* - to switch state
-
-#### Returns
-
-- `State[T]` - resulting state
+Decorator for automatic unpacking of State for function execution.
 
 #### See also
 
 - [T](#t)
-
-## unpack
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L36)
-
-```python
-def unpack(cnt: State[T]) -> T:
-```
-
-Extract value from State container.
-
-#### Arguments
-
-- `cnt` *State[T]* - container
-
-#### Returns
-
-- `T` - value
-
-#### See also
-
-- [T](#t)
-
-## wrong
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/state.py#L120)
-
-```python
-def wrong(value: T) -> State[T]:
-```
-
-Wraps value into State container in WRONG state.
-
-#### Arguments
-
-- `value` *T* - to wrap
-
-#### Returns
-
-- `State[T]` - container
-
-#### See also
-
-- [T](#t)
+- [V](#v)

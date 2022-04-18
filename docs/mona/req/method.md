@@ -16,7 +16,7 @@
 
 ## on_connect
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L113)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L72)
 
 ```python
 @state.accepts_right
@@ -27,7 +27,7 @@ Continue execution if request method is [CONNECT](#method).
 
 ## on_delete
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L77)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L48)
 
 ```python
 @state.accepts_right
@@ -38,7 +38,7 @@ Continue execution if request method is [DELETE](#method).
 
 ## on_get
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L41)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L24)
 
 ```python
 @state.accepts_right
@@ -49,7 +49,7 @@ Continue execution if request  method is [GET](#method).
 
 ## on_head
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L95)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L60)
 
 ```python
 @state.accepts_right
@@ -60,21 +60,17 @@ Continue execution if request method is [HEAD](#method).
 
 ## on_method
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L28)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L14)
 
 ```python
-def on_method(method: Method) -> handler.Handler:
+def on_method(method: str) -> handler.Handler:
 ```
 
 Continue execution if request  method is passed method.
 
-#### See also
-
-- [Method](#method)
-
 ## on_options
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L86)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L54)
 
 ```python
 @state.accepts_right
@@ -85,7 +81,7 @@ Continue execution if request method is [OPTIONS](#method).
 
 ## on_patch
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L59)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L36)
 
 ```python
 @state.accepts_right
@@ -96,7 +92,7 @@ Continue execution if request method is [PATCH](#method).
 
 ## on_post
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L50)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L30)
 
 ```python
 @state.accepts_right
@@ -107,7 +103,7 @@ Continue execution if request method is [POST](#method).
 
 ## on_put
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L68)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L42)
 
 ```python
 @state.accepts_right
@@ -118,7 +114,7 @@ Continue execution if request method is [PUT](#method).
 
 ## on_trace
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L104)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/method.py#L66)
 
 ```python
 @state.accepts_right
