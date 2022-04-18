@@ -8,7 +8,6 @@ Full list of [Mona](README.md#mona) project modules.
 - [Mona](mona/index.md#mona)
     - [Asgi](mona/asgi.md#asgi)
     - [Context](mona/context.md#context)
-    - [Error](mona/error.md#error)
     - [Future](mona/future.md#future)
     - [Handler](mona/handler.md#handler)
     - [Req](mona/req/index.md#req)

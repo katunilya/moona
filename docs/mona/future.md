@@ -60,7 +60,7 @@ Dunder function for >> syntax of executing futures.
 ```python
 @toolz.curry
 def bind(
-    function: typing.Callable[[T], typing.Union[typing.Awaitable[V], V]],
+    function: typing.Callable[[T], typing.Awaitable[V] | V],
     cnt: Future[T],
 ) -> Future[V]:
 ```
@@ -87,7 +87,7 @@ function (typing.Callable[[T], typing.Union[V, typing.Awaitable[V]]]): to bind
 
 ```python
 def compose(
-    *functions: typing.Callable[[T], typing.Union[V, typing.Awaitable[V]]],
+    *functions: typing.Callable[[T], typing.Awaitable[V] | V],
 ) -> typing.Callable[[T], typing.Awaitable[V]]:
 ```
 
@@ -150,25 +150,12 @@ Converts some value into Awaitable.
 
 ## pipe
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L97)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/future.py#L92)
 
 ```python
 def pipe(
     cnt: Future[T],
-    *functions: typing.Union[
-        typing.Callable[
-            [
-                T,
-            ],
-            typing.Awaitable[V],
-        ],
-        typing.Callable[
-            [
-                T,
-            ],
-            V,
-        ],
-    ],
+    *functions: typing.Callable[[T], typing.Awaitable[V] | V],
 ) -> Future[V]:
 ```
 

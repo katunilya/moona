@@ -7,30 +7,26 @@
     - [set_body_from_bytes](#set_body_from_bytes)
     - [set_body_from_dict](#set_body_from_dict)
     - [set_body_from_pydantic](#set_body_from_pydantic)
+    - [set_body_from_text](#set_body_from_text)
     - [set_body_text](#set_body_text)
 
 ## set_body_bytes
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L12)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L11)
 
 ```python
-def set_body_bytes(body: typing.ByteString) -> handler.Handler:
+def set_body_bytes(body: bytes) -> handler.Handler:
 ```
 
 Set response body from byte string.
 
 ## set_body_from_bytes
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L35)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L34)
 
 ```python
 def set_body_from_bytes(
-    function: typing.Callable[
-        [
-            context.Context,
-        ],
-        future.Future[state.RE[typing.ByteString]],
-    ],
+    function: typing.Callable[[context.Context], future.Future[state.ESafe[bytes]]],
 ) -> handler.Handler:
 ```
 
@@ -38,11 +34,11 @@ Set body from function calculation result.
 
 ## set_body_from_dict
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L66)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L98)
 
 ```python
 def set_body_from_dict(
-    function: typing.Callable[[context.Context], future.Future[state.RE[dict]]],
+    function: typing.Callable[[context.Context], future.Future[state.ESafe[dict]]],
 ) -> handler.Handler:
 ```
 
@@ -50,7 +46,7 @@ Set body from function calculation result.
 
 ## set_body_from_pydantic
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L97)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L130)
 
 ```python
 def set_body_from_pydantic(
@@ -58,16 +54,28 @@ def set_body_from_pydantic(
         [
             context.Context,
         ],
-        future.Future[state.RE[pydantic.BaseModel]],
+        future.Future[state.ESafe[pydantic.BaseModel]],
     ],
 ) -> handler.Handler:
 ```
 
 Set body from function calculation result.
 
+## set_body_from_text
+
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L64)
+
+```python
+def set_body_from_text(
+    function: typing.Callable[[context.Context], future.Future[state.ESafe[str]]],
+) -> handler.Handler:
+```
+
+Set body from function calculation result (str).
+
 ## set_body_text
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L23)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/res/body.py#L22)
 
 ```python
 def set_body_text(body: str) -> handler.Handler:

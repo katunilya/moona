@@ -5,7 +5,7 @@
 - [Mona](../../README.md#mona) / [Modules](../../MODULES.md#mona-modules) / [Mona](../index.md#mona) / [Req](index.md#req) / Body
     - [RequestBodyIsNotReceivedError](#requestbodyisnotreceivederror)
     - [TypeIsNotDataclassError](#typeisnotdataclasserror)
-    - [TypeIsNotPydanticBaseModel](#typeisnotpydanticbasemodel)
+    - [TypeIsNotPydanticBaseModelError](#typeisnotpydanticbasemodelerror)
     - [take_body](#take_body)
     - [take_body_as_dataclass](#take_body_as_dataclass)
     - [take_body_as_dict](#take_body_as_dict)
@@ -14,121 +14,90 @@
 
 ## RequestBodyIsNotReceivedError
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L13)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L11)
 
 ```python
-dataclass
-class RequestBodyIsNotReceivedError(Error):
+dataclasses.dataclass
+class RequestBodyIsNotReceivedError(Exception):
     def __init__():
 ```
 
 Request body is None and cannot be taken.
 
-#### See also
-
-- [Error](../error.md#error)
-
 ## TypeIsNotDataclassError
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L24)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L22)
 
 ```python
-dataclass
-class TypeIsNotDataclassError(Error):
-    def __init__(t: Type):
+dataclasses.dataclass
+class TypeIsNotDataclassError(Exception):
+    def __init__(t: typing.Type):
 ```
 
 Passed type is not dataclass.
 
-#### See also
+## TypeIsNotPydanticBaseModelError
 
-- [Error](../error.md#error)
-
-## TypeIsNotPydanticBaseModel
-
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L38)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L36)
 
 ```python
-dataclass
-class TypeIsNotPydanticBaseModel(Error):
-    def __init__(t: Type):
+dataclasses.dataclass
+class TypeIsNotPydanticBaseModelError(Exception):
+    def __init__(t: typing.Type):
 ```
 
 Passed type is not `pydantic.BaseModel`.
 
-#### See also
-
-- [Error](../error.md#error)
-
 ## take_body
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L51)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L49)
 
 ```python
-def take_body(ctx: Context) -> RE[ByteString]:
+def take_body(ctx: context.Context) -> state.ESafe[bytes]:
 ```
 
 Take request body as byte string.
 
-#### See also
-
-- [Context](../context.md#context)
-
 ## take_body_as_dataclass
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L67)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L65)
 
 ```python
-def take_body_as_dataclass(dataclass_type: Type) -> Callable[[Context], RE]:
+def take_body_as_dataclass(
+    dataclass_type: typing.Type,
+) -> typing.Callable[[context.Context], state.ESafe[object]]:
 ```
 
 Take request body as dataclass.
 
-#### See also
-
-- [Context](../context.md#context)
-- [RE](../state.md#re)
-
 ## take_body_as_dict
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L59)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L57)
 
 ```python
-def take_body_as_dict(ctx: Context) -> RE[dict]:
+def take_body_as_dict(ctx: context.Context) -> state.ESafe[dict]:
 ```
 
 Take request body as dict.
 
-#### See also
-
-- [Context](../context.md#context)
-
 ## take_body_as_pydantic
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L81)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L83)
 
 ```python
 def take_body_as_pydantic(
-    model_type: Type[BaseModel],
-) -> Callable[[Context], RE[BaseModel]]:
+    model_type: typing.Type[pydantic.BaseModel],
+) -> typing.Callable[[context.Context], state.ESafe[pydantic.BaseModel]]:
 ```
 
 Take request body as pydantic BaseModel.
 
-#### See also
-
-- [Context](../context.md#context)
-
 ## take_body_as_str
 
-[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L97)
+[[find in source code]](https://github.com/katunilya/mona/blob/main/mona/req/body.py#L101)
 
 ```python
-def take_body_as_str(ctx: Context) -> RE[str]:
+def take_body_as_str(ctx: context.Context) -> state.ESafe[str]:
 ```
 
 Take request body as str.
-
-#### See also
-
-- [Context](../context.md#context)
