@@ -14,7 +14,7 @@ def create(handler: handler.Handler) -> context.ASGIServer:
         await (
             future.from_value((scope, receive, send))
             >> context.from_asgi
-            >> state.right
+            >> state.Right
             >> handler
         )
 
