@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mona"
-version = "0.2.0"
+version = "0.2.1"
 description = "ASGI server with functional approach in mind"
 authors = ["Katun Ilya <katun.ilya@gmail.com>"]
 license = "MIT"
