@@ -52,7 +52,7 @@ def from_value(value: T) -> Future[T]:
 
 
 async def __bind(
-    function: typing.Callable[[T], typing.Union[typing.Awaitable[V], V]], cnt: Future[T]
+    function: typing.Callable[[T], typing.Awaitable[V] | V], cnt: Future[T]
 ) -> V:
     result = function(await cnt)
     return await result if inspect.isawaitable(result) else result
@@ -60,7 +60,7 @@ async def __bind(
 
 @toolz.curry
 def bind(
-    function: typing.Callable[[T], typing.Union[typing.Awaitable[V], V]], cnt: Future[T]
+    function: typing.Callable[[T], typing.Awaitable[V] | V], cnt: Future[T]
 ) -> Future[V]:
     """Bind sync or async function to Future.
 
@@ -75,7 +75,7 @@ def bind(
 
 
 def compose(
-    *functions: typing.Callable[[T], typing.Union[V, typing.Awaitable[V]]]
+    *functions: typing.Callable[[T], typing.Awaitable[V] | V]
 ) -> typing.Callable[[T], typing.Awaitable[V]]:
     """Converts sequence of functions into sequenced pipeline for `Future` container.
 
@@ -84,21 +84,14 @@ def compose(
     """
 
     async def _composition(cnt: T) -> V:
-        cnt = from_value(cnt)
-
-        for func in functions:
-            cnt = bind(func, cnt)
-
-        return await cnt
+        return await toolz.reduce(lambda c, f: bind(f, c), functions, from_value(cnt))
 
     return _composition
 
 
 def pipe(
     cnt: Future[T],
-    *functions: typing.Union[
-        typing.Callable[[T], typing.Awaitable[V]], typing.Callable[[T], V]
-    ],
+    *functions: typing.Callable[[T], typing.Awaitable[V] | V],
 ) -> Future[V]:
     """Composes `functions` and executes on `cnt`.
 
@@ -108,5 +101,4 @@ def pipe(
     Returns:
         Future[V]: result future
     """
-    composition = compose(*functions)
-    return cnt >> composition
+    return cnt >> compose(*functions)

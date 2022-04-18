@@ -66,7 +66,7 @@ def set_status(code: int) -> handler.Handler:
     @state.accepts_right
     def _handler(ctx: context.Context) -> context.StateContext:
         ctx.response.status = code
-        return state.right(ctx)
+        return state.Right(ctx)
 
     return _handler
 

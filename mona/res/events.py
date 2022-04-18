@@ -14,7 +14,7 @@ async def send_start(ctx: context.Context) -> context.StateContext:
         }
     )
 
-    return state.right(ctx)
+    return state.Right(ctx)
 
 
 @state.accepts_right
@@ -26,4 +26,4 @@ async def send_body(ctx: context.Context) -> context.StateContext:
             "body": ctx.response.body,
         }
     )
-    return state.final(ctx)
+    return state.Final(ctx)

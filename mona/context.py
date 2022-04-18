@@ -10,6 +10,7 @@ Scope = Message
 Receive = typing.Callable[[], typing.Awaitable[Message]]
 Send = typing.Callable[[Message], typing.Awaitable[None]]
 ASGIServer = typing.Callable[[Scope, Receive, Send], typing.Awaitable[None]]
+ASGIData = tuple[Scope, Receive, Send]
 
 
 @dataclasses.dataclass
@@ -27,7 +28,7 @@ class Server:
 
     __slots__ = "host", "port"
     host: str
-    port: typing.Optional[int]
+    port: int | None
 
 
 @dataclasses.dataclass
@@ -51,16 +52,16 @@ class Request:
     )
 
     type_: str
-    method: typing.Optional[str]
-    subprotocols: typing.Optional[typing.Iterable[str]]
+    method: str | None
+    subprotocols: typing.Iterable[str] | None
     asgi_version: str
     asgi_spec_version: str
     http_version: str
     scheme: str
     path: str
-    query_string: typing.ByteString
-    headers: dict[str, typing.ByteString]
-    body: typing.Optional[typing.ByteString]
+    query_string: bytes
+    headers: dict[str, bytes]
+    body: bytes | None
     server: Server
     client: Client
 
@@ -124,7 +125,7 @@ class Response:
 
     __slots__ = ("body", "headers", "status")
     body: typing.Any
-    headers: dict[typing.ByteString, typing.ByteString]
+    headers: dict[bytes, bytes]
     status: int
 
 
@@ -148,10 +149,10 @@ class Context:
     response: Response
     receive: Receive
     send: Send
-    error: typing.Optional[BaseException] = None
+    error: BaseException | None = None
 
 
-def from_asgi(scope: Scope, receive: Receive, send: Send) -> Context:
+def from_asgi(asgi: ASGIData) -> Context:
     """Create context from ASGI function args.
 
     Args:
@@ -162,6 +163,7 @@ def from_asgi(scope: Scope, receive: Receive, send: Send) -> Context:
     Returns:
         Context: for storing info about request
     """
+    scope, receive, send = asgi
     return Context(
         __request_from_scope(scope),
         __empty_response(),

@@ -7,176 +7,176 @@ from mona import context, req, state
     "arrange_method,arrange_state,assert_method,assert_state",
     [
         # GET
-        ("GET", state.RIGHT, "GET", state.RIGHT),
-        ("POST", state.RIGHT, "GET", state.WRONG),
-        ("PATCH", state.RIGHT, "GET", state.WRONG),
-        ("PUT", state.RIGHT, "GET", state.WRONG),
-        ("DELETE", state.RIGHT, "GET", state.WRONG),
-        ("OPTIONS", state.RIGHT, "GET", state.WRONG),
-        ("HEAD", state.RIGHT, "GET", state.WRONG),
-        ("TRACE", state.RIGHT, "GET", state.WRONG),
-        ("CONNECT", state.RIGHT, "GET", state.WRONG),
-        ("GET", state.WRONG, "GET", state.WRONG),
-        ("POST", state.WRONG, "GET", state.WRONG),
-        ("PATCH", state.WRONG, "GET", state.WRONG),
-        ("PUT", state.WRONG, "GET", state.WRONG),
-        ("DELETE", state.WRONG, "GET", state.WRONG),
-        ("OPTIONS", state.WRONG, "GET", state.WRONG),
-        ("HEAD", state.WRONG, "GET", state.WRONG),
-        ("TRACE", state.WRONG, "GET", state.WRONG),
-        ("CONNECT", state.WRONG, "GET", state.WRONG),
+        ("GET", state.Right, "GET", state.Right),
+        ("POST", state.Right, "GET", state.Wrong),
+        ("PATCH", state.Right, "GET", state.Wrong),
+        ("PUT", state.Right, "GET", state.Wrong),
+        ("DELETE", state.Right, "GET", state.Wrong),
+        ("OPTIONS", state.Right, "GET", state.Wrong),
+        ("HEAD", state.Right, "GET", state.Wrong),
+        ("TRACE", state.Right, "GET", state.Wrong),
+        ("CONNECT", state.Right, "GET", state.Wrong),
+        ("GET", state.Wrong, "GET", state.Wrong),
+        ("POST", state.Wrong, "GET", state.Wrong),
+        ("PATCH", state.Wrong, "GET", state.Wrong),
+        ("PUT", state.Wrong, "GET", state.Wrong),
+        ("DELETE", state.Wrong, "GET", state.Wrong),
+        ("OPTIONS", state.Wrong, "GET", state.Wrong),
+        ("HEAD", state.Wrong, "GET", state.Wrong),
+        ("TRACE", state.Wrong, "GET", state.Wrong),
+        ("CONNECT", state.Wrong, "GET", state.Wrong),
         # POST
-        ("GET", state.RIGHT, "POST", state.WRONG),
-        ("POST", state.RIGHT, "POST", state.RIGHT),
-        ("PATCH", state.RIGHT, "POST", state.WRONG),
-        ("PUT", state.RIGHT, "POST", state.WRONG),
-        ("DELETE", state.RIGHT, "POST", state.WRONG),
-        ("OPTIONS", state.RIGHT, "POST", state.WRONG),
-        ("HEAD", state.RIGHT, "POST", state.WRONG),
-        ("TRACE", state.RIGHT, "POST", state.WRONG),
-        ("CONNECT", state.RIGHT, "POST", state.WRONG),
-        ("GET", state.WRONG, "POST", state.WRONG),
-        ("POST", state.WRONG, "POST", state.WRONG),
-        ("PATCH", state.WRONG, "POST", state.WRONG),
-        ("PUT", state.WRONG, "POST", state.WRONG),
-        ("DELETE", state.WRONG, "POST", state.WRONG),
-        ("OPTIONS", state.WRONG, "POST", state.WRONG),
-        ("HEAD", state.WRONG, "POST", state.WRONG),
-        ("TRACE", state.WRONG, "POST", state.WRONG),
-        ("CONNECT", state.WRONG, "POST", state.WRONG),
+        ("GET", state.Right, "POST", state.Wrong),
+        ("POST", state.Right, "POST", state.Right),
+        ("PATCH", state.Right, "POST", state.Wrong),
+        ("PUT", state.Right, "POST", state.Wrong),
+        ("DELETE", state.Right, "POST", state.Wrong),
+        ("OPTIONS", state.Right, "POST", state.Wrong),
+        ("HEAD", state.Right, "POST", state.Wrong),
+        ("TRACE", state.Right, "POST", state.Wrong),
+        ("CONNECT", state.Right, "POST", state.Wrong),
+        ("GET", state.Wrong, "POST", state.Wrong),
+        ("POST", state.Wrong, "POST", state.Wrong),
+        ("PATCH", state.Wrong, "POST", state.Wrong),
+        ("PUT", state.Wrong, "POST", state.Wrong),
+        ("DELETE", state.Wrong, "POST", state.Wrong),
+        ("OPTIONS", state.Wrong, "POST", state.Wrong),
+        ("HEAD", state.Wrong, "POST", state.Wrong),
+        ("TRACE", state.Wrong, "POST", state.Wrong),
+        ("CONNECT", state.Wrong, "POST", state.Wrong),
         # PATCH
-        ("GET", state.RIGHT, "PATCH", state.WRONG),
-        ("POST", state.RIGHT, "PATCH", state.WRONG),
-        ("PATCH", state.RIGHT, "PATCH", state.RIGHT),
-        ("PUT", state.RIGHT, "PATCH", state.WRONG),
-        ("DELETE", state.RIGHT, "PATCH", state.WRONG),
-        ("OPTIONS", state.RIGHT, "PATCH", state.WRONG),
-        ("HEAD", state.RIGHT, "PATCH", state.WRONG),
-        ("TRACE", state.RIGHT, "PATCH", state.WRONG),
-        ("CONNECT", state.RIGHT, "PATCH", state.WRONG),
-        ("GET", state.WRONG, "PATCH", state.WRONG),
-        ("POST", state.WRONG, "PATCH", state.WRONG),
-        ("PATCH", state.WRONG, "PATCH", state.WRONG),
-        ("PUT", state.WRONG, "PATCH", state.WRONG),
-        ("DELETE", state.WRONG, "PATCH", state.WRONG),
-        ("OPTIONS", state.WRONG, "PATCH", state.WRONG),
-        ("HEAD", state.WRONG, "PATCH", state.WRONG),
-        ("TRACE", state.WRONG, "PATCH", state.WRONG),
-        ("CONNECT", state.WRONG, "PATCH", state.WRONG),
+        ("GET", state.Right, "PATCH", state.Wrong),
+        ("POST", state.Right, "PATCH", state.Wrong),
+        ("PATCH", state.Right, "PATCH", state.Right),
+        ("PUT", state.Right, "PATCH", state.Wrong),
+        ("DELETE", state.Right, "PATCH", state.Wrong),
+        ("OPTIONS", state.Right, "PATCH", state.Wrong),
+        ("HEAD", state.Right, "PATCH", state.Wrong),
+        ("TRACE", state.Right, "PATCH", state.Wrong),
+        ("CONNECT", state.Right, "PATCH", state.Wrong),
+        ("GET", state.Wrong, "PATCH", state.Wrong),
+        ("POST", state.Wrong, "PATCH", state.Wrong),
+        ("PATCH", state.Wrong, "PATCH", state.Wrong),
+        ("PUT", state.Wrong, "PATCH", state.Wrong),
+        ("DELETE", state.Wrong, "PATCH", state.Wrong),
+        ("OPTIONS", state.Wrong, "PATCH", state.Wrong),
+        ("HEAD", state.Wrong, "PATCH", state.Wrong),
+        ("TRACE", state.Wrong, "PATCH", state.Wrong),
+        ("CONNECT", state.Wrong, "PATCH", state.Wrong),
         # PUT
-        ("GET", state.RIGHT, "PUT", state.WRONG),
-        ("POST", state.RIGHT, "PUT", state.WRONG),
-        ("PATCH", state.RIGHT, "PUT", state.WRONG),
-        ("PUT", state.RIGHT, "PUT", state.RIGHT),
-        ("DELETE", state.RIGHT, "PUT", state.WRONG),
-        ("OPTIONS", state.RIGHT, "PUT", state.WRONG),
-        ("HEAD", state.RIGHT, "PUT", state.WRONG),
-        ("TRACE", state.RIGHT, "PUT", state.WRONG),
-        ("CONNECT", state.RIGHT, "PUT", state.WRONG),
-        ("GET", state.WRONG, "PUT", state.WRONG),
-        ("POST", state.WRONG, "PUT", state.WRONG),
-        ("PATCH", state.WRONG, "PUT", state.WRONG),
-        ("PUT", state.WRONG, "PUT", state.WRONG),
-        ("DELETE", state.WRONG, "PUT", state.WRONG),
-        ("OPTIONS", state.WRONG, "PUT", state.WRONG),
-        ("HEAD", state.WRONG, "PUT", state.WRONG),
-        ("TRACE", state.WRONG, "PUT", state.WRONG),
-        ("CONNECT", state.WRONG, "PUT", state.WRONG),
+        ("GET", state.Right, "PUT", state.Wrong),
+        ("POST", state.Right, "PUT", state.Wrong),
+        ("PATCH", state.Right, "PUT", state.Wrong),
+        ("PUT", state.Right, "PUT", state.Right),
+        ("DELETE", state.Right, "PUT", state.Wrong),
+        ("OPTIONS", state.Right, "PUT", state.Wrong),
+        ("HEAD", state.Right, "PUT", state.Wrong),
+        ("TRACE", state.Right, "PUT", state.Wrong),
+        ("CONNECT", state.Right, "PUT", state.Wrong),
+        ("GET", state.Wrong, "PUT", state.Wrong),
+        ("POST", state.Wrong, "PUT", state.Wrong),
+        ("PATCH", state.Wrong, "PUT", state.Wrong),
+        ("PUT", state.Wrong, "PUT", state.Wrong),
+        ("DELETE", state.Wrong, "PUT", state.Wrong),
+        ("OPTIONS", state.Wrong, "PUT", state.Wrong),
+        ("HEAD", state.Wrong, "PUT", state.Wrong),
+        ("TRACE", state.Wrong, "PUT", state.Wrong),
+        ("CONNECT", state.Wrong, "PUT", state.Wrong),
         # DELETE
-        ("GET", state.RIGHT, "DELETE", state.WRONG),
-        ("POST", state.RIGHT, "DELETE", state.WRONG),
-        ("PATCH", state.RIGHT, "DELETE", state.WRONG),
-        ("PUT", state.RIGHT, "DELETE", state.WRONG),
-        ("DELETE", state.RIGHT, "DELETE", state.RIGHT),
-        ("OPTIONS", state.RIGHT, "DELETE", state.WRONG),
-        ("HEAD", state.RIGHT, "DELETE", state.WRONG),
-        ("TRACE", state.RIGHT, "DELETE", state.WRONG),
-        ("CONNECT", state.RIGHT, "DELETE", state.WRONG),
-        ("GET", state.WRONG, "DELETE", state.WRONG),
-        ("POST", state.WRONG, "DELETE", state.WRONG),
-        ("PATCH", state.WRONG, "DELETE", state.WRONG),
-        ("PUT", state.WRONG, "DELETE", state.WRONG),
-        ("DELETE", state.WRONG, "DELETE", state.WRONG),
-        ("OPTIONS", state.WRONG, "DELETE", state.WRONG),
-        ("HEAD", state.WRONG, "DELETE", state.WRONG),
-        ("TRACE", state.WRONG, "DELETE", state.WRONG),
-        ("CONNECT", state.WRONG, "DELETE", state.WRONG),
+        ("GET", state.Right, "DELETE", state.Wrong),
+        ("POST", state.Right, "DELETE", state.Wrong),
+        ("PATCH", state.Right, "DELETE", state.Wrong),
+        ("PUT", state.Right, "DELETE", state.Wrong),
+        ("DELETE", state.Right, "DELETE", state.Right),
+        ("OPTIONS", state.Right, "DELETE", state.Wrong),
+        ("HEAD", state.Right, "DELETE", state.Wrong),
+        ("TRACE", state.Right, "DELETE", state.Wrong),
+        ("CONNECT", state.Right, "DELETE", state.Wrong),
+        ("GET", state.Wrong, "DELETE", state.Wrong),
+        ("POST", state.Wrong, "DELETE", state.Wrong),
+        ("PATCH", state.Wrong, "DELETE", state.Wrong),
+        ("PUT", state.Wrong, "DELETE", state.Wrong),
+        ("DELETE", state.Wrong, "DELETE", state.Wrong),
+        ("OPTIONS", state.Wrong, "DELETE", state.Wrong),
+        ("HEAD", state.Wrong, "DELETE", state.Wrong),
+        ("TRACE", state.Wrong, "DELETE", state.Wrong),
+        ("CONNECT", state.Wrong, "DELETE", state.Wrong),
         # OPTIONS
-        ("GET", state.RIGHT, "OPTIONS", state.WRONG),
-        ("POST", state.RIGHT, "OPTIONS", state.WRONG),
-        ("PATCH", state.RIGHT, "OPTIONS", state.WRONG),
-        ("PUT", state.RIGHT, "OPTIONS", state.WRONG),
-        ("DELETE", state.RIGHT, "OPTIONS", state.WRONG),
-        ("OPTIONS", state.RIGHT, "OPTIONS", state.RIGHT),
-        ("HEAD", state.RIGHT, "OPTIONS", state.WRONG),
-        ("TRACE", state.RIGHT, "OPTIONS", state.WRONG),
-        ("CONNECT", state.RIGHT, "OPTIONS", state.WRONG),
-        ("GET", state.WRONG, "OPTIONS", state.WRONG),
-        ("POST", state.WRONG, "OPTIONS", state.WRONG),
-        ("PATCH", state.WRONG, "OPTIONS", state.WRONG),
-        ("PUT", state.WRONG, "OPTIONS", state.WRONG),
-        ("DELETE", state.WRONG, "OPTIONS", state.WRONG),
-        ("OPTIONS", state.WRONG, "OPTIONS", state.WRONG),
-        ("HEAD", state.WRONG, "OPTIONS", state.WRONG),
-        ("TRACE", state.WRONG, "OPTIONS", state.WRONG),
-        ("CONNECT", state.WRONG, "OPTIONS", state.WRONG),
+        ("GET", state.Right, "OPTIONS", state.Wrong),
+        ("POST", state.Right, "OPTIONS", state.Wrong),
+        ("PATCH", state.Right, "OPTIONS", state.Wrong),
+        ("PUT", state.Right, "OPTIONS", state.Wrong),
+        ("DELETE", state.Right, "OPTIONS", state.Wrong),
+        ("OPTIONS", state.Right, "OPTIONS", state.Right),
+        ("HEAD", state.Right, "OPTIONS", state.Wrong),
+        ("TRACE", state.Right, "OPTIONS", state.Wrong),
+        ("CONNECT", state.Right, "OPTIONS", state.Wrong),
+        ("GET", state.Wrong, "OPTIONS", state.Wrong),
+        ("POST", state.Wrong, "OPTIONS", state.Wrong),
+        ("PATCH", state.Wrong, "OPTIONS", state.Wrong),
+        ("PUT", state.Wrong, "OPTIONS", state.Wrong),
+        ("DELETE", state.Wrong, "OPTIONS", state.Wrong),
+        ("OPTIONS", state.Wrong, "OPTIONS", state.Wrong),
+        ("HEAD", state.Wrong, "OPTIONS", state.Wrong),
+        ("TRACE", state.Wrong, "OPTIONS", state.Wrong),
+        ("CONNECT", state.Wrong, "OPTIONS", state.Wrong),
         # HEAD
-        ("GET", state.RIGHT, "HEAD", state.WRONG),
-        ("POST", state.RIGHT, "HEAD", state.WRONG),
-        ("PATCH", state.RIGHT, "HEAD", state.WRONG),
-        ("PUT", state.RIGHT, "HEAD", state.WRONG),
-        ("DELETE", state.RIGHT, "HEAD", state.WRONG),
-        ("OPTIONS", state.RIGHT, "HEAD", state.WRONG),
-        ("HEAD", state.RIGHT, "HEAD", state.RIGHT),
-        ("TRACE", state.RIGHT, "HEAD", state.WRONG),
-        ("CONNECT", state.RIGHT, "HEAD", state.WRONG),
-        ("GET", state.WRONG, "HEAD", state.WRONG),
-        ("POST", state.WRONG, "HEAD", state.WRONG),
-        ("PATCH", state.WRONG, "HEAD", state.WRONG),
-        ("PUT", state.WRONG, "HEAD", state.WRONG),
-        ("DELETE", state.WRONG, "HEAD", state.WRONG),
-        ("OPTIONS", state.WRONG, "HEAD", state.WRONG),
-        ("HEAD", state.WRONG, "HEAD", state.WRONG),
-        ("TRACE", state.WRONG, "HEAD", state.WRONG),
-        ("CONNECT", state.WRONG, "HEAD", state.WRONG),
+        ("GET", state.Right, "HEAD", state.Wrong),
+        ("POST", state.Right, "HEAD", state.Wrong),
+        ("PATCH", state.Right, "HEAD", state.Wrong),
+        ("PUT", state.Right, "HEAD", state.Wrong),
+        ("DELETE", state.Right, "HEAD", state.Wrong),
+        ("OPTIONS", state.Right, "HEAD", state.Wrong),
+        ("HEAD", state.Right, "HEAD", state.Right),
+        ("TRACE", state.Right, "HEAD", state.Wrong),
+        ("CONNECT", state.Right, "HEAD", state.Wrong),
+        ("GET", state.Wrong, "HEAD", state.Wrong),
+        ("POST", state.Wrong, "HEAD", state.Wrong),
+        ("PATCH", state.Wrong, "HEAD", state.Wrong),
+        ("PUT", state.Wrong, "HEAD", state.Wrong),
+        ("DELETE", state.Wrong, "HEAD", state.Wrong),
+        ("OPTIONS", state.Wrong, "HEAD", state.Wrong),
+        ("HEAD", state.Wrong, "HEAD", state.Wrong),
+        ("TRACE", state.Wrong, "HEAD", state.Wrong),
+        ("CONNECT", state.Wrong, "HEAD", state.Wrong),
         # TRACE
-        ("GET", state.RIGHT, "TRACE", state.WRONG),
-        ("POST", state.RIGHT, "TRACE", state.WRONG),
-        ("PATCH", state.RIGHT, "TRACE", state.WRONG),
-        ("PUT", state.RIGHT, "TRACE", state.WRONG),
-        ("DELETE", state.RIGHT, "TRACE", state.WRONG),
-        ("OPTIONS", state.RIGHT, "TRACE", state.WRONG),
-        ("HEAD", state.RIGHT, "TRACE", state.WRONG),
-        ("TRACE", state.RIGHT, "TRACE", state.RIGHT),
-        ("CONNECT", state.RIGHT, "TRACE", state.WRONG),
-        ("GET", state.WRONG, "TRACE", state.WRONG),
-        ("POST", state.WRONG, "TRACE", state.WRONG),
-        ("PATCH", state.WRONG, "TRACE", state.WRONG),
-        ("PUT", state.WRONG, "TRACE", state.WRONG),
-        ("DELETE", state.WRONG, "TRACE", state.WRONG),
-        ("OPTIONS", state.WRONG, "TRACE", state.WRONG),
-        ("HEAD", state.WRONG, "TRACE", state.WRONG),
-        ("TRACE", state.WRONG, "TRACE", state.WRONG),
-        ("CONNECT", state.WRONG, "TRACE", state.WRONG),
+        ("GET", state.Right, "TRACE", state.Wrong),
+        ("POST", state.Right, "TRACE", state.Wrong),
+        ("PATCH", state.Right, "TRACE", state.Wrong),
+        ("PUT", state.Right, "TRACE", state.Wrong),
+        ("DELETE", state.Right, "TRACE", state.Wrong),
+        ("OPTIONS", state.Right, "TRACE", state.Wrong),
+        ("HEAD", state.Right, "TRACE", state.Wrong),
+        ("TRACE", state.Right, "TRACE", state.Right),
+        ("CONNECT", state.Right, "TRACE", state.Wrong),
+        ("GET", state.Wrong, "TRACE", state.Wrong),
+        ("POST", state.Wrong, "TRACE", state.Wrong),
+        ("PATCH", state.Wrong, "TRACE", state.Wrong),
+        ("PUT", state.Wrong, "TRACE", state.Wrong),
+        ("DELETE", state.Wrong, "TRACE", state.Wrong),
+        ("OPTIONS", state.Wrong, "TRACE", state.Wrong),
+        ("HEAD", state.Wrong, "TRACE", state.Wrong),
+        ("TRACE", state.Wrong, "TRACE", state.Wrong),
+        ("CONNECT", state.Wrong, "TRACE", state.Wrong),
         # CONNECT
-        ("GET", state.RIGHT, "CONNECT", state.WRONG),
-        ("POST", state.RIGHT, "CONNECT", state.WRONG),
-        ("PATCH", state.RIGHT, "CONNECT", state.WRONG),
-        ("PUT", state.RIGHT, "CONNECT", state.WRONG),
-        ("DELETE", state.RIGHT, "CONNECT", state.WRONG),
-        ("OPTIONS", state.RIGHT, "CONNECT", state.WRONG),
-        ("HEAD", state.RIGHT, "CONNECT", state.WRONG),
-        ("TRACE", state.RIGHT, "CONNECT", state.WRONG),
-        ("CONNECT", state.RIGHT, "CONNECT", state.RIGHT),
-        ("GET", state.WRONG, "CONNECT", state.WRONG),
-        ("POST", state.WRONG, "CONNECT", state.WRONG),
-        ("PATCH", state.WRONG, "CONNECT", state.WRONG),
-        ("PUT", state.WRONG, "CONNECT", state.WRONG),
-        ("DELETE", state.WRONG, "CONNECT", state.WRONG),
-        ("OPTIONS", state.WRONG, "CONNECT", state.WRONG),
-        ("HEAD", state.WRONG, "CONNECT", state.WRONG),
-        ("TRACE", state.WRONG, "CONNECT", state.WRONG),
-        ("CONNECT", state.WRONG, "CONNECT", state.WRONG),
+        ("GET", state.Right, "CONNECT", state.Wrong),
+        ("POST", state.Right, "CONNECT", state.Wrong),
+        ("PATCH", state.Right, "CONNECT", state.Wrong),
+        ("PUT", state.Right, "CONNECT", state.Wrong),
+        ("DELETE", state.Right, "CONNECT", state.Wrong),
+        ("OPTIONS", state.Right, "CONNECT", state.Wrong),
+        ("HEAD", state.Right, "CONNECT", state.Wrong),
+        ("TRACE", state.Right, "CONNECT", state.Wrong),
+        ("CONNECT", state.Right, "CONNECT", state.Right),
+        ("GET", state.Wrong, "CONNECT", state.Wrong),
+        ("POST", state.Wrong, "CONNECT", state.Wrong),
+        ("PATCH", state.Wrong, "CONNECT", state.Wrong),
+        ("PUT", state.Wrong, "CONNECT", state.Wrong),
+        ("DELETE", state.Wrong, "CONNECT", state.Wrong),
+        ("OPTIONS", state.Wrong, "CONNECT", state.Wrong),
+        ("HEAD", state.Wrong, "CONNECT", state.Wrong),
+        ("TRACE", state.Wrong, "CONNECT", state.Wrong),
+        ("CONNECT", state.Wrong, "CONNECT", state.Wrong),
     ],
 )
 def test_on_method(
@@ -188,37 +188,37 @@ def test_on_method(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
-    handler_ = req.on_method(assert_method)
+    arrange_ctx = arrange_state(mock_context)
+    arrange_handler = req.on_method(assert_method)
 
     # act
-    ctx: context.StateContext = handler_(ctx)
+    act_ctx: context.StateContext = arrange_handler(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.RIGHT),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Right),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_get(
@@ -226,36 +226,36 @@ def test_on_get(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_get(ctx)
+    act_ctx: context.StateContext = req.on_get(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.RIGHT),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Right),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_post(
@@ -263,36 +263,36 @@ def test_on_post(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_post(ctx)
+    act_ctx: context.StateContext = req.on_post(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.RIGHT),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Right),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_patch(
@@ -300,36 +300,36 @@ def test_on_patch(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_patch(ctx)
+    act_ctx: context.StateContext = req.on_patch(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.RIGHT),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Right),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_put(
@@ -337,36 +337,36 @@ def test_on_put(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_put(ctx)
+    act_ctx: context.StateContext = req.on_put(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.RIGHT),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Right),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_delete(
@@ -374,36 +374,36 @@ def test_on_delete(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_delete(ctx)
+    act_ctx: context.StateContext = req.on_delete(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.RIGHT),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Right),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_options(
@@ -411,36 +411,36 @@ def test_on_options(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_options(ctx)
+    act_ctx: context.StateContext = req.on_options(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.RIGHT),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Right),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_head(
@@ -448,36 +448,36 @@ def test_on_head(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_head(ctx)
+    act_ctx: context.StateContext = req.on_head(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.RIGHT),
-        ("CONNECT", state.RIGHT, state.WRONG),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Right),
+        ("CONNECT", state.Right, state.Wrong),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_trace(
@@ -485,36 +485,36 @@ def test_on_trace(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_trace(ctx)
+    act_ctx: context.StateContext = req.on_trace(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
     "arrange_method,arrange_state,assert_state",
     [
-        ("GET", state.RIGHT, state.WRONG),
-        ("POST", state.RIGHT, state.WRONG),
-        ("PATCH", state.RIGHT, state.WRONG),
-        ("PUT", state.RIGHT, state.WRONG),
-        ("DELETE", state.RIGHT, state.WRONG),
-        ("OPTIONS", state.RIGHT, state.WRONG),
-        ("HEAD", state.RIGHT, state.WRONG),
-        ("TRACE", state.RIGHT, state.WRONG),
-        ("CONNECT", state.RIGHT, state.RIGHT),
-        ("GET", state.WRONG, state.WRONG),
-        ("POST", state.WRONG, state.WRONG),
-        ("PATCH", state.WRONG, state.WRONG),
-        ("PUT", state.WRONG, state.WRONG),
-        ("DELETE", state.WRONG, state.WRONG),
-        ("OPTIONS", state.WRONG, state.WRONG),
-        ("HEAD", state.WRONG, state.WRONG),
-        ("TRACE", state.WRONG, state.WRONG),
-        ("CONNECT", state.WRONG, state.WRONG),
+        ("GET", state.Right, state.Wrong),
+        ("POST", state.Right, state.Wrong),
+        ("PATCH", state.Right, state.Wrong),
+        ("PUT", state.Right, state.Wrong),
+        ("DELETE", state.Right, state.Wrong),
+        ("OPTIONS", state.Right, state.Wrong),
+        ("HEAD", state.Right, state.Wrong),
+        ("TRACE", state.Right, state.Wrong),
+        ("CONNECT", state.Right, state.Right),
+        ("GET", state.Wrong, state.Wrong),
+        ("POST", state.Wrong, state.Wrong),
+        ("PATCH", state.Wrong, state.Wrong),
+        ("PUT", state.Wrong, state.Wrong),
+        ("DELETE", state.Wrong, state.Wrong),
+        ("OPTIONS", state.Wrong, state.Wrong),
+        ("HEAD", state.Wrong, state.Wrong),
+        ("TRACE", state.Wrong, state.Wrong),
+        ("CONNECT", state.Wrong, state.Wrong),
     ],
 )
 def test_on_connect(
@@ -522,10 +522,10 @@ def test_on_connect(
 ):
     # arrange
     mock_context.request.method = arrange_method
-    ctx = state.pack(arrange_state, mock_context)
+    arrange_ctx = arrange_state(mock_context)
 
     # act
-    ctx: context.StateContext = req.on_connect(ctx)
+    act_ctx: context.StateContext = req.on_connect(arrange_ctx)
 
     # assert
-    assert ctx.state == assert_state
+    assert isinstance(act_ctx, assert_state)

@@ -7,22 +7,19 @@ SyncHandler = typing.Callable[[context.StateContext], context.StateContext]
 AsyncHandler = typing.Callable[
     [context.StateContext], typing.Awaitable[context.StateContext]
 ]
-Handler = typing.Union[SyncHandler, AsyncHandler]
+Handler = SyncHandler | AsyncHandler
 
 
-def __continue_on_fail(current_handler: Handler, next_handler: Handler) -> Handler:
+def __continue_on_not_right(current_handler: Handler, next_handler: Handler) -> Handler:
     @state.accepts_right
     async def __continuation(ctx: context.Context) -> context.StateContext:
-        ctx_copy = state.right(context.copy(ctx))
-
-        ctx_copy: context.StateContext = await (
-            future.from_value(ctx_copy) >> current_handler
-        )
-
-        if ctx_copy.state == state.WRONG:
-            return await (future.from_value(state.right(ctx)) >> next_handler)
-
-        return ctx_copy
+        match await (
+            future.from_value(ctx) >> context.copy >> state.Right >> current_handler
+        ):
+            case state.Right(value):
+                return value
+            case _:
+                return await (future.from_value(ctx) >> state.Right >> next_handler)
 
     return __continuation
 
@@ -34,6 +31,6 @@ def choose(*handlers: Handler) -> Handler:
         Handler: choose composition handler
     """
     if len(handlers) > 0:
-        return functools.reduce(__continue_on_fail, handlers)
+        return functools.reduce(__continue_on_not_right, handlers)
     else:
         return future.identity

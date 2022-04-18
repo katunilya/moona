@@ -4,60 +4,63 @@ from mona import context, req, state
 
 
 @pytest.mark.parametrize(
-    "headers,init_state,header_key,header_value,target_state,",
+    "arrange_headers,arrange_state,arrange_key,arrange_value,assert_state",
     [
         (
             {"content-type": b"application/json"},
-            state.RIGHT,
+            state.Right,
             "Content-Type",
             "application/json",
-            state.RIGHT,
+            state.Right,
         ),
         (
             {"content-type": b"application/json"},
-            state.RIGHT,
+            state.Right,
             "content-type",
             "application/json",
-            state.RIGHT,
+            state.Right,
         ),
         (
             {"content-type": b"application/json"},
-            state.WRONG,
+            state.Wrong,
             "Content-Type",
             "application/json",
-            state.WRONG,
+            state.Wrong,
         ),
         (
             {"content-type": b"application/json"},
-            state.RIGHT,
+            state.Right,
             "Content-Type",
             "text/plain",
-            state.WRONG,
+            state.Wrong,
         ),
         (
             {"content-type": b"application/json"},
-            state.RIGHT,
+            state.Right,
             "Custom-Header",
             "some value",
-            state.WRONG,
+            state.Wrong,
         ),
     ],
 )
 def test_on_header(
     mock_context: context.Context,
-    headers,
-    init_state,
-    header_key,
-    header_value,
-    target_state,
+    arrange_headers,
+    arrange_state,
+    arrange_key,
+    arrange_value,
+    assert_state,
 ):
-    mock_context.request.headers = headers
-    handler_ = req.has_header(header_key, header_value)
-    ctx = state.State(mock_context, init_state)
+    # arrange
+    mock_context.request.headers = arrange_headers
+    arrange_handler = req.has_header(arrange_key, arrange_value)
+    arrange_ctx = arrange_state(mock_context)
 
-    ctx = handler_(ctx)
+    # act
+    act_ctx = arrange_handler(arrange_ctx)
 
-    assert ctx.state == target_state
+    # assert
+    assert isinstance(act_ctx, assert_state)
 
 
 @pytest.mark.parametrize(
@@ -65,12 +68,12 @@ def test_on_header(
     [
         (
             {},
-            state.RIGHT,
+            state.Right,
             {},
         ),
         (
             {"content-type": b"application/json"},
-            state.RIGHT,
+            state.Right,
             {"content-type": "application/json"},
         ),
         (
@@ -81,7 +84,7 @@ def test_on_header(
                 "Date": b"Thu, 11 Aug 2016 15:23:13 GMT",
                 "Keep-Alive": b"timeout=5, max=1000",
             },
-            state.RIGHT,
+            state.Right,
             {
                 "Connection": "Keep-Alive",
                 "Content-Encoding": "gzip",
@@ -98,9 +101,12 @@ def test_take_headers(
     assert_state,
     assert_headers,
 ):
+    # arrange
     mock_context.request.headers = arrange_headers
 
-    headers: state.State[dict[str, str]] = req.take_headers(mock_context)
+    # act
+    act_headers: state.State[dict[str, str]] = req.take_headers(mock_context)
 
-    assert headers.state == assert_state
-    assert headers.value == assert_headers
+    # assert
+    assert isinstance(act_headers, assert_state)
+    assert act_headers.value == assert_headers

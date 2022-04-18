@@ -9,7 +9,7 @@ def set_header(key: str, value: str) -> handler.Handler:
     @state.accepts_right
     def _handler(ctx: context.Context) -> context.StateContext:
         ctx.response.headers[key] = value
-        return state.right(ctx)
+        return state.Right(ctx)
 
     return _handler
 

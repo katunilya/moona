@@ -7,7 +7,7 @@ def on_route(pattern: str) -> handler.Handler:
 
     @state.accepts_right
     def _handler(ctx: context.Context) -> context.StateContext:
-        return state.right(ctx) if pattern == ctx.request.path else state.wrong(ctx)
+        return state.Right(ctx) if pattern == ctx.request.path else state.Wrong(ctx)
 
     return _handler
 
@@ -21,9 +21,9 @@ def on_subroute(pattern: str) -> handler.Handler:
         if ctx.request.path.startswith(pattern):
             subroute = len(pattern)
             ctx.request.path = ctx.request.path[subroute:].strip("/")
-            return state.right(ctx)
+            return state.Right(ctx)
 
-        return state.wrong(ctx)
+        return state.Wrong(ctx)
 
     return _handler
 
@@ -35,9 +35,9 @@ def on_ciroute(pattern: str) -> handler.Handler:
     @state.accepts_right
     def _handler(ctx: context.Context) -> context.StateContext:
         return (
-            state.right(ctx)
+            state.Right(ctx)
             if ctx.request.path.lower() == pattern
-            else state.wrong(ctx)
+            else state.Wrong(ctx)
         )
 
     return _handler
@@ -52,7 +52,7 @@ def on_cisubroute(pattern: str) -> handler.Handler:
         if ctx.request.path.lower().startswith(pattern):
             subroute_len = len(pattern)
             ctx.request.path = ctx.request.path[subroute_len:].strip("/")
-            return state.right(ctx)
-        return state.wrong(ctx)
+            return state.Right(ctx)
+        return state.Wrong(ctx)
 
     return _handler
