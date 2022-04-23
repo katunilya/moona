@@ -66,7 +66,7 @@ MaybeFunc = typing.Callable[[T], Maybe[V]]
 
 
 @toolz.curry
-def bind(func: typing.Callable[[T], Maybe[V]], cnt: Maybe[T]) -> Maybe[V]:
+def bind(func: MaybeFunc[T, V], cnt: Maybe[T]) -> Maybe[V]:
     """Bind function for `Maybe` monad.
 
     `function` is executed only in case `cnt` is `Some` and not `Nothing` as it does not
@@ -86,7 +86,7 @@ def bind(func: typing.Callable[[T], Maybe[V]], cnt: Maybe[T]) -> Maybe[V]:
             return cnt
 
 
-def recover(value: T) -> typing.Callable[[Maybe[V]], Maybe[V] | Maybe[T]]:
+def recover(value: T) -> MaybeFunc[V, T | V]:
     """Recovers from `Nothing` or just passes `Some`.
 
     When `Some` value is passed nothing is done and it is just returned. When `Nothing`
@@ -120,9 +120,7 @@ def _continue_on_some(cur: MaybeFunc[T, V], nxt: MaybeFunc[T, V]) -> MaybeFunc[T
     return __continue_on_some
 
 
-def choose(
-    *functions: typing.Callable[[T], Maybe[V]]
-) -> typing.Callable[[T], Maybe[V]]:
+def choose(*functions: MaybeFunc[T, V]) -> MaybeFunc[T, V]:
     """Return first `Some` result from passed functions.
 
     If `functions` is empty, than return `Nothing`.
