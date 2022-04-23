@@ -8,6 +8,6 @@
         "tests"
     ],
     "vscodeGitCommit.template": [
-        "{message}"
+        "{message} (#{issue})"
     ]
 }
