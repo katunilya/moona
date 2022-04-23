@@ -84,3 +84,26 @@ def bind(func: typing.Callable[[T], Maybe[V]], cnt: Maybe[T]) -> Maybe[V]:
             return func(value)
         case _:
             return cnt
+
+
+def recover(value: T) -> typing.Callable[[Maybe[V]], Maybe[V] | Maybe[T]]:
+    """Recovers from `Nothing` or just passes `Some`.
+
+    When `Some` value is passed nothing is done and it is just returned. When `Nothing`
+    is passed than it is repaced with `Some` `value`.
+
+    Args:
+        value (T): to recover to
+
+    Returns:
+        typing.Callable[[Maybe[V]], Maybe[V] | Maybe[T]]: maybe handler function
+    """
+
+    def _recover(cnt: Maybe[V]) -> Maybe[V] | Maybe[T]:
+        match cnt:
+            case Some():
+                return cnt
+            case _:
+                return Some(value)
+
+    return _recover

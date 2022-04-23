@@ -25,3 +25,22 @@ def test_bind(arrange_function, arrange_cnt, assert_cnt):
     # assert
     assert act_cnt == assert_cnt
     assert act_cnt_rshift == assert_cnt
+
+
+@pytest.mark.parametrize(
+    "arrange_recovery_value,arrange_cnt,assert_cnt",
+    [
+        (1, maybe.Some(1), maybe.Some(1)),
+        (2, maybe.Some(1), maybe.Some(1)),
+        (2, maybe.Nothing, maybe.Some(2)),
+    ],
+)
+def test_recover(arrange_recovery_value, arrange_cnt, assert_cnt):
+    # arrange
+    arrange_recover = maybe.recover(arrange_recovery_value)
+
+    # act
+    act_cnt = arrange_recover(arrange_cnt)
+
+    # assert
+    assert act_cnt == assert_cnt
