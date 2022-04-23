@@ -1,6 +1,6 @@
 import pytest
 
-from mona import state
+from mona.monads import state
 
 
 @pytest.mark.parametrize(

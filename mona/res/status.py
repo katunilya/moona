@@ -1,4 +1,5 @@
-from mona import context, handler, state
+from mona import context, handler
+from mona.monads import state
 
 CONTINUE: int = 100
 SWITCHING_PROTOCOLS: int = 101

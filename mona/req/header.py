@@ -1,6 +1,7 @@
 import toolz
 
-from mona import context, handler, state
+from mona import context, handler
+from mona.monads import state
 
 
 def has_header(key: str, value: str, required: bool = False) -> handler.Handler:

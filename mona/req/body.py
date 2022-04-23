@@ -4,7 +4,8 @@ import typing
 import orjson
 import pydantic
 
-from mona import context, state
+from mona import context
+from mona.monads import state
 
 
 @dataclasses.dataclass

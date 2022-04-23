@@ -1,9 +1,10 @@
 from functools import reduce
 from typing import Awaitable, Callable
 
-from mona import context, future
+from mona import context
 from mona.context import Context
-from mona.maybe import Maybe, Some
+from mona.monads import future
+from mona.monads.maybe import Maybe, Some
 
 ContextFunc = Callable[[Maybe[Context]], Maybe[Context] | Awaitable[Maybe[Context]]]
 

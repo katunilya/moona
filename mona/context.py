@@ -3,7 +3,7 @@ import typing
 
 import toolz
 
-from mona import state
+from mona.monads import state
 
 Message = dict[str, typing.Any]
 Scope = Message

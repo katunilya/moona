@@ -1,4 +1,5 @@
-from mona import asgi, future, handler, req, res
+from mona import asgi, handler, req, res
+from mona.monads import future
 
 index = future.compose(
     req.on_get,

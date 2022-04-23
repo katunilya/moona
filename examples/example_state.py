@@ -1,6 +1,6 @@
 import dataclasses
 
-from mona import state
+from mona.monads import state
 
 
 @dataclasses.dataclass

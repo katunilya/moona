@@ -1,7 +1,8 @@
 import functools
 import typing
 
-from mona import context, future, state
+from mona import context
+from mona.monads import future, state
 
 SyncHandler = typing.Callable[[context.StateContext], context.StateContext]
 AsyncHandler = typing.Callable[

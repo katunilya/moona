@@ -1,6 +1,6 @@
 import pytest
 
-from mona import maybe
+from mona.monads import maybe
 
 
 def test_nothing_is_singleton():

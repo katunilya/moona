@@ -1,4 +1,5 @@
-from mona import asgi, future, req, res
+from mona import asgi, req, res
+from mona.monads import future
 
 app = asgi.create(
     future.compose(
