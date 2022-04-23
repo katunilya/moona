@@ -44,13 +44,13 @@ class Some(Maybe[T]):
 
 
 @dataclasses.dataclass(frozen=True)
-class _Nothing(Maybe[typing.Any]):
+class Nothing(Maybe[typing.Any]):
     """Private container for non-existent value."""
 
     __slots__ = ()
-    __instance: "_Nothing | None" = None
+    __instance: "Nothing | None" = None
 
-    def __new__(cls, *args, **kwargs) -> "_Nothing":
+    def __new__(cls, *args, **kwargs) -> "Nothing":  # noqa
         match cls.__instance:
             case None:
                 cls.__instance = object.__new__(cls)
@@ -58,11 +58,11 @@ class _Nothing(Maybe[typing.Any]):
             case _:
                 return cls.__instance
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # noqa
         super().__init__(None)
 
 
-Nothing = _Nothing()
+MaybeFunc = typing.Callable[[T], Maybe[V]]
 
 
 @toolz.curry
@@ -107,3 +107,33 @@ def recover(value: T) -> typing.Callable[[Maybe[V]], Maybe[V] | Maybe[T]]:
                 return Some(value)
 
     return _recover
+
+
+def _continue_on_some(cur: MaybeFunc[T, V], nxt: MaybeFunc[T, V]) -> MaybeFunc[T, V]:
+    def __continue_on_some(val: T):
+        match cur(val):
+            case Some(result):
+                return result
+            case Nothing():
+                return nxt(val)
+
+    return __continue_on_some
+
+
+def choose(
+    *functions: typing.Callable[[T], Maybe[V]]
+) -> typing.Callable[[T], Maybe[V]]:
+    """Return first `Some` result from passed functions.
+
+    If `functions` is empty, than return `Nothing`.
+    If no `function` can return `Some` than return `Nothing`.
+    """
+
+    def _choose(value: T):
+        match functions:
+            case ():
+                return Nothing()
+            case _:
+                return toolz.reduce(_continue_on_some, functions)(value)
+
+    return _choose
