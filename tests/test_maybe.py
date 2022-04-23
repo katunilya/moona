@@ -10,9 +10,9 @@ def test_nothing_is_singleton():
 @pytest.mark.parametrize(
     "arrange_function,arrange_cnt,assert_cnt",
     [
-        (lambda x: x, maybe.Some(1), maybe.Some(1)),
-        (lambda x: x, maybe.Some(2), maybe.Some(2)),
-        (lambda x: x, maybe.Nothing, maybe.Nothing),
+        (lambda x: maybe.Some(x), maybe.Some(1), maybe.Some(1)),
+        (lambda x: maybe.Some(x), maybe.Some(2), maybe.Some(2)),
+        (lambda x: maybe.Some(x), maybe.Nothing, maybe.Nothing),
         (lambda x: maybe.Nothing, maybe.Nothing, maybe.Nothing),
         (lambda x: maybe.Nothing, maybe.Some(1), maybe.Nothing),
     ],

@@ -22,6 +22,21 @@ class Maybe(state.State[T], abc.ABC):
     Strict types help ignore
     """
 
+    def __rshift__(self, func: typing.Callable[[T], "Maybe[V]"]) -> "Maybe[V]":
+        """Dunder method for `>>` bind syntax.
+
+        >>> maybe.bind(function, cnt)
+        >>> # exactly the same as
+        >>> cnt >> function
+
+        Args:
+            func (typing.Callable[[T], &quot;Maybe[V]&quot;]): _description_
+
+        Returns:
+            Maybe[V]: _description_
+        """
+        return bind(func, self)
+
 
 @dataclasses.dataclass(frozen=True)
 class Some(Maybe[T]):
@@ -51,7 +66,7 @@ Nothing = _Nothing()
 
 
 @toolz.curry
-def bind(function: typing.Callable[[Maybe[T]], Maybe[V]], cnt: Maybe[T]) -> Maybe[V]:
+def bind(func: typing.Callable[[T], Maybe[V]], cnt: Maybe[T]) -> Maybe[V]:
     """Bind function for `Maybe` monad.
 
     `function` is executed only in case `cnt` is `Some` and not `Nothing` as it does not
@@ -65,7 +80,7 @@ def bind(function: typing.Callable[[Maybe[T]], Maybe[V]], cnt: Maybe[T]) -> Mayb
         Maybe[V]: result of running `function` on `cnt` value.
     """
     match cnt:
-        case Some():
-            return function(cnt)
+        case Some(value):
+            return func(value)
         case _:
             return cnt
