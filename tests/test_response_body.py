@@ -1,7 +1,8 @@
 import pydantic
 import pytest
 
-from mona import context, future, res, state
+from mona import context, res
+from mona.monads import future, state
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,8 @@ import inspect
 
 import pytest
 
-from mona import context, future, handler, state
+from mona import context, handler
+from mona.monads import future, state
 
 
 def sync_handler(cnt: context.StateContext) -> context.StateContext:

@@ -1,4 +1,5 @@
-from mona import context, handler, state
+from mona import context, handler
+from mona.monads import state
 
 GET = "GET"
 POST = "POST"

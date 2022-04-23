@@ -3,7 +3,8 @@ import dataclasses
 import pydantic
 import pytest
 
-from mona import context, req, state
+from mona import context, req
+from mona.monads import state
 
 
 @pytest.mark.parametrize(

@@ -1,6 +1,6 @@
 import asyncio
 
-from mona import future
+from mona.monads import future
 
 
 async def async_inc(x: int) -> int:  # noqa

@@ -4,7 +4,7 @@ from typing import Any, Callable, TypeVar
 
 import toolz
 
-from mona import state
+from mona.monads import state
 
 T = TypeVar("T")
 V = TypeVar("V")

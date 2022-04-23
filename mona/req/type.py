@@ -1,4 +1,5 @@
-from mona import context, state
+from mona import context
+from mona.monads import state
 
 
 @state.accepts_right
