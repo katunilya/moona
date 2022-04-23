@@ -38,7 +38,7 @@ def test_bind(arrange_function, arrange_cnt, assert_cnt):
 )
 def test_recover(arrange_recovery_value, arrange_cnt, assert_cnt):
     # arrange
-    arrange_recover = maybe.recover(arrange_recovery_value)
+    arrange_recover = maybe.or_value(arrange_recovery_value)
 
     # act
     act_cnt = arrange_recover(arrange_cnt)

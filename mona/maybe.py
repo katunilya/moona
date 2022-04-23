@@ -1,13 +1,13 @@
 import abc
 import dataclasses
-import typing
+from typing import Any, Callable, TypeVar
 
 import toolz
 
 from mona import state
 
-T = typing.TypeVar("T")
-V = typing.TypeVar("V")
+T = TypeVar("T")
+V = TypeVar("V")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -22,7 +22,7 @@ class Maybe(state.State[T], abc.ABC):
     Strict types help ignore
     """
 
-    def __rshift__(self, func: typing.Callable[[T], "Maybe[V]"]) -> "Maybe[V]":
+    def __rshift__(self, func: Callable[[T], "Maybe[V]"]) -> "Maybe[V]":
         """Dunder method for `>>` bind syntax.
 
         >>> maybe.bind(function, cnt)
@@ -30,7 +30,7 @@ class Maybe(state.State[T], abc.ABC):
         >>> cnt >> function
 
         Args:
-            func (typing.Callable[[T], &quot;Maybe[V]&quot;]): _description_
+            func (Callable[[T], &quot;Maybe[V]&quot;]): _description_
 
         Returns:
             Maybe[V]: _description_
@@ -44,7 +44,7 @@ class Some(Maybe[T]):
 
 
 @dataclasses.dataclass(frozen=True)
-class Nothing(Maybe[typing.Any]):
+class Nothing(Maybe[Any]):
     """Private container for non-existent value."""
 
     __slots__ = ()
@@ -62,7 +62,7 @@ class Nothing(Maybe[typing.Any]):
         super().__init__(None)
 
 
-MaybeFunc = typing.Callable[[T], Maybe[V]]
+MaybeFunc = Callable[[T], Maybe[V]]
 
 
 @toolz.curry
@@ -73,7 +73,7 @@ def bind(func: MaybeFunc[T, V], cnt: Maybe[T]) -> Maybe[V]:
     make any sense to execute some `function` with `Nothing`.
 
     Args:
-        function (typing.Callable[[Maybe[T]], Maybe[V]]): to bind
+        function (Callable[[Maybe[T]], Maybe[V]]): to bind
         cnt (Maybe[T]): `Maybe` container
 
     Returns:
@@ -86,7 +86,7 @@ def bind(func: MaybeFunc[T, V], cnt: Maybe[T]) -> Maybe[V]:
             return cnt
 
 
-def recover(value: T) -> MaybeFunc[V, T | V]:
+def or_value(value: T) -> MaybeFunc[V, T | V]:
     """Recovers from `Nothing` or just passes `Some`.
 
     When `Some` value is passed nothing is done and it is just returned. When `Nothing`
@@ -96,17 +96,17 @@ def recover(value: T) -> MaybeFunc[V, T | V]:
         value (T): to recover to
 
     Returns:
-        typing.Callable[[Maybe[V]], Maybe[V] | Maybe[T]]: maybe handler function
+        Callable[[Maybe[V]], Maybe[V] | Maybe[T]]: maybe handler function
     """
 
-    def _recover(cnt: Maybe[V]) -> Maybe[V] | Maybe[T]:
+    def _or_value(cnt: Maybe[V]) -> Maybe[V] | Maybe[T]:
         match cnt:
             case Some():
                 return cnt
             case _:
                 return Some(value)
 
-    return _recover
+    return _or_value
 
 
 def _continue_on_some(cur: MaybeFunc[T, V], nxt: MaybeFunc[T, V]) -> MaybeFunc[T, V]:
