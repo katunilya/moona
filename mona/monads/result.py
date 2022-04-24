@@ -22,7 +22,12 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], abc.ABC):
     def __rshift__(
         self, func: Callable[[TSuccess], "Result[TSuccess, TFailure]"]
     ) -> "Result[TSuccess, TFailure]":
-        """Binding.
+        """Executes passed `func` when `Result` is `Success`, otherwise ignores.
+
+        Example::
+
+                Success(3) >> lambda x: Success(x + 1)  # Success(4)
+                Failure(3) >> lambda x: Success(x + 1)  # Failure(3)
 
         Args:
             func (Callable[[TSuccess], Result[TSuccess, TFailure]]): to bind to
@@ -40,7 +45,12 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], abc.ABC):
     def __lshift__(
         self, func: Callable[[TFailure], "Result[TSuccess, TFailure]"]
     ) -> "Result[TSuccess, TFailure]":
-        """Altering.
+        """Executes passed `func` when `Result` is `Failure`, otherwise ignores.
+
+        Example::
+
+                Success(3) << lambda x: Success(x + 1)  # Success(3)
+                Failure(3) << lambda x: Success(x + 1)  # Success(4)
 
         Args:
             func (Callable[[TFailure], &quot;Result[TSuccess, TFailure]&quot;]):
@@ -58,54 +68,40 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], abc.ABC):
 
 @dataclasses.dataclass(frozen=True)
 class Success(Result[TSuccess, Any]):
-    """Success."""
+    """Container that marks underlying value as `Success`full execution result."""
 
     value: TSuccess
 
 
 @dataclasses.dataclass(frozen=True)
 class Failure(Result[Any, TFailure]):
-    """Failure."""
+    """Container that marks underlying value as `Failure` execution result."""
 
     value: TFailure
-
-
-def bind(
-    func: Callable[[TSuccess], Result[TSuccess, TFailure]],
-    cnt: Result[TSuccess, TFailure],
-) -> Result[TSuccess, TFailure]:
-    """Binding.
-
-    Args:
-        func (Callable[[TSuccess], Result[TSuccess, TFailure]]): _description_
-        cnt (Result[TSuccess, TFailure]): _description_
-
-    Returns:
-        Result[TSuccess, TFailure]: _description_
-    """
-    return cnt >> func
-
-
-def alt(
-    func: Callable[[TFailure], Result[TSuccess, TFailure]],
-    cnt: Result[TSuccess, TFailure],
-) -> Result[TSuccess, TFailure]:
-    """Altering.
-
-    Args:
-        func (Callable[[TFailure], Result[TSuccess, TFailure]]): _description_
-        cnt (Result[TSuccess, TFailure]): _description_
-
-    Returns:
-        Result[TSuccess, TFailure]: _description_
-    """
-    return cnt << func
 
 
 def safe(
     func: Callable[[TSuccess], TSuccess | Exception]
 ) -> Callable[[TSuccess], Result[TSuccess, Exception]]:
     """When function returns or throws `Exception` it is wrapped into `Failure`.
+
+    Example::
+
+            @safe
+            def divide_one_by(x: int) -> int:
+                return 1 / x
+
+            divide_one_by(0)  # Failure(value=ZeroDivisionError('division by zero'))
+
+            @safe
+            def divide_two_by(x: int) -> int | Exception:
+                match x:
+                    case 0:
+                        return ValueError('Cannot divide by zero')
+                    case value:
+                        return 2 / value
+
+            divide_two_by(0)  # Failure(value=ValueError('Cannot divide by zero'))
 
     Args:
         func (Callable[[TSuccess], TSuccess | Exception]): _description_
