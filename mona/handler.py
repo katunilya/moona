@@ -31,7 +31,8 @@ def choose(*handlers: Handler) -> Handler:
     Returns:
         Handler: choose composition handler
     """
-    if len(handlers) > 0:
-        return functools.reduce(__continue_on_not_right, handlers)
-    else:
-        return future.identity
+    match handlers:
+        case ():
+            return future.identity
+        case _:
+            return functools.reduce(__continue_on_not_right, handlers)

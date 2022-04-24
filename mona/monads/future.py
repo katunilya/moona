@@ -1,104 +1,109 @@
 import dataclasses
+import functools
 import inspect
-import typing
+from typing import Awaitable, Callable, Generator, Generic, TypeVar
 
-import toolz
+from mona.monads.core import Bindable
 
-T = typing.TypeVar("T")
-V = typing.TypeVar("V")
+T = TypeVar("T")
+V = TypeVar("V")
 
 
 @dataclasses.dataclass(frozen=True)
-class Future(typing.Generic[T]):
-    """Container for awaitable values."""
+class Future(Bindable, Generic[T]):
+    """Container for performing asynchronous operations on some value in sync context.
 
-    value: typing.Awaitable[T]
+    `Future` allows running async function inside synchronous functions. Can execute
+    both sync and async functions and produce next `Future`s.
+    """
 
-    def __await__(self) -> typing.Generator[None, None, T]:
+    value: Awaitable[T]
+
+    def __await__(self) -> Generator[None, None, T]:
         """Dunder function that makes `Future` awaitable."""
         return self.value.__await__()
 
-    def __rshift__(
-        self, function: typing.Callable[["Future[T]"], "Future[V]"]
-    ) -> "Future[V]":
-        """Dunder function for >> syntax of executing futures."""
-        return bind(function, self)
+    async def __bind(self, function: Callable[[T], Awaitable[V] | V]) -> V:
+        result = function(await self.value)
+        return await result if inspect.isawaitable(result) else result
+
+    def __rshift__(self, func: Callable[[T], V | Awaitable[V]]) -> "Future[V]":
+        """Execute passed function synchronously even if it is async.
+
+        Via bind operator we can execute sync or async `func` on this `Future` and get
+        another `Future` as a result of computation.
+
+        Examples::
+
+                result = (Future.from_value(3)
+                    >> lambda x: x + 1
+                    >> async_plus_2
+                )  # Awaitable
+
+                print(await result)  # 5
+
+        Args:
+            func (Callable[[T], V  |  Awaitable[V]]): to execute
+
+        Returns:
+            Future[V]: result
+        """
+        return Future(self.__bind(func))
 
 
 async def identity(value: T) -> T:
-    """Converts some value into Awaitable.
+    """Asynchronously returns passed `value`.
 
     Args:
-        value (T): to be converted to awaitable.
+        value (T): to return asynchronously
 
     Returns:
-        T: awaitable value
+        T: return value
     """
     return value
 
 
-def from_value(value: T) -> Future[T]:
-    """Create `Future` from value.
+def from_value(value: T) -> "Future[T]":
+    """Create future from some present value (not awaitable).
 
-    Do not pass here another `Awaitable`.
+    Example::
+            f = Future.from_value(1)
+            print(await f)  # 1
 
     Args:
-        value (T): value to create awaitable.
+        value (T): value to wrap into `Future`
 
     Returns:
-        Future[T]: ready-to-use future
+        Future[T]: result
     """
     return Future(identity(value))
 
 
-async def __bind(
-    function: typing.Callable[[T], typing.Awaitable[V] | V], cnt: Future[T]
-) -> V:
-    result = function(await cnt)
-    return await result if inspect.isawaitable(result) else result
+def compose(*funcs: Callable[[T], Awaitable[V] | V]) -> Callable[[T], Awaitable[V]]:
+    """Combinator for sync and async functions that converts them into async pipeline.
 
+    If `funcs` is empty than returns async identity function.
 
-@toolz.curry
-def bind(
-    function: typing.Callable[[T], typing.Awaitable[V] | V], cnt: Future[T]
-) -> Future[V]:
-    """Bind sync or async function to Future.
+    Example::
 
-    Args:
-        function (typing.Callable[[T], typing.Union[V, typing.Awaitable[V]]]): to bind
-        cnt (Future[T]): container
+            composition = future.compose(
+                async_plus_1,
+                sync_plus_1,
+            )  # asynchronous function that executes async_func, than sync_func
+
+            result = await (Future.from_value(3) >> composition)  # 5
 
     Returns:
-        Future[V]: result of running `function` on `cnt` value
+        Callable[[T], Awaitable[V]]: function composition
     """
-    return Future(__bind(function, cnt))
+    match funcs:
+        case ():
+            return identity
+        case _:
 
+            async def _composition(cnt: T) -> V:
+                return await functools.reduce(
+                    lambda c, f: c >> f, funcs, from_value(cnt)
+                )
 
-def compose(
-    *functions: typing.Callable[[T], typing.Awaitable[V] | V]
-) -> typing.Callable[[T], typing.Awaitable[V]]:
-    """Converts sequence of functions into sequenced pipeline for `Future` container.
-
-    Returns:
-        typing.Callable[[Future[T]], Future[V]]: function composition
-    """
-
-    async def _composition(cnt: T) -> V:
-        return await toolz.reduce(lambda c, f: bind(f, c), functions, from_value(cnt))
-
-    return _composition
-
-
-def pipe(
-    cnt: Future[T],
-    *functions: typing.Callable[[T], typing.Awaitable[V] | V],
-) -> Future[V]:
-    """Composes `functions` and executes on `cnt`.
-
-    Args:
-        cnt (Future[T]): to execute
-
-    Returns:
-        Future[V]: result future
-    """
-    return cnt >> compose(*functions)
+            return _composition

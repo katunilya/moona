@@ -4,8 +4,7 @@ import pytest
 
 from mona.context import Context
 from mona.core import choose
-from mona.monads import future
-from mona.monads.maybe import Maybe, Nothing, Some
+from mona.monads import Maybe, Nothing, Some, future
 
 
 def sync_handler(ctx: Maybe[Context]) -> Maybe[Context]:
