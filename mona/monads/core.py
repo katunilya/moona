@@ -1,18 +1,34 @@
-import abc
-import dataclasses
-from typing import Generic, TypeVar
-
-TValue = TypeVar("TValue")
+from typing import Callable, Protocol
 
 
-@dataclasses.dataclass(frozen=True)
-class Container(abc.ABC, Generic[TValue]):
-    """Base container class for different monads.
+class Bindable(Protocol):
+    """Interface for monad containers that support binding.
 
-    Any monad has a container which explicitly shows what object we actually operate.
-    For that we specifically have this concrete abstract `Container` class. Monad
-    containers should be immutable, however it does not guarantee that wrapped `value`
-    is immutable too.
+    Binding is application of passed function on some monad-specific pre-condition or
+    action. Binding is done via `>>` operator. Commonly binding is applied only when
+    container is in some "right" state and computation can be continued.
     """
 
-    value: TValue
+    def __rshift__(self, func: Callable):
+        """Dunder method for `func` binding.
+
+        Args:
+            func (Callable): function to bind
+        """
+
+
+class Alterable(Protocol):
+    """Interface for monad containers that support altering.
+
+    Altering is application of passed function on some monad-specific pre-condition or
+    action. Altering is done via `<<` operator. Commonly altering is applied only when
+    container is in some "wrong" state and computation cannot be continued. Opposite of
+    binding.
+    """
+
+    def __lshift__(self, func: Callable):
+        """Dunder method for `func` altering.
+
+        Args:
+            func (Callable): function to alter
+        """
