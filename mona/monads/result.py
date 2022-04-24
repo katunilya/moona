@@ -14,7 +14,7 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], abc.ABC):
     """Base abstract container for computation `Result`.
 
     Railway-oriented programming concept. Stands for `Result` of some computation
-    sequence. Can be of 2 types: `Success` and `Fail`.
+    sequence. Can be of 2 types: `Success` and `Failure`.
     """
 
     value: TSuccess | TFailure
@@ -25,11 +25,11 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], abc.ABC):
         """Binding.
 
         Args:
-            func (Callable[[TSuccess], &quot;Result[TSuccess, TFailure]&quot;]):
-            _description_
+            func (Callable[[TSuccess], Result[TSuccess, TFailure]]): to bind to
+            container
 
         Returns:
-            Result[TSuccess, TFailure]: _description_
+            Result[TSuccess, TFailure]: of binding
         """
         match self:
             case Success(value):
