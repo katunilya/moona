@@ -1,6 +1,6 @@
 import pytest
 
-from mona import context, req
+from mona import req, types
 from mona.monads import state
 
 
@@ -14,14 +14,14 @@ from mona.monads import state
     ],
 )
 def test_reqest_on_type(
-    mock_context: context.Context, arrange_type, arrange_state, assert_state
+    mock_context: types.Context, arrange_type, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.type_ = arrange_type
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_http(arrange_ctx)
+    act_ctx: types.StateContext = req.on_http(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)

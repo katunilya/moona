@@ -1,6 +1,6 @@
 import pytest
 
-from mona import context, res
+from mona import res, types
 from mona.monads import future, state
 
 
@@ -13,7 +13,7 @@ from mona.monads import future, state
     ],
 )
 async def test_set_status(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     arrange_status,
     assert_state,
@@ -24,7 +24,7 @@ async def test_set_status(
     handler = res.set_status(arrange_status)
 
     # act
-    ctx: context.StateContext = await (ctx >> handler)
+    ctx: types.StateContext = await (ctx >> handler)
 
     # assert
     assert isinstance(ctx, assert_state)
@@ -102,7 +102,7 @@ async def test_set_status(
     ],
 )
 async def test_ready_setters(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     act_setter,
     assert_state,
@@ -112,7 +112,7 @@ async def test_ready_setters(
     ctx = future.from_value(arrange_state(mock_context))
 
     # act
-    ctx: context.StateContext = await (ctx >> act_setter)
+    ctx: types.StateContext = await (ctx >> act_setter)
 
     # assert
     assert isinstance(ctx, assert_state)

@@ -1,6 +1,6 @@
 import pytest
 
-from mona import context, req
+from mona import req, types
 from mona.monads import state
 
 
@@ -56,7 +56,7 @@ from mona.monads import state
     ],
 )
 def test_on_route(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_path,
     arrange_pattern,
     arrange_state,
@@ -68,7 +68,7 @@ def test_on_route(
     arrange_handler = req.on_route(arrange_pattern)
 
     # act
-    act_ctx: context.StateContext = arrange_handler(arrange_ctx)
+    act_ctx: types.StateContext = arrange_handler(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -216,7 +216,7 @@ def test_on_route(
     ],
 )
 def test_on_ciroute(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_path,
     arrange_pattern,
     arrange_state,
@@ -228,7 +228,7 @@ def test_on_ciroute(
     arrange_handler = req.on_ciroute(arrange_pattern)
 
     # act
-    act_ctx: context.StateContext = arrange_handler(arrange_ctx)
+    act_ctx: types.StateContext = arrange_handler(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -256,7 +256,7 @@ def test_on_ciroute(
     ],
 )
 def test_on_subroute(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_path,
     arrange_pattern,
     arrange_state,
@@ -269,7 +269,7 @@ def test_on_subroute(
     arrange_handle = req.on_subroute(arrange_pattern)
 
     # act
-    act_ctx: context.StateContext = arrange_handle(arrange_ctx)
+    act_ctx: types.StateContext = arrange_handle(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -332,7 +332,7 @@ def test_on_subroute(
     ],
 )
 def test_on_cisubroute(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_path,
     arrange_pattern,
     arrange_state,
@@ -345,7 +345,7 @@ def test_on_cisubroute(
     arrange_handle = req.on_cisubroute(arrange_pattern)
 
     # act
-    act_ctx: context.StateContext = arrange_handle(arrange_ctx)
+    act_ctx: types.StateContext = arrange_handle(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)

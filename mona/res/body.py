@@ -3,7 +3,7 @@ import typing
 import orjson
 import pydantic
 
-from mona import context, handler
+from mona import handler, types
 from mona.monads import future, state
 
 from . import header, status
@@ -13,7 +13,7 @@ def set_body_bytes(body: bytes) -> handler.Handler:
     """Set response body from byte string."""
 
     @state.accepts_right
-    def _handler(ctx: context.Context) -> context.StateContext:
+    def _handler(ctx: types.Context) -> types.StateContext:
         ctx.response.body = body
         return state.Right(ctx)
 
@@ -25,7 +25,7 @@ def set_body_text(body: str) -> handler.Handler:
     body = body.encode("UTF-8")
 
     @state.accepts_right
-    def _handler(ctx: context.Context) -> context.StateContext:
+    def _handler(ctx: types.Context) -> types.StateContext:
         ctx.response.body = body
         return state.Right(ctx)
 
@@ -33,12 +33,12 @@ def set_body_text(body: str) -> handler.Handler:
 
 
 def set_body_from_bytes(
-    function: typing.Callable[[context.Context], future.Future[state.ESafe[bytes]]]
+    function: typing.Callable[[types.Context], future.Future[state.ESafe[bytes]]]
 ) -> handler.Handler:
     """Set body from function calculation result."""
 
     @state.accepts_right
-    async def _handler(ctx: context.Context) -> context.StateContext:
+    async def _handler(ctx: types.Context) -> types.StateContext:
         match await (future.from_value(ctx) >> function):
             case state.Error(err):
                 return (
@@ -63,12 +63,12 @@ def set_body_from_bytes(
 
 
 def set_body_from_text(
-    function: typing.Callable[[context.Context], future.Future[state.ESafe[str]]]
+    function: typing.Callable[[types.Context], future.Future[state.ESafe[str]]]
 ) -> handler.Handler:
     """Set body from function calculation result (str)."""
 
     @state.accepts_right
-    async def _handler(ctx: context.Context) -> context.StateContext:
+    async def _handler(ctx: types.Context) -> types.StateContext:
         match await (future.from_value(ctx) >> function):
             case state.Error(err):
                 return (
@@ -97,12 +97,12 @@ def set_body_from_text(
 
 
 def set_body_from_dict(
-    function: typing.Callable[[context.Context], future.Future[state.ESafe[dict]]]
+    function: typing.Callable[[types.Context], future.Future[state.ESafe[dict]]]
 ) -> handler.Handler:
     """Set body from function calculation result."""
 
     @state.accepts_right
-    async def _handler(ctx: context.Context) -> context.StateContext:
+    async def _handler(ctx: types.Context) -> types.StateContext:
         match await (future.from_value(ctx) >> function):
             case state.Error(err):
                 return (
@@ -130,13 +130,13 @@ def set_body_from_dict(
 
 def set_body_from_pydantic(
     function: typing.Callable[
-        [context.Context], future.Future[state.ESafe[pydantic.BaseModel]]
+        [types.Context], future.Future[state.ESafe[pydantic.BaseModel]]
     ]
 ) -> handler.Handler:
     """Set body from function calculation result."""
 
     @state.accepts_right
-    async def _handler(ctx: context.Context) -> context.StateContext:
+    async def _handler(ctx: types.Context) -> types.StateContext:
         match await (future.from_value(ctx) >> function):
             case state.Error(err):
                 return (

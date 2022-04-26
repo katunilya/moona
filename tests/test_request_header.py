@@ -1,6 +1,6 @@
 import pytest
 
-from mona import context, req
+from mona import req, types
 from mona.monads import state
 
 
@@ -45,7 +45,7 @@ from mona.monads import state
     ],
 )
 def test_on_header(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_headers,
     arrange_state,
     arrange_key,
@@ -97,7 +97,7 @@ def test_on_header(
     ],
 )
 def test_take_headers(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_headers,
     assert_state,
     assert_headers,

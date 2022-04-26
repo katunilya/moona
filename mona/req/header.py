@@ -1,6 +1,6 @@
 import toolz
 
-from mona import context, handler
+from mona import handler, types
 from mona.monads import state
 
 
@@ -21,7 +21,7 @@ def has_header(key: str, value: str, required: bool = False) -> handler.Handler:
     value = value.encode("UTF-8")
 
     @state.accepts_right
-    def _handler(cnt: context.Context) -> state.State[context.Context]:
+    def _handler(cnt: types.Context) -> state.State[types.Context]:
         if actual_value := cnt.request.headers.get(key, None):
             return state.Right(cnt) if actual_value == value else state.Wrong(cnt)
 
@@ -30,7 +30,7 @@ def has_header(key: str, value: str, required: bool = False) -> handler.Handler:
     return _handler
 
 
-def take_headers(ctx: context.Context) -> state.State[dict[str, str]]:
+def take_headers(ctx: types.Context) -> state.State[dict[str, str]]:
     """Extracts request header as dict of strings.
 
     Args:

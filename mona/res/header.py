@@ -1,4 +1,4 @@
-from mona import context, handler
+from mona import handler, types
 from mona.monads import state
 
 
@@ -8,7 +8,7 @@ def set_header(key: str, value: str) -> handler.Handler:
     value = value.encode("UTF-8")
 
     @state.accepts_right
-    def _handler(ctx: context.Context) -> context.StateContext:
+    def _handler(ctx: types.Context) -> types.StateContext:
         ctx.response.headers[key] = value
         return state.Right(ctx)
 

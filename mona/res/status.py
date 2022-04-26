@@ -1,4 +1,4 @@
-from mona import context, handler
+from mona import handler, types
 from mona.monads import state
 
 CONTINUE: int = 100
@@ -65,7 +65,7 @@ def set_status(code: int) -> handler.Handler:
     """Generates handler that sets passed status code into response status code."""
 
     @state.accepts_right
-    def _handler(ctx: context.Context) -> context.StateContext:
+    def _handler(ctx: types.Context) -> types.StateContext:
         ctx.response.status = code
         return state.Right(ctx)
 
