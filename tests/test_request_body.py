@@ -3,7 +3,7 @@ import dataclasses
 import pydantic
 import pytest
 
-from mona import context, req
+from mona import req, types
 from mona.monads import state
 
 
@@ -16,7 +16,7 @@ from mona.monads import state
     ],
 )
 def test_take_body(
-    mock_context: context.Context, arrange_body, assert_state, assert_body
+    mock_context: types.Context, arrange_body, assert_state, assert_body
 ):
     # arrange
     mock_context.request.body = arrange_body
@@ -39,7 +39,7 @@ def test_take_body(
     ],
 )
 def test_take_body_as_dict(
-    mock_context: context.Context, arrange_body, assert_state, assert_body
+    mock_context: types.Context, arrange_body, assert_state, assert_body
 ):
     # arrange
     mock_context.request.body = arrange_body
@@ -76,7 +76,7 @@ class DataclassUser:  # noqa
     ],
 )
 def test_take_body_as_dataclass(
-    mock_context: context.Context, arrange_body, assert_state, assert_body
+    mock_context: types.Context, arrange_body, assert_state, assert_body
 ):
     # arrange
     mock_context.request.body = arrange_body
@@ -113,7 +113,7 @@ class PydanticUser(pydantic.BaseModel):  # noqa
     ],
 )
 def test_take_body_as_pydantic(
-    mock_context: context.Context, arrange_body, assert_state, assert_body
+    mock_context: types.Context, arrange_body, assert_state, assert_body
 ):
     mock_context.request.body = arrange_body
     arrange_handler = req.body.take_body_as_pydantic(PydanticUser)
@@ -145,7 +145,7 @@ def test_take_body_as_pydantic(
     ],
 )
 def test_take_body_as_str(
-    mock_context: context.Context, arrange_body, assert_state, assert_body
+    mock_context: types.Context, arrange_body, assert_state, assert_body
 ):
     # arrange
     mock_context.request.body = arrange_body

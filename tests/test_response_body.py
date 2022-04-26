@@ -1,7 +1,7 @@
 import pydantic
 import pytest
 
-from mona import context, res
+from mona import res, types
 from mona.monads import future, state
 
 
@@ -22,7 +22,7 @@ from mona.monads import future, state
     ],
 )
 def test_set_body_bytes(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     arrange_body,
     assert_state,
@@ -57,7 +57,7 @@ def test_set_body_bytes(
     ],
 )
 def test_set_body_text(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     arrange_body,
     assert_state,
@@ -147,7 +147,7 @@ async def async_set_error_body(_):  # noqa
     ],
 )
 async def test_set_body_from_bytes(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     act_function,
     assert_state,
@@ -158,7 +158,7 @@ async def test_set_body_from_bytes(
     arrange_handler = res.set_body_from_bytes(act_function)
 
     # act
-    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
+    act_ctx: types.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -236,7 +236,7 @@ async def test_set_body_from_bytes(
     ],
 )
 async def test_set_body_from_dict(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     act_function,
     assert_state,
@@ -247,7 +247,7 @@ async def test_set_body_from_dict(
     arrange_handler = res.set_body_from_dict(act_function)
 
     # act
-    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
+    act_ctx: types.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -363,7 +363,7 @@ class ExtendedUser(pydantic.BaseModel):  # noqa
     ],
 )
 async def test_set_body_from_pydantic(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     act_function,
     assert_state,
@@ -374,7 +374,7 @@ async def test_set_body_from_pydantic(
     arrange_handler = res.set_body_from_pydantic(act_function)
 
     # act
-    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
+    act_ctx: types.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -466,7 +466,7 @@ async def test_set_body_from_pydantic(
     ],
 )
 async def test_set_body_from_text(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     act_function,
     assert_state,
@@ -477,7 +477,7 @@ async def test_set_body_from_text(
     arrange_handler = res.set_body_from_text(act_function)
 
     # act
-    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
+    act_ctx: types.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
     assert isinstance(act_ctx, assert_state)

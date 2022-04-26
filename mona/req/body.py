@@ -4,7 +4,7 @@ import typing
 import orjson
 import pydantic
 
-from mona import context
+from mona import types
 from mona.monads import state
 
 
@@ -47,7 +47,7 @@ class TypeIsNotPydanticBaseModelError(Exception):
         self.code = 500
 
 
-def take_body(ctx: context.Context) -> state.ESafe[bytes]:
+def take_body(ctx: types.Context) -> state.ESafe[bytes]:
     """Take request body as byte string."""
     if ctx.request.body is None:
         return state.Error(RequestBodyIsNotReceivedError())
@@ -55,7 +55,7 @@ def take_body(ctx: context.Context) -> state.ESafe[bytes]:
     return state.Right(ctx.request.body)
 
 
-def take_body_as_dict(ctx: context.Context) -> state.ESafe[dict]:
+def take_body_as_dict(ctx: types.Context) -> state.ESafe[dict]:
     """Take request body as dict."""
     if ctx.request.body is None:
         return state.Error(RequestBodyIsNotReceivedError())
@@ -65,14 +65,14 @@ def take_body_as_dict(ctx: context.Context) -> state.ESafe[dict]:
 
 def take_body_as_dataclass(
     dataclass_type: typing.Type,
-) -> typing.Callable[[context.Context], state.ESafe[object]]:
+) -> typing.Callable[[types.Context], state.ESafe[object]]:
     """Take request body as dataclass."""
     # This exception can be raised as this is higher order function that will be
     # executed at app construction stage
     if not dataclasses.is_dataclass(dataclass_type):
         raise TypeIsNotDataclassError(dataclass_type)
 
-    def _handler(ctx: context.Context) -> dataclass_type:
+    def _handler(ctx: types.Context) -> dataclass_type:
         if ctx.request.body is None:
             return state.Error(RequestBodyIsNotReceivedError())
 
@@ -83,14 +83,14 @@ def take_body_as_dataclass(
 
 def take_body_as_pydantic(
     model_type: typing.Type[pydantic.BaseModel],
-) -> typing.Callable[[context.Context], state.ESafe[pydantic.BaseModel]]:
+) -> typing.Callable[[types.Context], state.ESafe[pydantic.BaseModel]]:
     """Take request body as pydantic BaseModel."""
     # This exception can be raised as this is higher order function that will be
     # executed at app construction stage
     if not issubclass(model_type, pydantic.BaseModel):
         raise TypeIsNotPydanticBaseModelError(model_type)
 
-    def _handler(ctx: context.Context) -> state.ESafe[model_type]:
+    def _handler(ctx: types.Context) -> state.ESafe[model_type]:
         if ctx.request.body is None:
             return state.Error(RequestBodyIsNotReceivedError())
 
@@ -99,7 +99,7 @@ def take_body_as_pydantic(
     return _handler
 
 
-def take_body_as_str(ctx: context.Context) -> state.ESafe[str]:
+def take_body_as_str(ctx: types.Context) -> state.ESafe[str]:
     """Take request body as str."""
     if ctx.request.body is None:
         return state.Error(RequestBodyIsNotReceivedError())

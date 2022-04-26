@@ -1,6 +1,6 @@
 import pytest
 
-from mona import context, res
+from mona import res, types
 from mona.monads import future, state
 
 
@@ -27,7 +27,7 @@ from mona.monads import future, state
     ],
 )
 async def test_set_header(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     arrange_header_key,
     arrange_header_value,
@@ -40,7 +40,7 @@ async def test_set_header(
     arrange_handler = res.set_header(arrange_header_key, arrange_header_value)
 
     # act
-    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
+    act_ctx: types.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
     try:
@@ -59,7 +59,7 @@ async def test_set_header(
     ],
 )
 async def test_set_content_type(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     arrange_value,
     assert_state,
@@ -70,7 +70,7 @@ async def test_set_content_type(
     arrange_handler = res.set_header_content_type(arrange_value)
 
     # act
-    act_ctx: context.StateContext = await (arrange_ctx >> arrange_handler)
+    act_ctx: types.StateContext = await (arrange_ctx >> arrange_handler)
 
     # assert
     try:
@@ -115,7 +115,7 @@ async def test_set_content_type(
     ],
 )
 async def test_ready_setters(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state,
     act_setter,
     assert_state,
@@ -126,7 +126,7 @@ async def test_ready_setters(
     arrange_ctx = future.from_value(arrange_state(mock_context))
 
     # act
-    act_ctx: context.StateContext = await (arrange_ctx >> act_setter)
+    act_ctx: types.StateContext = await (arrange_ctx >> act_setter)
 
     # assert
     try:

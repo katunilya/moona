@@ -1,10 +1,10 @@
 from functools import reduce
 from typing import Awaitable, Callable
 
-from mona import context
-from mona.context import Context
+from mona import types
 from mona.monads import future
 from mona.monads.maybe import Maybe, Some
+from mona.types import Context
 
 ContextFunc = Callable[[Maybe[Context]], Maybe[Context] | Awaitable[Maybe[Context]]]
 
@@ -46,7 +46,7 @@ def handler(
 def __next_on_some(current_func: ContextFunc, next_func: ContextFunc) -> ContextFunc:
     @handler
     async def _func(ctx: Context) -> Maybe[Context]:
-        match await (future.from_value(ctx) >> context.copy >> Some >> current_func):
+        match await (future.from_value(ctx) >> types.copy >> Some >> current_func):
             case Some(value):
                 return value
             case _:

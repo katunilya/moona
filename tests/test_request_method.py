@@ -1,6 +1,6 @@
 import pytest
 
-from mona import context, req
+from mona import req, types
 from mona.monads import state
 
 
@@ -181,7 +181,7 @@ from mona.monads import state
     ],
 )
 def test_on_method(
-    mock_context: context.Context,
+    mock_context: types.Context,
     arrange_state: str,
     arrange_method: str,
     assert_method: str,
@@ -193,7 +193,7 @@ def test_on_method(
     arrange_handler = req.on_method(assert_method)
 
     # act
-    act_ctx: context.StateContext = arrange_handler(arrange_ctx)
+    act_ctx: types.StateContext = arrange_handler(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -223,14 +223,14 @@ def test_on_method(
     ],
 )
 def test_on_get(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_get(arrange_ctx)
+    act_ctx: types.StateContext = req.on_get(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -260,14 +260,14 @@ def test_on_get(
     ],
 )
 def test_on_post(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_post(arrange_ctx)
+    act_ctx: types.StateContext = req.on_post(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -297,14 +297,14 @@ def test_on_post(
     ],
 )
 def test_on_patch(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_patch(arrange_ctx)
+    act_ctx: types.StateContext = req.on_patch(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -334,14 +334,14 @@ def test_on_patch(
     ],
 )
 def test_on_put(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_put(arrange_ctx)
+    act_ctx: types.StateContext = req.on_put(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -371,14 +371,14 @@ def test_on_put(
     ],
 )
 def test_on_delete(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_delete(arrange_ctx)
+    act_ctx: types.StateContext = req.on_delete(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -408,14 +408,14 @@ def test_on_delete(
     ],
 )
 def test_on_options(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_options(arrange_ctx)
+    act_ctx: types.StateContext = req.on_options(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -445,14 +445,14 @@ def test_on_options(
     ],
 )
 def test_on_head(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_head(arrange_ctx)
+    act_ctx: types.StateContext = req.on_head(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -482,14 +482,14 @@ def test_on_head(
     ],
 )
 def test_on_trace(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_trace(arrange_ctx)
+    act_ctx: types.StateContext = req.on_trace(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)
@@ -519,14 +519,14 @@ def test_on_trace(
     ],
 )
 def test_on_connect(
-    mock_context: context.Context, arrange_method, arrange_state, assert_state
+    mock_context: types.Context, arrange_method, arrange_state, assert_state
 ):
     # arrange
     mock_context.request.method = arrange_method
     arrange_ctx = arrange_state(mock_context)
 
     # act
-    act_ctx: context.StateContext = req.on_connect(arrange_ctx)
+    act_ctx: types.StateContext = req.on_connect(arrange_ctx)
 
     # assert
     assert isinstance(act_ctx, assert_state)

@@ -1,9 +1,9 @@
-from mona import context
+from mona import types
 from mona.monads import state
 
 
 @state.accepts_right
-async def receive_body(ctx: context.Context) -> context.Context:
+async def receive_body(ctx: types.Context) -> types.Context:
     """Read entire request body and place it into context as ByteString."""
     body = b""
     more_body = True

@@ -1,21 +1,21 @@
 import functools
 import typing
 
-from mona import context
+from mona import types
 from mona.monads import future, state
 
-SyncHandler = typing.Callable[[context.StateContext], context.StateContext]
+SyncHandler = typing.Callable[[types.StateContext], types.StateContext]
 AsyncHandler = typing.Callable[
-    [context.StateContext], typing.Awaitable[context.StateContext]
+    [types.StateContext], typing.Awaitable[types.StateContext]
 ]
 Handler = SyncHandler | AsyncHandler
 
 
 def __continue_on_not_right(current_handler: Handler, next_handler: Handler) -> Handler:
     @state.accepts_right
-    async def __continuation(ctx: context.Context) -> context.StateContext:
+    async def __continuation(ctx: types.Context) -> types.StateContext:
         match await (
-            future.from_value(ctx) >> context.copy >> state.Right >> current_handler
+            future.from_value(ctx) >> types.copy >> state.Right >> current_handler
         ):
             case state.Right(value):
                 return value

@@ -2,9 +2,9 @@ import inspect
 
 import pytest
 
-from mona.context import Context
 from mona.core import choose
 from mona.monads import Maybe, Nothing, Some, future
+from mona.types import Context
 
 
 def sync_handler(ctx: Maybe[Context]) -> Maybe[Context]:

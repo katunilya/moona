@@ -1,9 +1,9 @@
-from mona import context
+from mona import types
 from mona.monads import state
 
 
 @state.accepts_right
-async def send_start(ctx: context.Context) -> context.StateContext:
+async def send_start(ctx: types.Context) -> types.StateContext:
     """Send response start event accroding to ASGI specs."""
     headers = list(ctx.response.headers.items())
 
@@ -19,7 +19,7 @@ async def send_start(ctx: context.Context) -> context.StateContext:
 
 
 @state.accepts_right
-async def send_body(ctx: context.Context) -> context.StateContext:
+async def send_body(ctx: types.Context) -> types.StateContext:
     """Send response body event, which closes connection between server and client."""
     await ctx.send(
         {
