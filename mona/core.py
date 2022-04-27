@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Awaitable, Callable
 
-from mona import types
 from mona.monads import future
 from mona.monads.result import Result, Success
 from mona.utils import decode_headers
@@ -175,7 +174,7 @@ class HTTPResponse:
     body: bytes = b""
 
 
-def __copy_response(response: HTTPResponse) -> HTTPResponse:
+def __copy_http_response(response: HTTPResponse) -> HTTPResponse:
     return HTTPResponse(
         response.status,
         response.headers,
@@ -216,9 +215,9 @@ def create_http_context(scope: Scope, receive: Receive, send: Send) -> HTTPConte
     """Create context from ASGI function args.
 
     Args:
-        scope (Scope): ASGI scope
-        receive (Receive): ASGI receive
-        send (Send): ASGI send
+        scope (Scope): ASGI scope.
+        receive (Receive): ASGI receive.
+        send (Send): ASGI send.
 
     Returns:
         HTTPContext: for storing info about request
@@ -228,6 +227,28 @@ def create_http_context(scope: Scope, receive: Receive, send: Send) -> HTTPConte
         response=HTTPResponse(),
         receive=receive,
         send=send,
+    )
+
+
+def copy_http_context(ctx: HTTPContext) -> HTTPContext:
+    """Create complete copy of HTTPContext.
+
+    This function is needed to avoid side effects due to reference nature of Python when
+    using `choose` combinator.
+
+    Args:
+        ctx (HTTPContext): to be copied.
+
+    Returns:
+        HTTPContext: copy.
+    """
+    return HTTPContext(
+        request=__copy_http_request(ctx.request),
+        response=__copy_http_response(ctx.response),
+        receive=ctx.receive,
+        send=ctx.send,
+        started=ctx.started,
+        closed=ctx.closed,
     )
 
 
@@ -281,7 +302,9 @@ def __next_on_some(
 ) -> HTTPContextHandler:
     @handler
     async def _func(ctx: HTTPContext) -> HTTPContextResult:
-        match await (future.from_value(ctx) >> types.copy >> Success >> current_func):
+        match await (
+            future.from_value(ctx) >> copy_http_context >> Success >> current_func
+        ):
             case Success() as success:
                 return success
             case _:
