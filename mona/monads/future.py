@@ -50,33 +50,33 @@ class Future(Bindable, Generic[T]):
         """
         return Future(self.__bind(func))
 
+    @staticmethod
+    async def identity(value: T) -> T:
+        """Asynchronously returns passed `value`.
 
-async def identity(value: T) -> T:
-    """Asynchronously returns passed `value`.
+        Args:
+            value (T): to return asynchronously
 
-    Args:
-        value (T): to return asynchronously
+        Returns:
+            T: return value
+        """
+        return value
 
-    Returns:
-        T: return value
-    """
-    return value
+    @staticmethod
+    def from_value(value: T) -> "Future[T]":
+        """Create future from some present value (not awaitable).
 
+        Example::
+                f = Future.from_value(1)
+                print(await f)  # 1
 
-def from_value(value: T) -> "Future[T]":
-    """Create future from some present value (not awaitable).
+        Args:
+            value (T): value to wrap into `Future`
 
-    Example::
-            f = Future.from_value(1)
-            print(await f)  # 1
-
-    Args:
-        value (T): value to wrap into `Future`
-
-    Returns:
-        Future[T]: result
-    """
-    return Future(identity(value))
+        Returns:
+            Future[T]: result
+        """
+        return Future(Future.identity(value))
 
 
 def compose(*funcs: Callable[[T], Awaitable[V] | V]) -> Callable[[T], Awaitable[V]]:
@@ -98,12 +98,12 @@ def compose(*funcs: Callable[[T], Awaitable[V] | V]) -> Callable[[T], Awaitable[
     """
     match funcs:
         case ():
-            return identity
+            return Future.identity
         case _:
 
             async def _composition(cnt: T) -> V:
                 return await functools.reduce(
-                    lambda c, f: c >> f, funcs, from_value(cnt)
+                    lambda c, f: c >> f, funcs, Future.from_value(cnt)
                 )
 
             return _composition
