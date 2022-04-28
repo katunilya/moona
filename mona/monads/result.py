@@ -66,8 +66,8 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
 
     @staticmethod
     def altered(
-        func: Callable[[TFailure], "Result[TSuccess, TFailure]"],
-    ) -> Callable[["Result[TSuccess, TFailure]"], "Result[TSuccess, TFailure]"]:
+        func: Callable[[TFailure], "Result[VSuccess, VFailure]"],
+    ) -> Callable[["Result[TSuccess, TFailure]"], "Result[VSuccess, VFailure]"]:
         """Decorator for functions that will be executed only with `Failure` `Result`.
 
         Changes input and output types for passed function to `Result`.
@@ -90,8 +90,8 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
 
     @staticmethod
     def safe(
-        func: Callable[[TSuccess], TSuccess | Exception]
-    ) -> Callable[[TSuccess], Result[TSuccess, Exception]]:
+        func: Callable[[TSuccess], VSuccess | Exception]
+    ) -> Callable[[TSuccess], Result[VSuccess, Exception]]:
         """When function returns or throws `Exception` it is wrapped into `Failure`.
 
         Example::
@@ -113,10 +113,10 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
                 divide_two_by(0)  # Failure(value=ValueError('Cannot divide by zero'))
 
         Args:
-            func (Callable[[TSuccess], TSuccess | Exception]): _description_
+            func (Callable[[TSuccess], VSuccess | Exception]): _description_
 
         Returns:
-            Callable[[TSuccess], Result[TSuccess, Exception]]: _description_
+            Callable[[TSuccess], Result[VSuccess, Exception]]: _description_
         """
 
         @wraps(func)
