@@ -1,9 +1,6 @@
 from dataclasses import dataclass
-from functools import reduce
 from typing import Any, Awaitable, Callable
 
-from mona.monads import future
-from mona.monads.result import Result, Success
 from mona.utils import decode_headers
 
 Message = dict[str, Any]
@@ -12,8 +9,6 @@ Receive = Callable[[], Awaitable[Message]]
 Send = Callable[[Message], Awaitable[None]]
 ASGIApp = Callable[[Scope, Receive, Send], Awaitable[None]]
 ASGIData = tuple[Scope, Receive, Send]
-Header = tuple[str, str]
-Headers = dict[str, str]
 
 
 @dataclass
@@ -104,51 +99,63 @@ class HTTPRequest:
     server: ServerInfo
     client: ClientInfo
 
+    @staticmethod
+    def create(scope: Scope) -> "HTTPRequest":
+        """Create `HTTPRequest` object from ASGI scope.
 
-def __create_http_request(scope: Scope) -> HTTPRequest:
-    type_ = scope["type"]
-    asgi_version = scope["asgi"]["version"]
-    method = scope["method"]
-    asgi_spec_version = scope["asgi"].get("spec_version", "2.0")
-    http_version = scope.get("http_version", "1.1")
-    scheme = scope.get("http_version", "http" if type_ == "http" else "ws")
-    path = scope["path"].strip("/")
-    query_string = scope["query_string"]
-    client = ClientInfo(scope["client"]["host"], scope["client"]["port"])
-    server = ServerInfo(scope["server"]["host"], scope["server"]["port"])
-    headers = decode_headers(scope.get("headers", []))
-    body = None
-    return HTTPRequest(
-        type_,
-        method,
-        asgi_version,
-        asgi_spec_version,
-        http_version,
-        scheme,
-        path,
-        query_string,
-        headers,
-        body,
-        server,
-        client,
-    )
+        Args:
+            scope (Scope): ASGI scope.
 
+        Returns:
+            HTTPRequest: result.
+        """
+        type_ = scope["type"]
+        asgi_version = scope["asgi"]["version"]
+        method = scope["method"]
+        asgi_spec_version = scope["asgi"].get("spec_version", "2.0")
+        http_version = scope.get("http_version", "1.1")
+        scheme = scope.get("http_version", "http" if type_ == "http" else "ws")
+        path = scope["path"].strip("/")
+        query_string = scope["query_string"]
+        client = ClientInfo(scope["client"][0], scope["client"][1])
+        server = ServerInfo(scope["server"][0], scope["server"][1])
+        headers = decode_headers(scope.get("headers", []))
+        body = None
+        return HTTPRequest(
+            type_,
+            method,
+            asgi_version,
+            asgi_spec_version,
+            http_version,
+            scheme,
+            path,
+            query_string,
+            headers,
+            body,
+            server,
+            client,
+        )
 
-def __copy_http_request(request: HTTPRequest) -> HTTPRequest:
-    return HTTPRequest(
-        request.type_,
-        request.method,
-        request.asgi_version,
-        request.asgi_spec_version,
-        request.http_version,
-        request.scheme,
-        request.path,
-        request.query_string,
-        request.headers,
-        request.body,
-        request.client,
-        request.server,
-    )
+    def copy(self: "HTTPRequest") -> "HTTPRequest":
+        """Create a deepcopy of `HTTPRequest`.
+
+        Returns:
+            HTTPRequest: deepcopy.
+        """
+        return HTTPRequest(
+            self.type_,
+            self.method,
+            self.asgi_version,
+            self.asgi_spec_version,
+            self.http_version,
+            self.scheme,
+            self.path,
+            self.query_string,
+            self.headers.copy(),
+            self.body,
+            self.client,
+            self.server,
+        )
 
 
 @dataclass
@@ -169,17 +176,37 @@ class HTTPResponse:
         "headers",
         "body",
     )
-    status: int = 200
-    headers: dict[str, str] = {}
-    body: bytes = b""
+    status: int
+    headers: dict[str, str]
+    body: bytes
 
+    @staticmethod
+    def empty() -> "HTTPResponse":
+        """Create empty `HTTPResponse`.
 
-def __copy_http_response(response: HTTPResponse) -> HTTPResponse:
-    return HTTPResponse(
-        response.status,
-        response.headers,
-        response.body,
-    )
+        Empty `HTTPResponse` has 200 OK status code, empty dictionary for headers and
+        empty bytes string for body.
+
+        Returns:
+            HTTPResponse: empty response.
+        """
+        return HTTPResponse(
+            status=200,
+            headers={},
+            body=b"",
+        )
+
+    def copy(self: "HTTPResponse") -> "HTTPResponse":
+        """Create a deepcopy of `HTTPResponse`.
+
+        Returns:
+            HTTPResponse: deepcopy of HTTPResponse.
+        """
+        return HTTPResponse(
+            self.status,
+            self.headers.copy(),
+            self.body,
+        )
 
 
 @dataclass
@@ -210,133 +237,39 @@ class HTTPContext:
     started: bool = False
     closed: bool = False
 
+    @staticmethod
+    def create(scope: Scope, receive: Receive, send: Send) -> "HTTPContext":
+        """Create context from ASGI function args.
 
-def create_http_context(scope: Scope, receive: Receive, send: Send) -> HTTPContext:
-    """Create context from ASGI function args.
+        Args:
+            scope (Scope): ASGI scope.
+            receive (Receive): ASGI receive.
+            send (Send): ASGI send.
 
-    Args:
-        scope (Scope): ASGI scope.
-        receive (Receive): ASGI receive.
-        send (Send): ASGI send.
+        Returns:
+            HTTPContext: for storing info about request
+        """
+        return HTTPContext(
+            request=HTTPRequest.create(scope),
+            response=HTTPResponse(),
+            receive=receive,
+            send=send,
+        )
 
-    Returns:
-        HTTPContext: for storing info about request
-    """
-    return HTTPContext(
-        request=__create_http_request(scope),
-        response=HTTPResponse(),
-        receive=receive,
-        send=send,
-    )
+    def copy(self: "HTTPContext") -> "HTTPContext":
+        """Create complete copy of HTTPContext.
 
+        This function is needed to avoid side effects due to reference nature of Python
+        when using `choose` combinator.
 
-def copy_http_context(ctx: HTTPContext) -> HTTPContext:
-    """Create complete copy of HTTPContext.
-
-    This function is needed to avoid side effects due to reference nature of Python when
-    using `choose` combinator.
-
-    Args:
-        ctx (HTTPContext): to be copied.
-
-    Returns:
-        HTTPContext: copy.
-    """
-    return HTTPContext(
-        request=__copy_http_request(ctx.request),
-        response=__copy_http_response(ctx.response),
-        receive=ctx.receive,
-        send=ctx.send,
-        started=ctx.started,
-        closed=ctx.closed,
-    )
-
-
-HTTPContextResult = Result[HTTPContext, Exception]
-HTTPContextHandler = Callable[
-    [HTTPContextResult], HTTPContextResult | Awaitable[HTTPContextResult]
-]
-
-
-def handler(
-    func: Callable[[HTTPContext], HTTPContextResult | Awaitable[HTTPContextResult]]
-) -> HTTPContextHandler:
-    """Mandatory decorator for `HTTPContextHandler`.
-
-    This decorator provides `Result` monad handling logic for `HTTPContextHandler` out
-    of the box. With it you don't need to explicitly mention that handler excepts only
-    `Success` `HTTPContext`. In other words it transforms function that accepts
-    `HTTPContext` to function that accepts `Result[Context, Exception]` and will be
-    processed only when one is `Success[Context]`. Another requirement for `HTTPContext`
-    is that it must not be closed to be processed next.
-
-    Example::
-
-            @handler
-            def h(ctx: Context) -> Result[Context]:
-               ...
-
-            h(Success(ctx))  # executed
-            h(Failure(None))  # not executed
-
-    Args:
-        func (Callable[[HTTPContext], HTTPContextResult |
-        Awaitable[HTTPContextResult]]]): to be decorated
-
-    Returns:
-        HTTPContextHandler: ready-to-use HTTP Context Handler
-    """
-
-    def _func(ctx: HTTPContextResult) -> HTTPContextResult:
-        match ctx:
-            case Success(HTTPContext(closed=False)):
-                return ctx >> func
-            case other:
-                return other
-
-    return _func
-
-
-def __next_on_some(
-    current_func: HTTPContextHandler, next_func: HTTPContextHandler
-) -> HTTPContextHandler:
-    @handler
-    async def _func(ctx: HTTPContext) -> HTTPContextResult:
-        match await (
-            future.from_value(ctx) >> copy_http_context >> Success >> current_func
-        ):
-            case Success() as success:
-                return success
-            case _:
-                return await (future.from_value(ctx) >> Success >> next_func)
-
-    return _func
-
-
-def choose(*funcs: HTTPContextHandler) -> HTTPContextHandler:
-    """Logical combinator of `HTTPContextHandler`s catching first `Success` result.
-
-    Sequentially executes passed `HTTPContextHandler`s till one of them returns
-    `HTTPContextResult` which would be returned right away.
-
-    In case `func` is empty iterable `future.identity` function is returns so `choose`
-    won't critically affect application behavior.
-
-    Example::
-
-            c = choose(
-                func_1,  # returns Failure
-                func_2,  # returns Success
-                func_3,  # returns Success
-            )
-
-            result = await (future.from_value(ctx) >> c)  # result of func_2
-
-    Returns:
-        HTTPContextHandler: composed function
-    """
-    match funcs:
-        case ():
-            return future.identity
-        case _:
-            return reduce(__next_on_some, funcs)
+        Returns:
+            HTTPContext: copy.
+        """
+        return HTTPContext(
+            request=self.request.copy(),
+            response=self.response.copy(),
+            receive=self.receive,
+            send=self.send,
+            started=self.started,
+            closed=self.closed,
+        )
