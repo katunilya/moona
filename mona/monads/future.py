@@ -1,6 +1,6 @@
-import dataclasses
-import functools
-import inspect
+from dataclasses import dataclass
+from functools import reduce, wraps
+from inspect import isawaitable
 from typing import Awaitable, Callable, Generator, Generic, TypeVar
 
 from mona.monads.core import Bindable
@@ -9,7 +9,7 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class Future(Bindable, Generic[T]):
     """Container for performing asynchronous operations on some value in sync context.
 
@@ -25,29 +25,9 @@ class Future(Bindable, Generic[T]):
 
     async def __bind(self, function: Callable[[T], Awaitable[V] | V]) -> V:
         result = function(await self.value)
-        return await result if inspect.isawaitable(result) else result
+        return await result if isawaitable(result) else result
 
     def __rshift__(self, func: Callable[[T], V | Awaitable[V]]) -> "Future[V]":
-        """Execute passed function synchronously even if it is async.
-
-        Via bind operator we can execute sync or async `func` on this `Future` and get
-        another `Future` as a result of computation.
-
-        Examples::
-
-                result = (Future.from_value(3)
-                    >> lambda x: x + 1
-                    >> async_plus_2
-                )  # Awaitable
-
-                print(await result)  # 5
-
-        Args:
-            func (Callable[[T], V  |  Awaitable[V]]): to execute
-
-        Returns:
-            Future[V]: result
-        """
         return Future(self.__bind(func))
 
     @staticmethod
@@ -63,11 +43,11 @@ class Future(Bindable, Generic[T]):
         return value
 
     @staticmethod
-    def from_value(value: T) -> "Future[T]":
+    def create(value: T) -> "Future[T]":
         """Create future from some present value (not awaitable).
 
         Example::
-                f = Future.from_value(1)
+                f = Future.create(1)
                 print(await f)  # 1
 
         Args:
@@ -78,32 +58,53 @@ class Future(Bindable, Generic[T]):
         """
         return Future(Future.identity(value))
 
+    @staticmethod
+    def bound(
+        func: Callable[[T], Awaitable[V] | V],
+    ) -> Callable[["Future[T]"], "Future[V]"]:
+        """Decorator for functions to make them work with `Futures`.
 
-def compose(*funcs: Callable[[T], Awaitable[V] | V]) -> Callable[[T], Awaitable[V]]:
-    """Combinator for sync and async functions that converts them into async pipeline.
+        Makes function automatically bindable for `Future` without `>>` syntax.
 
-    If `funcs` is empty than returns async identity function.
+        Example::
 
-    Example::
+                @Future.bindable
+                def plus_1(x: int) -> int:
+                    return x + 1
 
-            composition = future.compose(
-                async_plus_1,
-                sync_plus_1,
-            )  # asynchronous function that executes async_func, than sync_func
+                plus_1(Future.create(3))  # Future(4)
+        """
 
-            result = await (Future.from_value(3) >> composition)  # 5
+        @wraps(func)
+        def _bound(cnt: "Future[T]") -> "Future[V]":
+            return cnt >> func
 
-    Returns:
-        Callable[[T], Awaitable[V]]: function composition
-    """
-    match funcs:
-        case ():
-            return Future.identity
-        case _:
+        return _bound
 
-            async def _composition(cnt: T) -> V:
-                return await functools.reduce(
-                    lambda c, f: c >> f, funcs, Future.from_value(cnt)
-                )
+    @staticmethod
+    def compose(*funcs: Callable[[T], Awaitable[V] | V]) -> Callable[[T], Awaitable[V]]:
+        """Combinator for sync and async functions that converts them into async pipeline.
 
-            return _composition
+        If `funcs` is empty than returns async identity function.
+
+        Example::
+
+                composition = future.compose(
+                    async_plus_1,
+                    sync_plus_1,
+                )  # asynchronous function that executes async_func, than sync_func
+
+                result = await (Future.from_value(3) >> composition)  # 5
+
+        Returns:
+            Callable[[T], Awaitable[V]]: function composition
+        """
+        match funcs:
+            case ():
+                return Future.identity
+            case _:
+
+                async def _composition(cnt: T) -> V:
+                    return await reduce(lambda c, f: c >> f, funcs, Future.create(cnt))
+
+                return _composition
