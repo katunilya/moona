@@ -234,6 +234,7 @@ class HTTPContext:
     response: HTTPResponse
     receive: Receive
     send: Send
+    received_body: bool = False
     started: bool = False
     closed: bool = False
 
@@ -270,6 +271,7 @@ class HTTPContext:
             response=self.response.copy(),
             receive=self.receive,
             send=self.send,
+            received_body=self.received_body,
             started=self.started,
             closed=self.closed,
         )
