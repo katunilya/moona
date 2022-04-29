@@ -38,35 +38,6 @@ class BodyIsNotValidJson(HTTPContextError):
         )
 
 
-@http_handler
-async def receive_body(ctx: HTTPContext) -> HTTPHandlerResult:
-    """Handler "http.request" ASGI event, receive Request body.
-
-    If body was already taken, than nothing would be done and `Success` `HTTPContext`
-    would be returned. If at some point we receive "http.disconnect" event than
-    `HTTPContext` is closed and `Success` `HTTPContext` returned.
-    """
-    match ctx.received_body:
-        case True:
-            body = b""
-            while True:
-                match await ctx.receive():
-                    case {"type": "http.request"} as message:
-                        match message.get("more_body", False):
-                            case True:
-                                body += message.get("body", b"")
-                            case False:
-                                body += message.get("body", b"")
-                                ctx.request.body = body
-                                ctx.received_body = True
-                                return Success(ctx)
-                    case {"type": "http.disconnect"}:
-                        ctx.closed = True
-                        return Success(ctx)
-        case False:
-            return Success(ctx)
-
-
 def set_body_bytes(body: bytes) -> HTTPHandler:
     """`HTTPContext` handler that sets passed `bytes` to `HTTPResponse` body.
 
