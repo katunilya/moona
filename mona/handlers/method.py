@@ -7,6 +7,12 @@ from mona.monads.result import Failure, Success
 
 
 class HTTPMethod(Enum):
+    """HTTP Method values based on RFC 2616.
+
+    Note:
+        * https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1.1
+    """
+
     GET = "GET"
     POST = "POST"
     PATCH = "PATCH"
@@ -43,46 +49,12 @@ def method(method_: HTTPMethod) -> HTTPHandler:
     return _method
 
 
-def get(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only GET requests."""
-    return method(HTTPMethod.GET)
-
-
-def post(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only POST requests."""
-    return method(HTTPMethod.POST)
-
-
-def patch(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only PATCH requests."""
-    return method(HTTPMethod.PATCH)
-
-
-def put(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only PUT requests."""
-    return method(HTTPMethod.PUT)
-
-
-def delete(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only DELETE requests."""
-    return method(HTTPMethod.DELETE)
-
-
-def options(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only OPTIONS requests."""
-    return method(HTTPMethod.OPTIONS)
-
-
-def head(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only HEAD requests."""
-    return method(HTTPMethod.HEAD)
-
-
-def trace(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only TRACE requests."""
-    return method(HTTPMethod.TRACE)
-
-
-def connect(ctx: HTTPContext) -> HTTPHandlerResult:
-    """`HTTPHandler` that allows only CONNECT requests."""
-    return method(HTTPMethod.CONNECT)
+GET = method(HTTPMethod.GET)
+POST = method(HTTPMethod.POST)
+PATCH = method(HTTPMethod.PATCH)
+PUT = method(HTTPMethod.PUT)
+DELETE = method(HTTPMethod.DELETE)
+OPTIONS = method(HTTPMethod.OPTIONS)
+HEAD = method(HTTPMethod.HEAD)
+TRACE = method(HTTPMethod.TRACE)
+CONNECT = method(HTTPMethod.CONNECT)
