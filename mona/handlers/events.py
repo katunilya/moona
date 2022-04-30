@@ -1,10 +1,10 @@
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPHandlerResult, http_handler
+from mona.handlers.core import HTTPContextResult, http_handler
 from mona.monads.result import Success
 
 
 @http_handler
-async def receive_body(ctx: HTTPContext) -> HTTPHandlerResult:
+async def receive_body(ctx: HTTPContext) -> HTTPContextResult:
     """Handler "http.request" ASGI event, receive Request body.
 
     If body was already taken, than nothing would be done and `Success` `HTTPContext`
@@ -35,7 +35,7 @@ async def receive_body(ctx: HTTPContext) -> HTTPHandlerResult:
 
 
 @http_handler
-async def send_body(ctx: HTTPContext) -> HTTPHandlerResult:
+async def send_body(ctx: HTTPContext) -> HTTPContextResult:
     """Handler that sends "http.response.body" event to client."""
     match ctx.closed:
         case True:
@@ -47,7 +47,7 @@ async def send_body(ctx: HTTPContext) -> HTTPHandlerResult:
 
 
 @http_handler
-async def send_response_start(ctx: HTTPContext) -> HTTPHandlerResult:
+async def send_response_start(ctx: HTTPContext) -> HTTPContextResult:
     """`HTTPContext` handler that sends "http.response.start" event to client."""
     match ctx.closed, ctx.started:
         case True, _:

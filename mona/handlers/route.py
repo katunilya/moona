@@ -1,5 +1,5 @@
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPHandler, HTTPHandlerResult, http_handler
+from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 from mona.handlers.error import HTTPContextError
 from mona.monads.result import Failure, Success
 
@@ -25,7 +25,7 @@ def on_route(path: str) -> HTTPHandler:
     path = path.strip("/")
 
     @http_handler
-    def _route(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _route(ctx: HTTPContext) -> HTTPContextResult:
         match ctx.request.path == path:
             case True:
                 return Success(ctx)
@@ -45,7 +45,7 @@ def on_subroute(path: str) -> HTTPHandler:
     path = path.strip("/")
 
     @http_handler
-    def _subroute(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _subroute(ctx: HTTPContext) -> HTTPContextResult:
         match ctx.request.path.startswith(path):
             case True:
                 ctx.request.path = ctx.request.path.lstrip(path).strip("/")

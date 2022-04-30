@@ -1,7 +1,7 @@
 from enum import Enum
 
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPHandler, HTTPHandlerResult, http_handler
+from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 from mona.handlers.error import HTTPContextError
 from mona.monads.result import Failure, Success
 
@@ -39,7 +39,7 @@ def method(method_: HTTPMethod) -> HTTPHandler:
     """Continues execution if request method is passed method."""
 
     @http_handler
-    def _method(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _method(ctx: HTTPContext) -> HTTPContextResult:
         match ctx.request.method == method_:
             case True:
                 return Success(ctx)
