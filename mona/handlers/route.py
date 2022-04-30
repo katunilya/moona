@@ -15,7 +15,7 @@ class WrongPathError(HTTPContextError):
         )
 
 
-def route(path: str) -> HTTPHandler:
+def on_route(path: str) -> HTTPHandler:
     """`HTTPContext` handler that `Success`fully processes ctx only on right path.
 
     Request path must be exactly the same as path passed as an argument to the handler
@@ -35,7 +35,7 @@ def route(path: str) -> HTTPHandler:
     return _route
 
 
-def subroute(path: str) -> HTTPHandler:
+def on_subroute(path: str) -> HTTPHandler:
     """`HTTPHandler` that proceeds only when Request path starts with passed path.
 
     Leading part of the path is removed after processing the request. For example
