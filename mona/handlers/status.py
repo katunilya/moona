@@ -67,7 +67,7 @@ class HTTPStatusCode(IntEnum):
     NOT_EXTENDED = 510
 
 
-def status(code: HTTPStatusCode) -> HTTPHandler:
+def set_status(code: HTTPStatusCode) -> HTTPHandler:
     """`HTTPHandler` that sets status code to response."""
 
     @http_handler
@@ -78,13 +78,13 @@ def status(code: HTTPStatusCode) -> HTTPHandler:
     return _status
 
 
-OK = status(HTTPStatusCode.OK)
-CREATED = status(HTTPStatusCode.CREATED)
-BAD_REQUEST = status(HTTPStatusCode.BAD_REQUEST)
-UNAUTHORIZED = status(HTTPStatusCode.UNAUTHORIZED)
-FORBIDDEN = status(HTTPStatusCode.FORBIDDEN)
-NOT_FOUND = status(HTTPStatusCode.NOT_FOUND)
-METHOD_NOT_ALLOWED = status(HTTPStatusCode.METHOD_NOT_ALLOWED)
-INTERNAL_SERVER_ERROR = status(HTTPStatusCode.INTERNAL_SERVER_ERROR)
-NOT_IMPLEMENTED = status(HTTPStatusCode.NOT_IMPLEMENTED)
-BAD_GATEWAY = status(HTTPStatusCode.BAD_GATEWAY)
+set_status_ok = set_status(HTTPStatusCode.OK)
+set_status_created = set_status(HTTPStatusCode.CREATED)
+set_status_bad_request = set_status(HTTPStatusCode.BAD_REQUEST)
+set_status_unauthorized = set_status(HTTPStatusCode.UNAUTHORIZED)
+set_status_forbidden = set_status(HTTPStatusCode.FORBIDDEN)
+set_status_not_found = set_status(HTTPStatusCode.NOT_FOUND)
+set_status_method_not_allowed = set_status(HTTPStatusCode.METHOD_NOT_ALLOWED)
+set_status_internal_server_error = set_status(HTTPStatusCode.INTERNAL_SERVER_ERROR)
+set_status_not_implemented = set_status(HTTPStatusCode.NOT_IMPLEMENTED)
+set_status_bad_gateway = set_status(HTTPStatusCode.BAD_GATEWAY)
