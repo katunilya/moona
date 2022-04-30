@@ -1,7 +1,7 @@
 from typing import Callable
 
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPHandler, HTTPHandlerResult, http_handler
+from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 from mona.monads.maybe import Maybe, Nothing, Some
 from mona.monads.result import Success
 
@@ -30,7 +30,7 @@ def set_header(name: str, value: str) -> HTTPHandler:
     value: bytes = value.decode("UTF-8")
 
     @http_handler
-    def _handler(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _handler(ctx: HTTPContext) -> HTTPContextResult:
         ctx.response.headers[name] = value
         return Success(ctx)
 
@@ -62,7 +62,7 @@ def remove_header(name: str) -> HTTPHandler:
     name: bytes = name.lower().decode("UTF-8")
 
     @http_handler
-    def _handler(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _handler(ctx: HTTPContext) -> HTTPContextResult:
         del ctx.response.headers[name]
         return Success(ctx)
 

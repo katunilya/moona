@@ -132,6 +132,37 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
 
         return _wrapper
 
+    @staticmethod
+    def successfull(value: TSuccess) -> Success[TSuccess]:
+        """Wraps passed value into Success container.
+
+        Args:
+            value (TSuccess): value to wrap.
+
+        Returns:
+            Success[TSuccess]: container.
+        """
+        return Success(value)
+
+    @staticmethod
+    def failed(value: TFailure) -> Failure[TFailure]:
+        """Wraps passed value into Failure container.
+
+        Args:
+            value (TFailure): value to wrap.
+
+        Returns:
+            Failure[TFailure]: container.
+        """
+        return Failure(value)
+
+    @staticmethod
+    def safely_bound(
+        func: Callable[[TSuccess], VSuccess | Exception]
+    ) -> Callable[[Result[TSuccess, TFailure]], Result[VSuccess, Exception]]:
+        """Decorator for functions that combins `bound` and `safe`."""
+        return Result.bound(Result.safe(func))
+
 
 @dataclass(frozen=True)
 class Success(Result[TSuccess, Any]):
@@ -145,3 +176,6 @@ class Failure(Result[Any, TFailure]):
     """Container that marks underlying value as `Failure` execution result."""
 
     value: TFailure
+
+
+Safe = Result[TSuccess, Exception]

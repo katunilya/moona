@@ -5,13 +5,13 @@ from mona.handlers.error import HTTPContextError
 from mona.monads.future import Future
 from mona.monads.result import Failure, Result, Success
 
-HTTPHandlerResult = Result[HTTPContext, HTTPContextError]
+HTTPContextResult = Result[HTTPContext, HTTPContextError]
 BaseHTTPHandler = Callable[
     [HTTPContext | HTTPContextError],
     Awaitable[HTTPContext | HTTPContextError] | HTTPContext | HTTPContextError,
 ]
 HTTPHandler = Callable[
-    [HTTPHandlerResult], Awaitable[HTTPHandlerResult] | HTTPHandlerResult
+    [HTTPContextResult], Awaitable[HTTPContextResult] | HTTPContextResult
 ]
 
 
@@ -76,7 +76,7 @@ def choose(*handlers: HTTPHandler) -> HTTPHandler:
     """
 
     @http_handler
-    async def _choose(ctx: HTTPContext) -> HTTPHandlerResult:
+    async def _choose(ctx: HTTPContext) -> HTTPContextResult:
         match handlers:
             case ():
                 return Success(ctx)

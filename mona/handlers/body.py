@@ -1,11 +1,11 @@
 from dataclasses import is_dataclass
-from typing import Awaitable, Callable, Type
+from typing import Any, Awaitable, Callable, Type, TypeVar
 
 import orjson
 from pydantic import BaseModel
 
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPHandler, HTTPHandlerResult, http_handler
+from mona.handlers.core import HTTPContextResult, HTTPHandler, compose, http_handler
 from mona.handlers.error import HTTPContextError
 from mona.handlers.header import set_header
 from mona.monads.future import Future
@@ -46,7 +46,7 @@ def set_body_bytes(body: bytes) -> HTTPHandler:
     content_length = len(body)
 
     @http_handler
-    def _set_body_bytes(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _set_body_bytes(ctx: HTTPContext) -> HTTPContextResult:
         ctx.response.body = body
         return Success(ctx) >> set_header("Content-Length", content_length)
 
@@ -61,7 +61,7 @@ def set_body_text(body: str) -> HTTPHandler:
     body: str = body.encode("UTF-8")
 
     @http_handler
-    def _set_body_text(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _set_body_text(ctx: HTTPContext) -> HTTPContextResult:
         return (
             Success(ctx)
             >> set_body_bytes(body)
@@ -91,7 +91,7 @@ def set_body_json(body: object) -> HTTPHandler:
             json_body: bytes = orjson.dumps(other)
 
     @http_handler
-    def _set_body_json(ctx: HTTPContext) -> HTTPHandlerResult:
+    def _set_body_json(ctx: HTTPContext) -> HTTPContextResult:
         return (
             Success(ctx)
             >> set_body_bytes(json_body)
@@ -109,7 +109,7 @@ def set_body_bytes_from(
     """`HTTPContext` handler that sets body from `bytes` result of some func."""
 
     @http_handler
-    async def _set_body_bytes_from(ctx: HTTPContext) -> HTTPHandlerResult:
+    async def _set_body_bytes_from(ctx: HTTPContext) -> HTTPContextResult:
         match await (Future.create(ctx) >> func):
             case Failure() as failure:
                 return Failure(HTTPContextError(ctx, str(failure.value)))
@@ -124,12 +124,18 @@ def set_body_str_from(
         [HTTPContext], Result[str, Exception] | Awaitable[Result[str, Exception]]
     ]
 ) -> HTTPHandler:
-    """`HTTPContext` handler that sets body from `str` result of some func."""
-    return set_body_bytes_from(
-        Future.compose(
-            func,
-            Result.bound(encode_utf_8),
-        )
+    """`HTTPContext` handler that sets body from `str` result of some func.
+
+    Also sets header "Content-Type: text/plain".
+    """
+    return compose(
+        set_body_bytes_from(
+            compose(
+                func,
+                Result.bound(encode_utf_8),
+            )
+        ),
+        set_header("Content-Type", "text/plain"),
     )
 
 
@@ -139,11 +145,14 @@ def set_body_json_from(
     ]
 ) -> HTTPHandler:
     """`HTTPContext` handler that sets body from some object converted to `json`."""
-    return set_body_bytes_from(
-        Future.compose(
-            func,
-            Result.bound(serialize),
-        )
+    return compose(
+        set_body_bytes_from(
+            compose(
+                func,
+                Result.bound(serialize),
+            )
+        ),
+        set_header("Content-Type", "application/json"),
     )
 
 
@@ -297,3 +306,58 @@ def get_body_json_pydantic(
                     return Failure(BodyIsNotValidJson(ctx, err))
 
     return _get_body_json_pydantic
+
+
+def get_body_json(
+    type_: Type[Any],
+) -> Callable[
+    [HTTPContext], Result[Maybe[BaseModel], BodyNotReceivedError | BodyIsNotValidJson]
+]:
+    """Provides facade for other dict/dataclass/pydantic json body getters.
+
+    Args:
+        type_ (Type[Any]): to parse JSON from.
+
+    Returns:
+        Callable[ [HTTPContext], Result[Maybe[BaseModel], BodyNotReceivedError |
+        BodyIsNotValidJson] ]: resulting JSON body getter function.
+    """
+    if issubclass(type_, BaseModel):
+        return get_body_json_pydantic(type_)
+
+    if is_dataclass(type_):
+        return get_body_json_dataclass(type_)
+
+    if type_ == dict:
+        return get_body_json_dict
+
+    return lambda ctx: Failure(BodyIsNotValidJson(ctx, f"Wrong type: {type_}"))
+
+
+T = TypeVar("T")
+V = TypeVar("V")
+
+
+def bind_json(
+    request_type: Type[T],
+    func: Callable[[T], Awaitable[HTTPHandler] | HTTPHandler],
+) -> HTTPHandler:
+    """`HTTPHandler` that handles full receive-respond JSON cycle.
+
+    This handler fully processes the response. It closes connection and finishes
+    response by itself.
+
+    Args:
+        request_type (Type[T]): to what type request JSON body should be bind.
+
+    Returns:
+        HTTPHandler: resulting handler that actually performs action.
+    """
+    return compose(
+        set_body_json_from(
+            compose(
+                get_body_json(request_type),
+                func,
+            )
+        ),
+    )
