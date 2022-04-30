@@ -68,7 +68,7 @@ class Future(Bindable, Generic[T]):
 
         Example::
 
-                @Future.bindable
+                @Future.bound
                 def plus_1(x: int) -> int:
                     return x + 1
 
