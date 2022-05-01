@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
-from mona.utils import decode_headers
+from toolz import keymap
 
 Message = dict[str, Any]
 Scope = Message
@@ -94,7 +94,7 @@ class HTTPRequest:
     scheme: str
     path: str
     query_string: bytes
-    headers: dict[str, str]
+    headers: dict[bytes, bytes]
     body: bytes | None
     server: ServerInfo
     client: ClientInfo
@@ -119,7 +119,7 @@ class HTTPRequest:
         query_string = scope["query_string"]
         client = ClientInfo(scope["client"][0], scope["client"][1])
         server = ServerInfo(scope["server"][0], scope["server"][1])
-        headers = decode_headers(scope.get("headers", []))
+        headers = keymap(bytes.lower, dict(scope.get("headers", [])))
         body = None
         return HTTPRequest(
             type_,

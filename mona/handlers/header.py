@@ -1,9 +1,12 @@
 from typing import Callable
 
+from toolz import itemmap
+
 from mona.core import HTTPContext
 from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 from mona.monads.maybe import Maybe, Nothing, Some
 from mona.monads.result import Success
+from mona.utils import decode_utf_8, encode_utf_8
 
 
 def set_header(name: str, value: str) -> HTTPHandler:
@@ -26,8 +29,8 @@ def set_header(name: str, value: str) -> HTTPHandler:
     Returns:
         HTTPHandler: actually performs settings response header.
     """
-    name: bytes = name.lower().decode("UTF-8")
-    value: bytes = value.decode("UTF-8")
+    name: bytes = encode_utf_8(name.lower())
+    value: bytes = encode_utf_8(value)
 
     @http_handler
     def _handler(ctx: HTTPContext) -> HTTPContextResult:
@@ -59,7 +62,7 @@ def remove_header(name: str) -> HTTPHandler:
     Returns:
         HTTPHandler: actually performs remove of response header.
     """
-    name: bytes = name.lower().decode("UTF-8")
+    name: bytes = encode_utf_8(name.lower())
 
     @http_handler
     def _handler(ctx: HTTPContext) -> HTTPContextResult:
@@ -84,14 +87,14 @@ def get_header(
         Callable[[HTTPContext], Maybe[tuple[str, str]]]: function that actually returns
         headers.
     """
-    name: str = name.lower()
+    header_name: bytes = encode_utf_8(name).lower()
 
     def _getter(ctx: HTTPContext) -> Maybe[tuple[str, str]]:
-        match ctx.request.headers.get(name, None):
+        match ctx.request.headers.get(header_name, None):
             case None:
                 return Nothing()
             case value:
-                return Some((name, value))
+                return Some((name.lower(), decode_utf_8(value)))
 
     return _getter
 
@@ -112,4 +115,6 @@ def get_headers(ctx: HTTPContext) -> Maybe[dict[str, str]]:
         case {}:
             return Nothing()
         case headers:
-            return Some(headers)
+            return Some(
+                itemmap(lambda h, v: (decode_utf_8(h), decode_utf_8(v)), headers)
+            )
