@@ -1,4 +1,4 @@
-from mona.core import ASGIApp, HTTPContext, HTTPContextError, Receive, Scope, Send
+from mona.core import ASGIApp, ContextError, HTTPContext, Receive, Scope, Send
 from mona.handlers.body import set_body_text
 from mona.handlers.core import HTTPContextResult, HTTPHandler
 from mona.handlers.events import send_body_async, send_response_start_async
@@ -39,7 +39,7 @@ def create(handler: HTTPHandler) -> ASGIApp:
                             >> send_response_start_async
                             >> send_body_async
                         )
-            case Failure(value=HTTPContextError() as err):
+            case Failure(value=ContextError() as err):
                 match err.ctx.started, err.ctx.closed:
                     case True, True:
                         return

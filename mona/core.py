@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
@@ -213,8 +214,36 @@ class HTTPResponse:
         )
 
 
+class BaseContext(ABC, Bindable):
+    """Base class for each kind of Context handled by application.
+
+    Mainly there are 3 kinds:
+    * `HTTPContext` (implemented)
+    * `LifespanContext` (in progress)
+    * `WebsocketContext` (not implemented)
+    """
+
+    def __rshift__(
+        self,
+        handler: Callable[[BaseContext | ContextError], BaseContext | ContextError],
+    ) -> BaseContext | ContextError:
+        """Binding for `BaseContext`.
+
+        This must be used only for sync handler for easier to read syntax. For async
+        functions use `Future`.
+
+        Args:
+            handler (Callable[[BaseContext | ContextError], BaseContext |
+            ContextError]): sync handler to execute with this ctx.
+
+        Returns:
+            BaseContext | ContextError: result of handler.
+        """
+        return handler(self)
+
+
 @dataclass
-class HTTPContext(Bindable):
+class HTTPContext(BaseContext):
     """Object that contains entire information related to HTTP Request.
 
     Mostly it's structure is replication of HTTP Connection Scope of ASGI Specification.
@@ -280,28 +309,8 @@ class HTTPContext(Bindable):
             closed=self.closed,
         )
 
-    def __rshift__(
-        self,
-        handler: Callable[
-            [HTTPContext | HTTPContextError], HTTPContext | HTTPContextError
-        ],
-    ) -> HTTPContext | HTTPContextError:
-        """Binding for `HTTPContext`.
 
-        This must be used only for sync handler for easier to read syntax. For async
-        functions use `Future`.
-
-        Args:
-            handler (Callable[[HTTPContext | HTTPContextError], HTTPContext |
-            HTTPContextError]): sync handler to execute with this ctx.
-
-        Returns:
-            HTTPContext | HTTPContextError: result of handler.
-        """
-        return handler(self)
-
-
-class HTTPContextError(Exception, Bindable):
+class ContextError(Exception, BaseContext):
     """Base class for `Exception`s that happen during handling `HTTPContext`.
 
     Attributes:
@@ -317,30 +326,10 @@ class HTTPContextError(Exception, Bindable):
 
     def __init__(
         self,
-        ctx: HTTPContext,
+        ctx: BaseContext,
         message: str = "Internal Server Error happened during handling request.",
         status=500,
     ) -> None:
         self.ctx = ctx
         self.message = message
         self.status = status
-
-    def __rshift__(
-        self,
-        handler: Callable[
-            [HTTPContext | HTTPContextError], HTTPContext | HTTPContextError
-        ],
-    ) -> HTTPContext | HTTPContextError:
-        """Binding for `HTTPContextError`.
-
-        This must be used only for sync handler for easier to read syntax. For async
-        functions use `Future`.
-
-        Args:
-            handler (Callable[[HTTPContext | HTTPContextError], HTTPContext |
-            HTTPContextError]): sync handler to execute with this ctx.
-
-        Returns:
-            HTTPContext | HTTPContextError: result of handler.
-        """
-        return handler(self)

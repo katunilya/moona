@@ -1,8 +1,8 @@
-from mona.core import HTTPContext, HTTPContextError
+from mona.core import ContextError, HTTPContext
 from mona.handlers.core import HTTPContextResult, http_handler
 
 
-class WrongRequestType(HTTPContextError):
+class WrongRequestType(ContextError):
     """`HTTPHandler` received `HTTPContext` of wrong type."""
 
     def __init__(self, ctx: HTTPContext, type_: str) -> None:

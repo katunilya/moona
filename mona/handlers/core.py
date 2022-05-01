@@ -1,10 +1,10 @@
 from functools import wraps
 from typing import Awaitable, Callable
 
-from mona.core import HTTPContext, HTTPContextError
+from mona.core import ContextError, HTTPContext
 from mona.monads.future import Future
 
-HTTPContextResult = HTTPContext | HTTPContextError
+HTTPContextResult = HTTPContext | ContextError
 HTTPHandler = Callable[
     [HTTPContextResult], HTTPContextResult | Awaitable[HTTPContextResult]
 ]
@@ -28,7 +28,7 @@ def http_handler(handler: HTTPHandler) -> HTTPHandler:
                         return handler(ctx)
                     case True:
                         return ctx
-            case HTTPContextError() as err:
+            case ContextError() as err:
                 return err
 
     return _http_handler
@@ -47,7 +47,7 @@ def error_handler(handler: HTTPHandler) -> HTTPHandler:
         result: HTTPContextResult,
     ) -> HTTPContextResult | Awaitable[HTTPContextResult]:
         match result:
-            case HTTPContextError() as err:
+            case ContextError() as err:
                 return handler(err)
             case HTTPContext() as ctx:
                 return ctx
@@ -107,7 +107,7 @@ def choose(*handlers: HTTPHandler) -> HTTPHandler:
                     match await (Future.create(result) >> HTTPContext.copy >> handler):
                         case HTTPContext() as ctx:
                             return ctx
-                        case HTTPContextError():
+                        case ContextError():
                             continue
                 return result
 
