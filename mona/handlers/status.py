@@ -1,8 +1,7 @@
 from enum import IntEnum
 
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
-from mona.monads.result import Success
+from mona.handlers.core import HTTPHandler, http_handler
 
 
 class HTTPStatusCode(IntEnum):
@@ -71,9 +70,9 @@ def set_status(code: HTTPStatusCode) -> HTTPHandler:
     """`HTTPHandler` that sets status code to response."""
 
     @http_handler
-    def _status(ctx: HTTPContext) -> HTTPContextResult:
+    def _status(ctx: HTTPContext) -> HTTPContext:
         ctx.response.status = code
-        return Success(ctx)
+        return ctx
 
     return _status
 

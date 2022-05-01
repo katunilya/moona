@@ -138,3 +138,30 @@ async def test_compose(value, func, assert_result):
     assert inspect.isawaitable(result)
     assert isinstance(result, Future)
     assert await result == assert_result
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "value, funcs, result",
+    [
+        (1, [], 1),
+        (1, [identity], 1),
+        (1, [lambda x: x], 1),
+        ("1", [identity], "1"),
+        ("1", [lambda x: x], "1"),
+        (3, [async_plus_1], 4),
+        (3, [lambda x: x + 1], 4),
+        (3, [async_multiply_3], 9),
+        (3, [lambda x: x * 3], 9),
+        (1, [lambda x: x + 1, lambda x: x * 3], 6),
+        (1, [async_plus_1, async_multiply_3], 6),
+        (1, [async_plus_1, lambda x: x * 3], 6),
+        (1, [lambda x: x + 1, async_multiply_3], 6),
+        ("John Doe", [async_strip], "John Doe"),
+        ("   John Doe  ", [async_strip], "John Doe"),
+        ("John Doe", [lambda s: s.strip()], "John Doe"),
+        ("   John Doe  ", [lambda s: s.strip()], "John Doe"),
+    ],
+)
+async def test_pipe(value, funcs, result):
+    assert await Future.do(value, *funcs) == result

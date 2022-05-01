@@ -1,7 +1,5 @@
-from mona.core import HTTPContext
+from mona.core import HTTPContext, HTTPContextError
 from mona.handlers.core import HTTPContextResult, http_handler
-from mona.handlers.error import HTTPContextError
-from mona.monads.result import Failure, Success
 
 
 class WrongRequestType(HTTPContextError):
@@ -20,6 +18,6 @@ def http(ctx: HTTPContext) -> HTTPContextResult:
     """`HTTPHandler` that processes only `HTTPContext` of "http" type."""
     match ctx.request.type_:
         case "http":
-            return Success(ctx)
+            return ctx
         case _:
-            return Failure(WrongRequestType(ctx, "http"))
+            return WrongRequestType(ctx, "http")

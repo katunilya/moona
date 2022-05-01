@@ -1,7 +1,5 @@
-from mona.core import HTTPContext
+from mona.core import HTTPContext, HTTPContextError
 from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
-from mona.handlers.error import HTTPContextError
-from mona.monads.result import Failure, Success
 
 
 class WrongPathError(HTTPContextError):
@@ -28,9 +26,9 @@ def route(path: str) -> HTTPHandler:
     def _route(ctx: HTTPContext) -> HTTPContextResult:
         match ctx.request.path == path:
             case True:
-                return Success(ctx)
+                return ctx
             case False:
-                return Failure(WrongPathError(ctx, path))
+                return WrongPathError(ctx, path)
 
     return _route
 
@@ -49,9 +47,9 @@ def subroute(path: str) -> HTTPHandler:
         match ctx.request.path.startswith(path):
             case True:
                 ctx.request.path = ctx.request.path.lstrip(path).strip("/")
-                return Success(ctx)
+                return ctx
             case False:
-                return Failure(WrongPathError(ctx, path))
+                return WrongPathError(ctx, path)
 
     return _subroute
 
@@ -69,9 +67,9 @@ def ci_route(path: str) -> HTTPHandler:
     def _ci_route(ctx: HTTPContext) -> HTTPContextResult:
         match ctx.request.path.lower() == path:
             case True:
-                return Success(ctx)
+                return ctx
             case False:
-                return Failure(WrongPathError(ctx, path))
+                return WrongPathError(ctx, path)
 
     return _ci_route
 
@@ -91,8 +89,8 @@ def ci_subroute(path: str) -> HTTPHandler:
         match ctx.request.path.lower().startswith(path):
             case True:
                 ctx.request.path = ctx.request.path[subroute_len:].strip("/")
-                return Success(ctx)
+                return ctx
             case False:
-                return Failure(WrongPathError(ctx, path))
+                return WrongPathError(ctx, path)
 
     return _ci_subroute

@@ -1,9 +1,7 @@
 from enum import Enum
 
-from mona.core import HTTPContext
+from mona.core import HTTPContext, HTTPContextError
 from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
-from mona.handlers.error import HTTPContextError
-from mona.monads.result import Failure, Success
 
 
 class HTTPMethod(Enum):
@@ -42,9 +40,9 @@ def method(method_: HTTPMethod) -> HTTPHandler:
     def _method(ctx: HTTPContext) -> HTTPContextResult:
         match ctx.request.method == method_:
             case True:
-                return Success(ctx)
+                return ctx
             case False:
-                return Failure(WrongHTTPMethodError(ctx))
+                return WrongHTTPMethodError(ctx)
 
     return _method
 

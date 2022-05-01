@@ -1,37 +1,58 @@
+from functools import wraps
 from typing import Awaitable, Callable
 
-from mona.core import HTTPContext
-from mona.handlers.error import HTTPContextError
+from mona.core import HTTPContext, HTTPContextError
 from mona.monads.future import Future
-from mona.monads.result import Failure, Result, Success
 
-HTTPContextResult = Result[HTTPContext, HTTPContextError]
-BaseHTTPHandler = Callable[
-    [HTTPContext | HTTPContextError],
-    Awaitable[HTTPContext | HTTPContextError] | HTTPContext | HTTPContextError,
-]
+HTTPContextResult = HTTPContext | HTTPContextError
 HTTPHandler = Callable[
-    [HTTPContextResult], Awaitable[HTTPContextResult] | HTTPContextResult
+    [HTTPContextResult], HTTPContextResult | Awaitable[HTTPContextResult]
 ]
 
 
-def http_handler(handler: BaseHTTPHandler) -> HTTPHandler:
+def http_handler(handler: HTTPHandler) -> HTTPHandler:
     """Decorator for `HTTPContext` handlers.
 
     This decorator will run this handler only when `Success[HTTPContext]` is passed.
     Provides needed for switching from `Success` state to `Success` or `Failure`.
     """
-    return Result.bound(handler)
+
+    @wraps(handler)
+    def _http_handler(
+        result: HTTPContextResult,
+    ) -> HTTPContextResult | Awaitable[HTTPContextResult]:
+        match result:
+            case HTTPContext() as ctx:
+                match ctx.closed:
+                    case False:
+                        return handler(ctx)
+                    case True:
+                        return ctx
+            case HTTPContextError() as err:
+                return err
+
+    return _http_handler
 
 
-def error_handler(handler: BaseHTTPHandler) -> HTTPHandler:
+def error_handler(handler: HTTPHandler) -> HTTPHandler:
     """Decorator for `HTTPContextError` handlers.
 
     This decorator will run this handler only when `Failure[HTTPContextError]` is
     passed. Provides needed for switching from `Failure` state to `Success` or
     `Failure`.
     """
-    return Result.altered(handler)
+
+    @wraps(handler)
+    def _error_handler(
+        result: HTTPContextResult,
+    ) -> HTTPContextResult | Awaitable[HTTPContextResult]:
+        match result:
+            case HTTPContextError() as err:
+                return handler(err)
+            case HTTPContext() as ctx:
+                return ctx
+
+    return _error_handler
 
 
 def compose(*handlers: HTTPHandler) -> HTTPHandler:
@@ -76,22 +97,36 @@ def choose(*handlers: HTTPHandler) -> HTTPHandler:
     """
 
     @http_handler
-    async def _choose(ctx: HTTPContext) -> HTTPContextResult:
+    async def _choose(result: HTTPContextResult) -> HTTPContextResult:
         match handlers:
             case ():
-                return Success(ctx)
+                return result
             case some_handlers:
                 for handler in some_handlers:
-                    match await (
-                        Future.create(ctx)
-                        >> HTTPContext.copy
-                        >> Result.successfull
-                        >> handler
-                    ):
-                        case Success() as success:
-                            return success
-                        case Failure():
+                    match await (Future.create(result) >> HTTPContext.copy >> handler):
+                        case HTTPContext() as ctx:
+                            return ctx
+                        case HTTPContextError():
                             continue
-                return Success(ctx)
+                return result
 
     return _choose
+
+
+def do(ctx: HTTPContextResult, *handlers: HTTPHandler) -> Future[HTTPContextResult]:
+    """Execute multiple handlers on passed `HTTPContext` or `HTTPContextError`.
+
+    If `HTTPContext` passed than it is automatically wrapped into `Success`. If
+    `HTTPContextError` than it is wrapped into `Failure`.
+
+    Note:
+        This is possible syntax for executing multiple functions, but `>>` is more
+        supported.
+
+    Args:
+        ctx (HTTPContext | HTTPContextError | HTTPContextResult): to use as argument.
+
+    Returns:
+        Future[HTTPContextResult]: result.
+    """
+    return Future.do(ctx, *handlers)
