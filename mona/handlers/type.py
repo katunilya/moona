@@ -16,10 +16,10 @@ class WrongRequestType(HTTPContextError):
 
 
 @http_handler
-def on_http(ctx: HTTPContext) -> HTTPContextResult:
+def http(ctx: HTTPContext) -> HTTPContextResult:
     """`HTTPHandler` that processes only `HTTPContext` of "http" type."""
     match ctx.request.type_:
         case "http":
             return Success(ctx)
         case _:
-            return Failure
+            return Failure(WrongRequestType(ctx, "http"))
