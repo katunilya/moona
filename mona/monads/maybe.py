@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC
 from dataclasses import dataclass
 from functools import reduce, wraps
@@ -167,6 +169,27 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
                     return Some(result)
 
         return _wrapper
+
+    @staticmethod
+    def some(value: TSome) -> Some[TSome]:
+        """Wraps passed value into `Some` container.
+
+        Args:
+            value (TSome): to wrap.
+
+        Returns:
+            Some[TSome]: container.
+        """
+        return Some(value)
+
+    @staticmethod
+    def nothing(_: Any) -> Nothing:
+        """Converts `Any` value into nothing.
+
+        Returns:
+            Nothing: container.
+        """
+        return Nothing()
 
 
 @dataclass(frozen=True)
