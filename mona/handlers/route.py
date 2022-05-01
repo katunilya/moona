@@ -84,12 +84,13 @@ def ci_subroute(path: str) -> HTTPHandler:
     handler `HTTPContext` will have "users". Route is case-insensitive.
     """
     path = path.strip("/").lower()
+    subroute_len = len(path)
 
     @http_handler
     def _ci_subroute(ctx: HTTPContext) -> HTTPContextResult:
         match ctx.request.path.lower().startswith(path):
             case True:
-                ctx.request.path = ctx.request.path.lstrip(path).strip("/")
+                ctx.request.path = ctx.request.path[subroute_len:].strip("/")
                 return Success(ctx)
             case False:
                 return Failure(WrongPathError(ctx, path))
