@@ -42,7 +42,7 @@ def method(method_: HTTPMethod) -> HTTPHandler:
             case True:
                 return ctx
             case False:
-                return WrongHTTPMethodError(ctx)
+                return WrongHTTPMethodError(ctx, method_)
 
     return _method
 
