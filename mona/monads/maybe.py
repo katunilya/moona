@@ -92,8 +92,8 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
 
         Example::
 
-                @Maybe.bound
-                def get_user(name: str) -> Maybe[User]:
+                @Maybe.altered
+                def get_user(name: None) -> Maybe[User]:
                     ...
 
                 result get_user(Nothing())  # Nothing
@@ -143,7 +143,7 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
         return _choose
 
     @staticmethod
-    def no_none(
+    def noneless(
         func: Callable[[TSome], VSome | None]
     ) -> Callable[[TSome], "Maybe[VSome]"]:
         """Decorator for functions that might return `None`.
@@ -153,7 +153,7 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
 
         Example::
 
-                @no_none
+                @Maybe.noneless
                 def func(x: int) -> int | None:
                     return x if x > 10 else None
 
