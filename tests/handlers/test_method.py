@@ -1,13 +1,24 @@
 import pytest
 
 from mona.core import HTTPContext
-from mona.handlers.method import WrongHTTPMethodError, method
+from mona.handlers.method import (
+    CONNECT,
+    DELETE,
+    GET,
+    HEAD,
+    OPTIONS,
+    PATCH,
+    POST,
+    PUT,
+    TRACE,
+    WrongHTTPMethodError,
+    method,
+)
 
 
 @pytest.mark.parametrize(
     "arrange_method, method_, result_type",
     [
-        # GET
         ("GET", "GET", HTTPContext),
         ("POST", "GET", WrongHTTPMethodError),
         ("PATCH", "GET", WrongHTTPMethodError),
@@ -17,7 +28,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "GET", WrongHTTPMethodError),
         ("TRACE", "GET", WrongHTTPMethodError),
         ("CONNECT", "GET", WrongHTTPMethodError),
-        # POST
         ("GET", "POST", WrongHTTPMethodError),
         ("POST", "POST", HTTPContext),
         ("PATCH", "POST", WrongHTTPMethodError),
@@ -27,7 +37,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "POST", WrongHTTPMethodError),
         ("TRACE", "POST", WrongHTTPMethodError),
         ("CONNECT", "POST", WrongHTTPMethodError),
-        # PATCH
         ("GET", "PATCH", WrongHTTPMethodError),
         ("POST", "PATCH", WrongHTTPMethodError),
         ("PATCH", "PATCH", HTTPContext),
@@ -37,7 +46,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "PATCH", WrongHTTPMethodError),
         ("TRACE", "PATCH", WrongHTTPMethodError),
         ("CONNECT", "PATCH", WrongHTTPMethodError),
-        # PUT
         ("GET", "PUT", WrongHTTPMethodError),
         ("POST", "PUT", WrongHTTPMethodError),
         ("PATCH", "PUT", WrongHTTPMethodError),
@@ -47,7 +55,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "PUT", WrongHTTPMethodError),
         ("TRACE", "PUT", WrongHTTPMethodError),
         ("CONNECT", "PUT", WrongHTTPMethodError),
-        # DELETE
         ("GET", "DELETE", WrongHTTPMethodError),
         ("POST", "DELETE", WrongHTTPMethodError),
         ("PATCH", "DELETE", WrongHTTPMethodError),
@@ -57,7 +64,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "DELETE", WrongHTTPMethodError),
         ("TRACE", "DELETE", WrongHTTPMethodError),
         ("CONNECT", "DELETE", WrongHTTPMethodError),
-        # OPTIONS
         ("GET", "OPTIONS", WrongHTTPMethodError),
         ("POST", "OPTIONS", WrongHTTPMethodError),
         ("PATCH", "OPTIONS", WrongHTTPMethodError),
@@ -67,7 +73,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "OPTIONS", WrongHTTPMethodError),
         ("TRACE", "OPTIONS", WrongHTTPMethodError),
         ("CONNECT", "OPTIONS", WrongHTTPMethodError),
-        # HEAD
         ("GET", "HEAD", WrongHTTPMethodError),
         ("POST", "HEAD", WrongHTTPMethodError),
         ("PATCH", "HEAD", WrongHTTPMethodError),
@@ -77,7 +82,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "HEAD", HTTPContext),
         ("TRACE", "HEAD", WrongHTTPMethodError),
         ("CONNECT", "HEAD", WrongHTTPMethodError),
-        # TRACE
         ("GET", "TRACE", WrongHTTPMethodError),
         ("POST", "TRACE", WrongHTTPMethodError),
         ("PATCH", "TRACE", WrongHTTPMethodError),
@@ -87,7 +91,6 @@ from mona.handlers.method import WrongHTTPMethodError, method
         ("HEAD", "TRACE", WrongHTTPMethodError),
         ("TRACE", "TRACE", HTTPContext),
         ("CONNECT", "TRACE", WrongHTTPMethodError),
-        # CONNECT
         ("GET", "CONNECT", WrongHTTPMethodError),
         ("POST", "CONNECT", WrongHTTPMethodError),
         ("PATCH", "CONNECT", WrongHTTPMethodError),
@@ -102,3 +105,174 @@ from mona.handlers.method import WrongHTTPMethodError, method
 def test_method(ctx: HTTPContext, arrange_method, method_, result_type):
     ctx.request.method = arrange_method
     assert isinstance(ctx >> method(method_), result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", HTTPContext),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_GET(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> GET, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", HTTPContext),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_POST(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> POST, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", HTTPContext),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_PATCH(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> PATCH, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", HTTPContext),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_PUT(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> PUT, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", HTTPContext),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_DELETE(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> DELETE, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", HTTPContext),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_OPTIONS(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> OPTIONS, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", HTTPContext),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_HEAD(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> HEAD, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", HTTPContext),
+        ("CONNECT", WrongHTTPMethodError),
+    ],
+)
+def test_TRACE(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> TRACE, result_type)
+
+
+@pytest.mark.parametrize(
+    "method_, result_type",
+    [
+        ("GET", WrongHTTPMethodError),
+        ("POST", WrongHTTPMethodError),
+        ("PATCH", WrongHTTPMethodError),
+        ("PUT", WrongHTTPMethodError),
+        ("DELETE", WrongHTTPMethodError),
+        ("OPTIONS", WrongHTTPMethodError),
+        ("HEAD", WrongHTTPMethodError),
+        ("TRACE", WrongHTTPMethodError),
+        ("CONNECT", HTTPContext),
+    ],
+)
+def test_CONNECT(ctx: HTTPContext, method_, result_type):  # noqa
+    ctx.request.method = method_
+    assert isinstance(ctx >> CONNECT, result_type)

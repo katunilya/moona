@@ -26,7 +26,6 @@ from mona.handlers.method import (
     POST,
     PUT,
     TRACE,
-    HTTPMethod,
     WrongHTTPMethodError,
     method,
 )
