@@ -6,7 +6,7 @@ create_env:
 
 activate_env:
 	@echo "🐍 Activating Virtual Environment (python3.10)..."
-	activate ./.venv/bin/activate"
+	activate ./.venv/bin/activate
 
 # =========================== Dependency Management ============================
 
@@ -46,10 +46,13 @@ test:
 check: check_flake8 check_isort test
 	@echo "✅ All checks are finished!"
 
+<<<<<<< HEAD
 setup_pre_commit:
 	@echo "⚠️ Setting up pre-commit"
 	@poetry run install
 
+=======
+>>>>>>> 30-redesign-handlers-for-continuation-use
 # ========================== Documentation Management ==========================
 
 docs:
@@ -58,5 +61,9 @@ docs:
 
 # ===================== Development Environment Management =====================
 
+<<<<<<< HEAD
 setup: create_env activate_env install_all setup_pre_commit
+=======
+setup: create_env activate_env install_all
+>>>>>>> 30-redesign-handlers-for-continuation-use
 	@echo "✨ Setup finished!"
