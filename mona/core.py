@@ -265,6 +265,7 @@ class LifespanContext(BaseContext):
     asgi_spec_version: str
     receive: Receive
     send: Send
+    finished: bool
 
     @staticmethod
     def create(scope: Scope, receive: Receive, send: Send) -> LifespanContext:
@@ -284,6 +285,7 @@ class LifespanContext(BaseContext):
             asgi_spec_version=scope["asgi"].get("spec_version", "1.0"),
             receive=receive,
             send=send,
+            finished=False,
         )
 
 

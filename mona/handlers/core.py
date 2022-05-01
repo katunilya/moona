@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Awaitable, Callable
 
-from mona.core import ContextError, HTTPContext
+from mona.core import ContextError, HTTPContext, LifespanContext
 from mona.monads.future import Future
 
 HTTPContextResult = HTTPContext | ContextError
@@ -131,3 +131,26 @@ def do(ctx: HTTPContextResult, *handlers: HTTPHandler) -> Future[HTTPContextResu
         Future[HTTPContextResult]: result.
     """
     return Future.do(ctx, *handlers)
+
+
+LifespanContextResult = LifespanContext | ContextError
+LifespanHandler = Callable[
+    [LifespanContextResult], LifespanContextResult | Awaitable[LifespanContextResult]
+]
+
+
+def lifespan_handler(handler: LifespanHandler) -> LifespanHandler:
+    """Decorator for `LifespanContext` handlers on startup and shutdown.
+
+    This decorator will proceed only unfinished `LifespanContext`.
+    """
+
+    @wraps(handler)
+    def _lifespan_handler(result: LifespanContextResult) -> LifespanContextResult:
+        match result:
+            case LifespanContext(finished=False) as ctx:
+                return handler(ctx)
+            case ContextError() as err:
+                return err
+
+    return _lifespan_handler
