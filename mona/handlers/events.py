@@ -1,5 +1,3 @@
-from asyncio import Future
-
 from mona.core import HTTPContext
 from mona.handlers.core import HTTPContextResult, http_handler
 
@@ -58,7 +56,7 @@ async def send_body_async(ctx: HTTPContext) -> HTTPContextResult:
     If "http.response.start" event was not send than it will be during execution of this
     handler.
     """
-    ctx: HTTPContext = await Future.create(ctx) >> send_response_start_async
+    ctx: HTTPContext = await (ctx >> send_response_start_async)
     await ctx.send({"type": "http.response.body", "body": ctx.response.body})
     ctx.closed = True
     return ctx
