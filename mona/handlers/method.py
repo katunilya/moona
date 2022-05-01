@@ -1,25 +1,7 @@
-from enum import Enum
+from __future__ import annotations
 
 from mona.core import HTTPContext, HTTPContextError
 from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
-
-
-class HTTPMethod(Enum):
-    """HTTP Method values based on RFC 2616.
-
-    Note:
-        * https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1.1
-    """
-
-    GET = "GET"
-    POST = "POST"
-    PATCH = "PATCH"
-    PUT = "PUT"
-    DELETE = "DELETE"
-    OPTIONS = "OPTIONS"
-    HEAD = "HEAD"
-    TRACE = "TRACE"
-    CONNECT = "CONNECT"
 
 
 class WrongHTTPMethodError(HTTPContextError):
@@ -33,7 +15,7 @@ class WrongHTTPMethodError(HTTPContextError):
         )
 
 
-def method(method_: HTTPMethod) -> HTTPHandler:
+def method(method_: str) -> HTTPHandler:
     """Continues execution if request method is passed method."""
 
     @http_handler
@@ -47,12 +29,12 @@ def method(method_: HTTPMethod) -> HTTPHandler:
     return _method
 
 
-GET = method(HTTPMethod.GET)
-POST = method(HTTPMethod.POST)
-PATCH = method(HTTPMethod.PATCH)
-PUT = method(HTTPMethod.PUT)
-DELETE = method(HTTPMethod.DELETE)
-OPTIONS = method(HTTPMethod.OPTIONS)
-HEAD = method(HTTPMethod.HEAD)
-TRACE = method(HTTPMethod.TRACE)
-CONNECT = method(HTTPMethod.CONNECT)
+GET = method("GET")
+POST = method("POST")
+PATCH = method("PATCH")
+PUT = method("PUT")
+DELETE = method("DELETE")
+OPTIONS = method("OPTIONS")
+HEAD = method("HEAD")
+TRACE = method("TRACE")
+CONNECT = method("CONNECT")
