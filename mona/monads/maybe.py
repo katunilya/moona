@@ -1,6 +1,6 @@
-import abc
-import dataclasses
-import functools
+from abc import ABC
+from dataclasses import dataclass
+from functools import reduce, wraps
 from typing import Any, Callable, Generic, TypeVar
 
 from mona.monads.core import Alterable, Bindable
@@ -9,8 +9,8 @@ TSome = TypeVar("TSome")
 VSome = TypeVar("VSome")
 
 
-@dataclasses.dataclass(frozen=True)
-class Maybe(Bindable, Alterable, Generic[TSome], abc.ABC):
+@dataclass(frozen=True)
+class Maybe(Bindable, Alterable, Generic[TSome], ABC):
     """General purpose container for optional value.
 
     `Maybe` container has 2 variations: `Some` and `Nothing`. `Some` stands for some
@@ -28,10 +28,10 @@ class Maybe(Bindable, Alterable, Generic[TSome], abc.ABC):
         `Nothing` just return it.
 
         Args:
-            func (Callable[[T], Maybe[V]]): to bind
+            func (Callable[[T], Maybe[V]]): to bind.
 
         Returns:
-            Maybe[V]: result
+            Maybe[V]: result.
         """
         match self:
             case Some(value):
@@ -39,31 +39,142 @@ class Maybe(Bindable, Alterable, Generic[TSome], abc.ABC):
             case Nothing() as nothing:
                 return nothing
 
-    def __lshift__(self, func: Callable[["Nothing"], "Maybe[TSome]"]) -> "Maybe[TSome]":
+    def __lshift__(self, func: Callable[[None], "Maybe[VSome]"]) -> "Maybe[VSome]":
         """Dunder method for `<<` altering.
 
         Perform execution of `func` only when container is `Nothing`. In case container
         is `Some` just return it.
 
         Args:
-            func (Callable[[Nothing], Maybe[TSome]]): to alter
+            func (Callable[[TSome], Maybe[VSome]]): to alter.
 
         Returns:
-            Maybe[TSome]: result
+            Maybe[VSome]: result.
         """
         match self:
-            case Nothing() as nothing:
-                return func(nothing)
+            case Nothing():
+                return func(None)
             case Some() as some:
                 return some
 
+    @staticmethod
+    def bound(
+        func: Callable[[TSome], "Maybe[VSome]"]
+    ) -> Callable[["Maybe[TSome]"], "Maybe[VSome]"]:
+        """Decorator for functions that will be executed only with `Some` value.
 
-@dataclasses.dataclass(frozen=True)
+        Changes input type to `Maybe`.
+
+        Example::
+
+                @Maybe.bound
+                def get_user(name: str) -> Maybe[User]:
+                    ...
+
+                result get_user(Nothing())  # Nothing
+        """
+
+        @wraps(func)
+        def _bound(cnt: "Maybe[TSome]") -> "Maybe[VSome]":
+            return cnt >> func
+
+        return _bound
+
+    @staticmethod
+    def altered(
+        func: Callable[[TSome], "Maybe[VSome]"]
+    ) -> Callable[["Maybe[TSome]"], "Maybe[VSome]"]:
+        """Decorator for functions that will be executed only with `Nothing`.
+
+        Changes input type to `Maybe`.
+
+        Example::
+
+                @Maybe.bound
+                def get_user(name: str) -> Maybe[User]:
+                    ...
+
+                result get_user(Nothing())  # Nothing
+        """
+
+        @wraps(func)
+        def _altered(cnt: "Maybe[TSome]") -> "Maybe[VSome]":
+            return cnt << func
+
+        return _altered
+
+    @staticmethod
+    def _continue_on_some(
+        cur: Callable[[TSome], VSome], nxt: Callable[[TSome], VSome]
+    ) -> Callable[[TSome], VSome]:
+        def __continue_on_some(val: TSome):
+            match cur(val):
+                case Some(result):
+                    return result
+                case Nothing():
+                    return nxt(val)
+
+        return __continue_on_some
+
+    @staticmethod
+    def choose(*funcs: Callable[[TSome], VSome]) -> Callable[[TSome], VSome]:
+        """Return first `Some` result from passed functions.
+
+        If `funcs` is empty, than return `Nothing`.
+        If no `func` can return `Some` than return `Nothing`.
+
+        Example::
+
+                result = Some(1) >> choose(
+                    lambda x: Nothing(),
+                    lambda x: Some(2)
+                )  # Some(2)
+        """
+
+        def _choose(value: TSome):
+            match funcs:
+                case ():
+                    return Nothing()
+                case _:
+                    return reduce(Maybe._continue_on_some, funcs)(value)
+
+        return _choose
+
+    @staticmethod
+    def no_none(
+        func: Callable[[TSome], VSome | None]
+    ) -> Callable[[TSome], "Maybe[VSome]"]:
+        """Decorator for functions that might return `None`.
+
+        When decorated function returns `None` it is converted to `Nothing`, otherwise
+        wrapped into `Some` container.
+
+        Example::
+
+                @no_none
+                def func(x: int) -> int | None:
+                    return x if x > 10 else None
+
+                Some(1) >> func  # Nothing
+        """
+
+        @wraps(func)
+        def _wrapper(value: TSome):
+            match func(value):
+                case None:
+                    return Nothing()
+                case result:
+                    return Some(result)
+
+        return _wrapper
+
+
+@dataclass(frozen=True)
 class Some(Maybe[TSome]):
     """`Maybe` container for values that are actually present."""
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class Nothing(Maybe[Any]):
     """Singleton `Maybe` container marking value absence."""
 
@@ -80,127 +191,3 @@ class Nothing(Maybe[Any]):
 
     def __init__(self) -> None:  # noqa
         super().__init__(None)
-
-
-MaybeFunc = Callable[[TSome], Maybe[VSome]]
-
-
-def bind(func: MaybeFunc[TSome, VSome], cnt: Maybe[TSome]) -> Maybe[VSome]:
-    """Bind function for `Maybe` monad.
-
-    `function` is executed only in case `cnt` is `Some` and not `Nothing` as it does not
-    make any sense to execute some `function` with `Nothing`.
-
-    Args:
-        function (Callable[[Maybe[T]], Maybe[V]]): to bind
-        cnt (Maybe[T]): `Maybe` container
-
-    Returns:
-        Maybe[V]: result of running `function` on `cnt` value.
-    """
-    return cnt >> func
-
-
-def alter(
-    func: Callable[[Nothing], Maybe[VSome]], cnt: Maybe[TSome]
-) -> Maybe[TSome | VSome]:
-    """Alter function for `Maybe` monad.
-
-    Args:
-        func (Callable[[Nothing], Maybe[VSome]]): function to alter
-        cnt (Maybe[TSome]): `Maybe` container
-
-    Returns:
-        Maybe[TSome | VSome]: result
-    """
-    return cnt << func
-
-
-def or_value(value: TSome) -> MaybeFunc[VSome, TSome | VSome]:
-    """Recovers from `Nothing` or just passes `Some`.
-
-    When `Some` value is passed nothing is done and it is just returned. When `Nothing`
-    is passed than it is repaced with `Some` `value`.
-
-    Example::
-
-            Nothing() << or_value(1) ##  Some(1)
-
-    Args:
-        value (T): to replace `Nothing` with
-
-    Returns:
-        Callable[[Maybe[V]], Maybe[V] | Maybe[T]]: maybe handler function
-    """
-
-    def _or_value(cnt: Maybe[VSome]) -> Maybe[VSome] | Maybe[TSome]:
-        match cnt:
-            case Some() as some:
-                return some
-            case Nothing():
-                return Some(value)
-
-    return _or_value
-
-
-def _continue_on_some(
-    cur: MaybeFunc[TSome, VSome], nxt: MaybeFunc[TSome, VSome]
-) -> MaybeFunc[TSome, VSome]:
-    def __continue_on_some(val: TSome):
-        match cur(val):
-            case Some(result):
-                return result
-            case Nothing():
-                return nxt(val)
-
-    return __continue_on_some
-
-
-def choose(*functions: MaybeFunc[TSome, VSome]) -> MaybeFunc[TSome, VSome]:
-    """Return first `Some` result from passed functions.
-
-    If `functions` is empty, than return `Nothing`.
-    If no `function` can return `Some` than return `Nothing`.
-
-    Example::
-
-            result = Some(1) >> choose(
-                lambda x: Nothing(),
-                lambda x: Some(2)
-            )  # Some(2)
-    """
-
-    def _choose(value: TSome):
-        match functions:
-            case ():
-                return Nothing()
-            case _:
-                return functools.reduce(_continue_on_some, functions)(value)
-
-    return _choose
-
-
-def no_none(func: Callable[[TSome], VSome | None]) -> Callable[[TSome], Maybe[VSome]]:
-    """Decorator for functions that might return `None`.
-
-    When decorated function returns `None` it is converted to `Nothing`, otherwise
-    wrapped into `Some` container.
-
-    Example::
-
-            @no_none
-            def func(x: int) -> int | None:
-                return x if x > 10 else None
-
-            Some(1) >> func  # Nothing
-    """
-
-    @functools.wraps(func)
-    def _wrapper(value: TSome):
-        match func(value):
-            case None:
-                return Nothing()
-            case result:
-                return Some(result)
-
-    return _wrapper
