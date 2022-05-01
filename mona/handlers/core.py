@@ -58,7 +58,8 @@ def error_handler(handler: HTTPHandler) -> HTTPHandler:
 def compose(*handlers: HTTPHandler) -> HTTPHandler:
     """Combinator for `HTTPHandler`s for sequential execution.
 
-    Passed `HTTPHandler`s are executed one-by-one in passed oreder.
+    Passed `HTTPHandler`s are executed one-by-one in passed oreder. Suitable for both
+    sync and async handlers.
 
     Example::
 
