@@ -63,5 +63,5 @@ def send():
 
 
 @pytest.fixture
-def mock_context(scope, receive, send) -> HTTPContext:
+def ctx(scope, receive, send) -> HTTPContext:
     return HTTPContext.create(scope, receive, send)
