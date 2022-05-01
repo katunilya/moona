@@ -8,7 +8,7 @@ from mona.monads.future import Future
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "arrange_value",
+    "value",
     [
         1,
         2,
@@ -18,19 +18,16 @@ from mona.monads.future import Future
         b"some_byte_str",
     ],
 )
-async def test_identity(arrange_value):
-    # act
-    act_value = Future.identity(arrange_value)
-
-    # assert
-    assert inspect.isawaitable(act_value)
-    assert not isinstance(act_value, Future)
-    assert await act_value == arrange_value
+async def test_identity(value):
+    result = Future.identity(value)
+    assert inspect.isawaitable(result)
+    assert not isinstance(result, Future)
+    assert await result == value
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "arrange_value",
+    "value",
     [
         1,
         2,
@@ -40,14 +37,11 @@ async def test_identity(arrange_value):
         b"some_byte_str",
     ],
 )
-async def test_create(arrange_value):
-    # act
-    act_value = Future.create(arrange_value)
-
-    # assert
-    assert inspect.isawaitable(act_value)
-    assert isinstance(act_value, Future)
-    assert await act_value == arrange_value
+async def test_create(value):
+    result = Future.create(value)
+    assert inspect.isawaitable(result)
+    assert isinstance(result, Future)
+    assert await result == value
 
 
 async def async_plus_1(x: int) -> int:
@@ -68,7 +62,7 @@ async def identity(x: Any) -> Any:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "arrange_value, arrange_function, assert_value",
+    "value, func, assert_result",
     [
         (1, lambda x: x, 1),
         ("1", lambda x: x, "1"),
@@ -84,22 +78,16 @@ async def identity(x: Any) -> Any:
         ("   John Doe  ", async_strip, "John Doe"),
     ],
 )
-async def test_bound(arrange_value, arrange_function, assert_value):
-    # arrange
-    arrange_future = Future.create(arrange_value)
-
-    # act
-    act_value = Future.bound(arrange_function)(arrange_future)
-
-    # assert
-    assert inspect.isawaitable(act_value)
-    assert isinstance(act_value, Future)
-    assert await act_value == assert_value
+async def test_bound(value, func, assert_result):
+    result = Future.bound(func)(Future.create(value))
+    assert inspect.isawaitable(result)
+    assert isinstance(result, Future)
+    assert await result == assert_result
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "arrange_value, arrange_function, assert_value",
+    "value, func, assert_result",
     [
         (1, lambda x: x, 1),
         ("1", lambda x: x, "1"),
@@ -115,22 +103,16 @@ async def test_bound(arrange_value, arrange_function, assert_value):
         ("   John Doe  ", async_strip, "John Doe"),
     ],
 )
-async def test_bind(arrange_value, arrange_function, assert_value):
-    # arrange
-    arrange_future = Future.create(arrange_value)
-
-    # act
-    act_value = arrange_future >> arrange_function
-
-    # assert
-    assert inspect.isawaitable(act_value)
-    assert isinstance(act_value, Future)
-    assert await act_value == assert_value
+async def test_bind(value, func, assert_result):
+    result = Future.create(value) >> func
+    assert inspect.isawaitable(result)
+    assert isinstance(result, Future)
+    assert await result == assert_result
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "arrange_value, arrange_functions, assert_value",
+    "value, func, assert_result",
     [
         (1, [], 1),
         (1, [identity], 1),
@@ -151,15 +133,8 @@ async def test_bind(arrange_value, arrange_function, assert_value):
         ("   John Doe  ", [lambda s: s.strip()], "John Doe"),
     ],
 )
-async def test_compose(arrange_value, arrange_functions, assert_value):
-    # assert
-    arrange_future = Future.create(arrange_value)
-    arrange_composition = Future.compose(*arrange_functions)
-
-    # act
-    act_value = arrange_future >> arrange_composition
-
-    # assert
-    assert inspect.isawaitable(act_value)
-    assert isinstance(act_value, Future)
-    assert await act_value == assert_value
+async def test_compose(value, func, assert_result):
+    result = Future.create(value) >> Future.compose(*func)
+    assert inspect.isawaitable(result)
+    assert isinstance(result, Future)
+    assert await result == assert_result
