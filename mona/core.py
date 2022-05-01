@@ -252,7 +252,7 @@ class HTTPContext:
         """
         return HTTPContext(
             request=HTTPRequest.create(scope),
-            response=HTTPResponse(),
+            response=HTTPResponse.empty(),
             receive=receive,
             send=send,
         )
