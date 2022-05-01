@@ -243,6 +243,51 @@ class BaseContext(ABC, Bindable):
 
 
 @dataclass
+class LifespanContext(BaseContext):
+    """Context for handling actions performed on startup and shutdown.
+
+    It contains all the information required based on ASGI Lifespan Specification.
+
+    Note:
+        https://asgi.readthedocs.io/en/latest/specs/lifespan.html
+
+    Attributes:
+        type_ (str): type of context. Must be "lifespan".
+        asgi_version (str): version of the ASGI spec.
+        asgi_spec_version (str): The version of this spec being used. Optional; if
+        missing defaults to "1.0".
+        receive (Receive): ASGI receive function.
+        send (Send): ASGI send function.
+    """
+
+    type_: str
+    asgi_version: str
+    asgi_spec_version: str
+    receive: Receive
+    send: Send
+
+    @staticmethod
+    def create(scope: Scope, receive: Receive, send: Send) -> LifespanContext:
+        """Creates an instance of LifespanContext from ASGI args.
+
+        Args:
+            scope (Scope): ASGI scope.
+            receive (Receive): ASGI receive function.
+            send (Send): ASGI send function.
+
+        Returns:
+            LifespanContext: result.
+        """
+        return LifespanContext(
+            type_=scope["type"],
+            asgi_version=scope["asgi"]["version"],
+            asgi_spec_version=scope["asgi"].get("spec_version", "1.0"),
+            receive=receive,
+            send=send,
+        )
+
+
+@dataclass
 class HTTPContext(BaseContext):
     """Object that contains entire information related to HTTP Request.
 
