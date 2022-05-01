@@ -108,3 +108,21 @@ class Future(Bindable, Generic[T]):
                     return await reduce(lambda c, f: c >> f, funcs, Future.create(cnt))
 
                 return _composition
+
+    @staticmethod
+    def do(
+        cnt: T | "Future[T]", *funcs: Callable[[T], Awaitable[V] | V]
+    ) -> "Future[V]":
+        """Execute multiple sync and async function on some `Future` container.
+
+        Args:
+            cnt (Future[T]): to use as argument for functions.
+
+        Returns:
+            Future[V]: result.
+        """
+        match cnt:
+            case Future():
+                return cnt >> Future.compose(*funcs)
+            case _:
+                return Future.create(cnt) >> Future.compose(*funcs)

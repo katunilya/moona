@@ -1,20 +1,16 @@
 import pytest
 
 from mona.core import HTTPContext
-from mona.handlers.type import http
-from mona.monads import Failure, Success
+from mona.handlers.type import WrongRequestType, http
 
 
 @pytest.mark.parametrize(
-    "type_, initial, assert_result",
+    "type_, assert_result",
     [
-        ("http", Success, Success),
-        ("websocket", Success, Failure),
-        ("http", Failure, Failure),
-        ("websocket", Failure, Failure),
+        ("http", HTTPContext),
+        ("websocket", WrongRequestType),
     ],
 )
-def test_reqest_on_type(ctx: HTTPContext, type_, initial, assert_result):
+def test_reqest_on_type(ctx: HTTPContext, type_, assert_result):
     ctx.request.type_ = type_
-    result = http(initial(ctx))
-    assert isinstance(result, assert_result)
+    assert isinstance(ctx >> http, assert_result)

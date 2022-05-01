@@ -4,17 +4,17 @@ import orjson
 from pydantic import BaseModel
 
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
-from mona.handlers.events import receive_body, send_body
+from mona.handlers.core import HTTPContextResult, HTTPHandler, compose, do, http_handler
+from mona.handlers.events import receive_body_async, send_body_async
 from mona.handlers.header import set_header
 from mona.monads.future import Future
 from mona.monads.result import Result, Safe
-from mona.utils import decode_utf_8, deserialize
+from mona.utils import decode_utf_8, deserialize, encode_utf_8
 
 T = TypeVar("T")
 
 
-def get_body_bytes(ctx: HTTPContext) -> Future[Safe[bytes]]:
+def get_body_bytes_async(ctx: HTTPContext) -> Future[Safe[bytes]]:
     """Try to get `HTTPRequest` body as raw `bytes`.
 
     If request body was not received than it will be. Than it will be extracted as
@@ -27,15 +27,14 @@ def get_body_bytes(ctx: HTTPContext) -> Future[Safe[bytes]]:
     Returns:
         Future[Safe[bytes]]: async result.
     """
-    return (
-        Future.create(ctx)
-        >> Result.successfull
-        >> receive_body
-        >> Result.safely_bound(lambda ctx_: ctx_.request.body)
+    return do(
+        ctx,
+        receive_body_async,
+        Result.safely_bound(lambda ctx_: ctx_.request.body),
     )
 
 
-def get_body_text(ctx: HTTPContext) -> Future[Safe[str]]:
+def get_body_text_async(ctx: HTTPContext) -> Future[Safe[str]]:
     """Try to get `HTTPRequest` body as `str`.
 
     Gets body as `bytes` first and than decode as UTF-8.
@@ -46,10 +45,14 @@ def get_body_text(ctx: HTTPContext) -> Future[Safe[str]]:
     Returns:
         Future[Safe[str]]: async result.
     """
-    return Future.create(ctx) >> get_body_bytes >> Result.safely_bound(decode_utf_8)
+    return do(
+        ctx,
+        receive_body_async,
+        Result.safely_bound(decode_utf_8),
+    )
 
 
-def get_body_json(
+def get_body_json_async(
     target_type: Type[BaseModel],
 ) -> Callable[[HTTPContext], Future[Safe[BaseModel]]]:
     """Parses `bytes` body as JSON to passed type and returns that from context.
@@ -67,7 +70,11 @@ def get_body_json(
     """
 
     def _get_json_body(ctx: HTTPContext) -> Future[Safe[BaseModel]]:
-        return Future.create(ctx) >> get_body_bytes >> Result.safely_bound(deserialize)
+        return do(
+            ctx,
+            get_body_bytes_async,
+            Result.safely_bound(deserialize(target_type)),
+        )
 
     return _get_json_body
 
@@ -78,12 +85,12 @@ def set_body_bytes(data: bytes) -> HTTPHandler:
     Also sets headers:
     * Content-Length: XXX
     """
-    content_length = len(data)
+    _set_header = set_header("Content-Length", len(data))
 
     @http_handler
     def _set_body_bytes(ctx: HTTPContext) -> HTTPContextResult:
         ctx.response.body = data
-        return Result.successfull(ctx) >> set_header("Content-Length", content_length)
+        return _set_header(Result.successfull(ctx))
 
     return _set_body_bytes
 
@@ -95,17 +102,10 @@ def set_body_text(data: str) -> HTTPHandler:
     * Content-Type: text/plain
     * Content-Length: XXX
     """
-    body: str = data.encode("UTF-8")
-
-    @http_handler
-    def _set_body_text(ctx: HTTPContext) -> HTTPContextResult:
-        return (
-            Result.successfull(ctx)
-            >> set_body_bytes(body)
-            >> set_header("Content-Type", "text/plain")
-        )
-
-    return _set_body_text
+    return compose(
+        set_body_bytes(encode_utf_8(data)),
+        set_header("Content-Type", "text/plain"),
+    )
 
 
 def set_body_json(data: BaseModel) -> HTTPHandler:
@@ -115,20 +115,15 @@ def set_body_json(data: BaseModel) -> HTTPHandler:
     * Content-Type: application/json
     * Content-Length: XXX
     """
-    body: bytes = data.json(encoder=orjson.dumps)
-
-    @http_handler
-    def _set_body_json(ctx: HTTPContext) -> HTTPContextResult:
-        return (
-            Result.successfull(ctx)
-            >> set_body_bytes(body)
-            >> set_header("Content-Type", "application/json")
-        )
-
-    return _set_body_json
+    return compose(
+        set_body_bytes(data.json(encoder=orjson.dumps)),
+        set_header("Content-Type", "application/json"),
+    )
 
 
-def bind_body_bytes(func: Callable[[HTTPContext], Future[Safe[bytes]]]) -> HTTPHandler:
+def bind_body_bytes_async(
+    func: Callable[[HTTPContext], Future[Safe[bytes]]]
+) -> HTTPHandler:
     """`HTTPHandler` that sets `bytes` processed from `func` execution.
 
     Args:
@@ -138,14 +133,19 @@ def bind_body_bytes(func: Callable[[HTTPContext], Future[Safe[bytes]]]) -> HTTPH
 
     @http_handler
     async def _bind_body_bytes(ctx: HTTPContext) -> HTTPContextResult:
-        return Result.successfull(ctx) >> set_body_bytes(
-            await (Future.create(ctx) >> func)
+        data = await (Future.create(ctx) >> func)
+        return do(
+            ctx,
+            Result.successfull,
+            set_body_bytes(data),
         )
 
     return _bind_body_bytes
 
 
-def bind_body_text(func: Callable[[HTTPContext], Future[Safe[str]]]) -> HTTPHandler:
+def bind_body_text_async(
+    func: Callable[[HTTPContext], Future[Safe[str]]]
+) -> HTTPHandler:
     """`HTTPHandler` that sets `str` processed from `func` execution.
 
     Args:
@@ -155,14 +155,17 @@ def bind_body_text(func: Callable[[HTTPContext], Future[Safe[str]]]) -> HTTPHand
 
     @http_handler
     async def _bind_body_text(ctx: HTTPContext) -> HTTPContextResult:
-        return Result.successfull(ctx) >> set_body_text(
-            await (Future.create(ctx) >> func)
+        data = await (Future.create(ctx) >> func)
+        return do(
+            ctx,
+            Result.successfull,
+            set_body_text(data),
         )
 
     return _bind_body_text
 
 
-def bind_body_json(
+def bind_body_json_async(
     func: Callable[[HTTPContext], Future[Safe[BaseModel]]]
 ) -> HTTPHandler:
     """`HTTPHandler` that sets `BaseModel` processed from `func` execution.
@@ -174,61 +177,49 @@ def bind_body_json(
 
     @http_handler
     async def _bind_body_json(ctx: HTTPContext) -> HTTPContextResult:
-        return Result.successfull(ctx) >> set_body_json(
-            await (Future.create(ctx) >> func)
+        data = await (Future.create(ctx) >> func)
+        return do(
+            ctx,
+            Result.successfull,
+            set_body_json(data),
         )
 
     return _bind_body_json
 
 
-def send_body_bytes(data: bytes) -> HTTPHandler:
+def send_body_bytes_async(data: bytes) -> HTTPHandler:
     """`HTTPHandler` that sets body to passed `bytes` and sends the response.
 
     Also sets headers:
     * Content-Length: XXX
     """
-
-    @http_handler
-    def _send_body_bytes(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return (
-            Future.create(ctx)
-            >> Result.successfull
-            >> set_body_bytes(data)
-            >> send_body
-        )
-
-    return _send_body_bytes
+    return compose(
+        set_body_bytes(data),
+        send_body_async,
+    )
 
 
-def send_body_text(data: str) -> HTTPHandler:
+def send_body_text_async(data: str) -> HTTPHandler:
     """`HTTPHandler` that sets body to passed `str` and sends the response.
 
     Also sets headers:
     * Content-Type: text/plain
     * Content-Length: XXX
     """
-
-    @http_handler
-    def _send_body_text(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return (
-            Future.create(ctx) >> Result.successfull >> set_body_text(data) >> send_body
-        )
-
-    return _send_body_text
+    return compose(
+        set_body_text(data),
+        send_body_async,
+    )
 
 
-def send_body_json(data: BaseModel) -> HTTPHandler:
+def send_body_json_async(data: BaseModel) -> HTTPHandler:
     """`HTTPHandler` that sets body to passed `BaseModel` as json and sends response.
 
     Also sets headers:
     * Content-Type: application/json
     * Content-Length: XXX
     """
-
-    @http_handler
-    def _send_body_json(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return (
-            Future.create(ctx) >> Result.successfull >> set_body_json(data) >> send_body
-        )
-
-    return _send_body_json
+    return compose(
+        set_body_json(data),
+        send_body_async,
+    )

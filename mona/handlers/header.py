@@ -5,7 +5,6 @@ from toolz import itemmap
 from mona.core import HTTPContext
 from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 from mona.monads.maybe import Maybe, Nothing, Some
-from mona.monads.result import Success
 from mona.utils import decode_utf_8, encode_utf_8
 
 
@@ -35,7 +34,7 @@ def set_header(name: str, value: str) -> HTTPHandler:
     @http_handler
     def _handler(ctx: HTTPContext) -> HTTPContextResult:
         ctx.response.headers[name] = value
-        return Success(ctx)
+        return ctx
 
     return _handler
 
@@ -67,7 +66,7 @@ def remove_header(name: str) -> HTTPHandler:
     @http_handler
     def _handler(ctx: HTTPContext) -> HTTPContextResult:
         del ctx.response.headers[name]
-        return Success(ctx)
+        return ctx
 
     return _handler
 

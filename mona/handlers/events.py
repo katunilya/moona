@@ -1,20 +1,21 @@
+from asyncio import Future
+
 from mona.core import HTTPContext
 from mona.handlers.core import HTTPContextResult, http_handler
-from mona.monads.result import Success
 
 
 @http_handler
-async def receive_body(ctx: HTTPContext) -> HTTPContextResult:
+async def receive_body_async(ctx: HTTPContext) -> HTTPContextResult:
     """Handler "http.request" ASGI event, receive Request body.
 
     If body was already taken, than nothing would be done and `Success` `HTTPContext`
     would be returned. If at some point we receive "http.disconnect" event than
     `HTTPContext` is closed and `Success` `HTTPContext` returned.
     """
-    match ctx.closed, ctx.received_body:
-        case True, _:
-            return Success(ctx)
-        case False, True:
+    match ctx.received_body:
+        case True:
+            return ctx
+        case False:
             body = b""
             while True:
                 match await ctx.receive():
@@ -26,35 +27,19 @@ async def receive_body(ctx: HTTPContext) -> HTTPContextResult:
                                 body += message.get("body", b"")
                                 ctx.request.body = body
                                 ctx.received_body = True
-                                return Success(ctx)
+                                return ctx
                     case {"type": "http.disconnect"}:
                         ctx.closed = True
-                        return Success(ctx)
-        case False, False:
-            return Success(ctx)
+                        return ctx
 
 
 @http_handler
-async def send_body(ctx: HTTPContext) -> HTTPContextResult:
-    """Handler that sends "http.response.body" event to client."""
-    match ctx.closed:
-        case True:
-            return Success(ctx)
-        case False:
-            await ctx.send({"type": "http.response.body", "body": ctx.response.body})
-            ctx.closed = True
-            return Success(ctx)
-
-
-@http_handler
-async def send_response_start(ctx: HTTPContext) -> HTTPContextResult:
+async def send_response_start_async(ctx: HTTPContext) -> HTTPContextResult:
     """`HTTPContext` handler that sends "http.response.start" event to client."""
-    match ctx.closed, ctx.started:
-        case True, _:
-            return Success(ctx)
-        case False, True:
-            return Success(ctx)
-        case False, False:
+    match ctx.started:
+        case True:
+            return ctx
+        case False:
             await ctx.send(
                 {
                     "type": "http.response.start",
@@ -64,3 +49,16 @@ async def send_response_start(ctx: HTTPContext) -> HTTPContextResult:
             )
             ctx.started = True
             return ctx
+
+
+@http_handler
+async def send_body_async(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sends "http.response.body" event to client.
+
+    If "http.response.start" event was not send than it will be during execution of this
+    handler.
+    """
+    ctx: HTTPContext = await Future.create(ctx) >> send_response_start_async
+    await ctx.send({"type": "http.response.body", "body": ctx.response.body})
+    ctx.closed = True
+    return ctx

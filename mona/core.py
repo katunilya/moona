@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
 from toolz import keymap
+
+from mona.monads.core import Bindable
 
 Message = dict[str, Any]
 Scope = Message
@@ -210,7 +214,7 @@ class HTTPResponse:
 
 
 @dataclass
-class HTTPContext:
+class HTTPContext(Bindable):
     """Object that contains entire information related to HTTP Request.
 
     Mostly it's structure is replication of HTTP Connection Scope of ASGI Specification.
@@ -275,3 +279,68 @@ class HTTPContext:
             started=self.started,
             closed=self.closed,
         )
+
+    def __rshift__(
+        self,
+        handler: Callable[
+            [HTTPContext | HTTPContextError], HTTPContext | HTTPContextError
+        ],
+    ) -> HTTPContext | HTTPContextError:
+        """Binding for `HTTPContext`.
+
+        This must be used only for sync handler for easier to read syntax. For async
+        functions use `Future`.
+
+        Args:
+            handler (Callable[[HTTPContext | HTTPContextError], HTTPContext |
+            HTTPContextError]): sync handler to execute with this ctx.
+
+        Returns:
+            HTTPContext | HTTPContextError: result of handler.
+        """
+        return handler(self)
+
+
+class HTTPContextError(Exception, Bindable):
+    """Base class for `Exception`s that happen during handling `HTTPContext`.
+
+    Attributes:
+        ctx (HTTPContext): context that failed to be processed.
+        message (str): message to respond.
+        status (int): status code for response to send.
+
+    Args:
+        ctx (HTTPContext): context that failed to be processed.
+        message (str): message to respond.
+        status (int): status code for response to send.
+    """
+
+    def __init__(
+        self,
+        ctx: HTTPContext,
+        message: str = "Internal Server Error happened during handling request.",
+        status=500,
+    ) -> None:
+        self.ctx = ctx
+        self.message = message
+        self.status = status
+
+    def __rshift__(
+        self,
+        handler: Callable[
+            [HTTPContext | HTTPContextError], HTTPContext | HTTPContextError
+        ],
+    ) -> HTTPContext | HTTPContextError:
+        """Binding for `HTTPContextError`.
+
+        This must be used only for sync handler for easier to read syntax. For async
+        functions use `Future`.
+
+        Args:
+            handler (Callable[[HTTPContext | HTTPContextError], HTTPContext |
+            HTTPContextError]): sync handler to execute with this ctx.
+
+        Returns:
+            HTTPContext | HTTPContextError: result of handler.
+        """
+        return handler(self)
