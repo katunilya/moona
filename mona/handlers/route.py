@@ -15,7 +15,7 @@ class WrongPathError(HTTPContextError):
         )
 
 
-def on_route(path: str) -> HTTPHandler:
+def route(path: str) -> HTTPHandler:
     """`HTTPContext` handler that `Success`fully processes ctx only on right path.
 
     Request path must be exactly the same as path passed as an argument to the handler
@@ -35,7 +35,7 @@ def on_route(path: str) -> HTTPHandler:
     return _route
 
 
-def on_subroute(path: str) -> HTTPHandler:
+def subroute(path: str) -> HTTPHandler:
     """`HTTPHandler` that proceeds only when Request path starts with passed path.
 
     Leading part of the path is removed after processing the request. For example
@@ -54,3 +54,44 @@ def on_subroute(path: str) -> HTTPHandler:
                 return Failure(WrongPathError(ctx, path))
 
     return _subroute
+
+
+def ci_route(path: str) -> HTTPHandler:
+    """`HTTPContext` handler that `Success`fully processes ctx only on right path.
+
+    Request path must be case-insensitive to path passed as an argument to the handler
+    HOF. In order to keep them of the same format paths (bth in request and in handler)
+    are striped from leading and trailing "/".
+    """
+    path = path.strip("/").lower()
+
+    @http_handler
+    def _ci_route(ctx: HTTPContext) -> HTTPContextResult:
+        match ctx.request.path.lower() == path:
+            case True:
+                return Success(ctx)
+            case False:
+                return Failure(WrongPathError(ctx, path))
+
+    return _ci_route
+
+
+def ci_subroute(path: str) -> HTTPHandler:
+    """`HTTPHandler` that proceeds only when Request path starts with passed path.
+
+    Leading part of the path is removed after processing the request. For example
+    request path was "group/users". Subroute waited for "group". After processing this
+    handler `HTTPContext` will have "users". Route is case-insensitive.
+    """
+    path = path.strip("/").lower()
+
+    @http_handler
+    def _ci_subroute(ctx: HTTPContext) -> HTTPContextResult:
+        match ctx.request.path.lower().startswith(path):
+            case True:
+                ctx.request.path = ctx.request.path.lstrip(path).strip("/")
+                return Success(ctx)
+            case False:
+                return Failure(WrongPathError(ctx, path))
+
+    return _ci_subroute
