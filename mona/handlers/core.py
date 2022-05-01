@@ -82,7 +82,12 @@ def choose(*handlers: HTTPHandler) -> HTTPHandler:
                 return Success(ctx)
             case some_handlers:
                 for handler in some_handlers:
-                    match await (Future.create(ctx) >> HTTPContext.copy >> handler):
+                    match await (
+                        Future.create(ctx)
+                        >> HTTPContext.copy
+                        >> Result.successfull
+                        >> handler
+                    ):
                         case Success() as success:
                             return success
                         case Failure():
