@@ -1,2 +1,2 @@
 from mona.asgi import create
-from mona.core import HTTPContext, HTTPContextError
+from mona.core import ContextError, HTTPContext

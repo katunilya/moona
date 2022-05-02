@@ -1,10 +1,34 @@
 from functools import wraps
 from typing import Awaitable, Callable
 
-from mona.core import HTTPContext, HTTPContextError
+from mona.core import BaseContext, ContextError, HTTPContext, LifespanContext
 from mona.monads.future import Future
 
-HTTPContextResult = HTTPContext | HTTPContextError
+ContextResult = BaseContext | ContextError
+Handler = Callable[[ContextResult], ContextResult | Awaitable[ContextResult]]
+
+
+def error_handler(handler: Handler) -> Handler:
+    """Decorator for `ContextError` handlers.
+
+    This decorator will run handler only when `ContextError` is
+    passed.
+    """
+
+    @wraps(handler)
+    def _error_handler(
+        result: ContextResult,
+    ) -> ContextResult | Awaitable[ContextResult]:
+        match result:
+            case ContextError() as err:
+                return handler(err)
+            case other:
+                return other
+
+    return _error_handler
+
+
+HTTPContextResult = HTTPContext | ContextError
 HTTPHandler = Callable[
     [HTTPContextResult], HTTPContextResult | Awaitable[HTTPContextResult]
 ]
@@ -24,35 +48,14 @@ def http_handler(handler: HTTPHandler) -> HTTPHandler:
         match result:
             case HTTPContext() as ctx:
                 match ctx.closed:
-                    case False:
-                        return handler(ctx)
                     case True:
                         return ctx
-            case HTTPContextError() as err:
-                return err
+                    case False:
+                        return ctx >> handler
+            case other:
+                return other
 
     return _http_handler
-
-
-def error_handler(handler: HTTPHandler) -> HTTPHandler:
-    """Decorator for `HTTPContextError` handlers.
-
-    This decorator will run this handler only when `Failure[HTTPContextError]` is
-    passed. Provides needed for switching from `Failure` state to `Success` or
-    `Failure`.
-    """
-
-    @wraps(handler)
-    def _error_handler(
-        result: HTTPContextResult,
-    ) -> HTTPContextResult | Awaitable[HTTPContextResult]:
-        match result:
-            case HTTPContextError() as err:
-                return handler(err)
-            case HTTPContext() as ctx:
-                return ctx
-
-    return _error_handler
 
 
 def compose(*handlers: HTTPHandler) -> HTTPHandler:
@@ -107,7 +110,7 @@ def choose(*handlers: HTTPHandler) -> HTTPHandler:
                     match await (Future.create(result) >> HTTPContext.copy >> handler):
                         case HTTPContext() as ctx:
                             return ctx
-                        case HTTPContextError():
+                        case ContextError():
                             continue
                 return result
 
@@ -131,3 +134,26 @@ def do(ctx: HTTPContextResult, *handlers: HTTPHandler) -> Future[HTTPContextResu
         Future[HTTPContextResult]: result.
     """
     return Future.do(ctx, *handlers)
+
+
+LifespanContextResult = LifespanContext | ContextError
+LifespanHandler = Callable[
+    [LifespanContextResult], LifespanContextResult | Awaitable[LifespanContextResult]
+]
+
+
+def lifespan_handler(handler: LifespanHandler) -> LifespanHandler:
+    """Decorator for `LifespanContext` handlers on startup and shutdown.
+
+    This decorator will proceed only unfinished `LifespanContext`.
+    """
+
+    @wraps(handler)
+    def _lifespan_handler(result: LifespanContextResult) -> LifespanContextResult:
+        match result:
+            case LifespanContext() as ctx:
+                return ctx >> handler
+            case other:
+                return other
+
+    return _lifespan_handler

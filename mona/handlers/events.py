@@ -42,7 +42,7 @@ async def send_response_start_async(ctx: HTTPContext) -> HTTPContextResult:
                 {
                     "type": "http.response.start",
                     "status": ctx.response.status,
-                    "headers": ctx.response.headers,
+                    "headers": list(ctx.response.headers.items()),
                 }
             )
             ctx.started = True

@@ -1,10 +1,16 @@
-from mona.core import ASGIApp, HTTPContext, HTTPContextError, Receive, Scope, Send
-from mona.handlers.body import set_body_text
+from mona.core import (
+    ASGIApp,
+    ContextError,
+    HTTPContext,
+    LifespanContext,
+    Receive,
+    Scope,
+    Send,
+)
 from mona.handlers.core import HTTPContextResult, HTTPHandler
-from mona.handlers.events import send_body_async, send_response_start_async
-from mona.handlers.status import set_status
+from mona.handlers.error import send_error_async
+from mona.handlers.events import send_body_async
 from mona.monads.future import Future
-from mona.monads.result import Failure, Success
 
 
 def create(handler: HTTPHandler) -> ASGIApp:
@@ -18,46 +24,20 @@ def create(handler: HTTPHandler) -> ASGIApp:
     """
 
     async def _asgi(scope: Scope, receive: Receive, send: Send) -> None:
-        result: HTTPContextResult = await (
-            Future.create(HTTPContext.create(scope, receive, send))
-            >> Success
-            >> handler
-        )
-        match result:
-            case Success(value=HTTPContext() as ctx):
-                match ctx.started, ctx.closed:
-                    case True, True:
-                        # started and closed
-                        return
-                    case True, False:
-                        # started, but not closed (response not send)
-                        await (Future.create(ctx) >> Success >> send_body_async)
-                    case False, _:
-                        await (
-                            Future.create(ctx)
-                            >> Success
-                            >> send_response_start_async
-                            >> send_body_async
-                        )
-            case Failure(value=HTTPContextError() as err):
-                match err.ctx.started, err.ctx.closed:
-                    case True, True:
-                        return
-                    case True, False:
-                        await (
-                            Future.create()
-                            >> Success
-                            >> set_body_text(err.message)
-                            >> send_body_async
-                        )
-                    case False, _:
-                        await (
-                            Future.create(err.ctx)
-                            >> Success
-                            >> set_status(err.status)
-                            >> set_body_text(err.message)
-                            >> send_response_start_async
-                            >> send_body_async
-                        )
+        match scope:
+            case {"type": "lifespan"}:
+                await (
+                    Future.create(LifespanContext.create(scope, receive, send))
+                    >> handler
+                )
+            case {"type": "http"}:
+                result: HTTPContextResult = await (
+                    Future.create(HTTPContext.create(scope, receive, send)) >> handler
+                )
+                match result:
+                    case HTTPContext() as ctx:
+                        await (ctx >> send_body_async)
+                    case ContextError() as err:
+                        await (err >> send_error_async)
 
     return _asgi

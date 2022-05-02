@@ -1,23 +1,23 @@
-from mona.core import HTTPContext, HTTPContextError
+from mona.core import BaseContext, ContextError, HTTPContext
 from mona.handlers.core import HTTPContextResult, http_handler
 
 
-class WrongRequestType(HTTPContextError):
-    """`HTTPHandler` received `HTTPContext` of wrong type."""
+class WrongContextType(ContextError):
+    """`Handler` received Context of wrong type."""
 
-    def __init__(self, ctx: HTTPContext, type_: str) -> None:
+    def __init__(self, ctx: BaseContext, type_: str) -> None:
         super().__init__(
             ctx,
-            f"Wrong request type. Requires: {type_}. Received: {ctx.request.type_}.",
+            f"Wrong request type. Requires: {type_}. Received: {str(ctx)}.",
             500,
         )
 
 
 @http_handler
-def http(ctx: HTTPContext) -> HTTPContextResult:
-    """`HTTPHandler` that processes only `HTTPContext` of "http" type."""
-    match ctx.request.type_:
-        case "http":
+def http(ctx: BaseContext) -> HTTPContextResult:
+    """Handler that processes only `HTTPContext`."""
+    match ctx:
+        case HTTPContext():
             return ctx
         case _:
-            return WrongRequestType(ctx, "http")
+            return WrongContextType(ctx, "http")

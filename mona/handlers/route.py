@@ -1,8 +1,8 @@
-from mona.core import HTTPContext, HTTPContextError
+from mona.core import ContextError, HTTPContext
 from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 
 
-class WrongPathError(HTTPContextError):
+class WrongPathError(ContextError):
     """`HTTPContext` is handled via wrong handler based on path mismatch."""
 
     def __init__(self, ctx: HTTPContext, path: str) -> None:

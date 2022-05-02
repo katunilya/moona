@@ -4,7 +4,7 @@ import orjson
 import toolz
 from pydantic import BaseModel
 
-from mona.core import HTTPContext, HTTPContextError
+from mona.core import ContextError, HTTPContext
 from mona.handlers.core import HTTPContextResult, HTTPHandler, compose, do, http_handler
 from mona.handlers.events import receive_body_async, send_body_async
 from mona.handlers.header import set_header
@@ -140,7 +140,7 @@ def bind_body_bytes_async(
             case Success(data):
                 return ctx >> set_body_bytes(data)
             case Failure(err):
-                return HTTPContextError(ctx, str(err))
+                return ContextError(ctx, str(err))
 
     return _bind_body_bytes
 
@@ -163,7 +163,7 @@ def bind_body_text_async(
             case Success(data):
                 return ctx >> set_body_text(data)
             case Failure(err):
-                return HTTPContextError(ctx, str(err))
+                return ContextError(ctx, str(err))
 
     return _bind_body_text
 
@@ -186,7 +186,7 @@ def bind_body_json_async(
             case Success(data):
                 return ctx >> set_body_json(data)
             case Failure(err):
-                return HTTPContextError(ctx, str(err))
+                return ContextError(ctx, str(err))
 
     return _bind_body_json
 
