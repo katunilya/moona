@@ -141,14 +141,15 @@ pip install dist/mona-0.2.0.tar.gz
 
 ## 🏗️ Develop
 
-Fork repository and setup [poetry](https://github.com/python-poetry/poetry)
-environment:
+Fork repository. `poetry` is required for project development as it provides
+simple way of managing dependencies and environment. To setup a project run:
 
 ```sh
-poetry shell        # create poetry environment and activate in current shell
-poetry install      # install dependencies
+make setup
 ```
 
-Now you are ready to bring your ideas to the project. Check out
-[Contribution Guidelines](/CONTRIBUTING.md) for more information on project
-development.
+This will create and activate environment, install all required dependencies and
+setup `pre-commit`.
+
+Now you are ready to bring your ideas to the project. Check out [Contribution
+Guidelines](/CONTRIBUTING.md) for more information on project development.
