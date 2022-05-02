@@ -151,5 +151,24 @@ make setup
 This will create and activate environment, install all required dependencies and
 setup `pre-commit`.
 
+### `Makefile`
+
+Other `Makefile` features:
+
+- `create_env`: create virtual environment;
+- `activate_env`: activate virtual environment;
+- `update_deps`: update dependencies with `poetry`;
+- `deps_install_no_dev`: install all dependencies except required for
+  development with `poetry`;
+- `deps_install`: install all dependencies with `poetry`;
+- `deps_export`: export dependencies into `requirements.txt`;
+- `check_flake8`: check repository with `flake8`;
+- `check_isort`: check repository with `isort`;
+- `test`: run `pytest` tests;
+- `check`: run all previous checks;
+- `setup_pre_commit`: setup `pre-commit` hooks;
+- `docs`: generate new documentation source files;
+- `setup`: setup repository for development;
+
 Now you are ready to bring your ideas to the project. Check out [Contribution
 Guidelines](/CONTRIBUTING.md) for more information on project development.
