@@ -136,7 +136,7 @@ Another way is to build package from source:
 git clone https://github.com/katunilya/mona
 cd mona
 poetry build
-pip install dist/mona-0.2.0.tar.gz
+pip install dist/mona-0.2.2.tar.gz
 ```
 
 ## 🏗️ Develop
