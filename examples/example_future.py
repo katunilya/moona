@@ -1,30 +1,39 @@
 import asyncio
 
-from mona.monads import future
+from mona.monads import Future
 
 
-async def async_inc(x: int) -> int:  # noqa
+async def async_inc(x: int) -> int:
     return x + 1
 
 
-def sync_square(x: int) -> int:  # noqa
+def sync_square(x: int) -> int:
     return x**2
 
 
-async def main():  # noqa
-    f = future.from_value(3)  # create some Future from sync value
+async def main():
+    # Future can be directly created from awaitable
+    f = Future(async_inc(2))
 
-    composition = future.compose(async_inc, async_inc, sync_square)  # (x + 1 + 1)^2
+    print(await f)  # 3
 
-    result = await future.bind(composition, f)
+    # Future can be also created from present value via Future.create
+    f = Future.create(3)  # create some Future from sync value
 
-    print(result)  # 25
+    composition = Future.compose(
+        async_inc,
+        async_inc,
+        sync_square,
+    )  # (x + 1 + 1)^2
+    # composition: (int) -> Future[int] (which is nearly the same as Awaitable[int])
 
-    # there is another syntax for exactly the same thing
-    result = await (future.from_value(3) >> async_inc >> async_inc >> sync_square)
+    # Future monad overrides `>>` operator for applying sync or async functions
+    result = await (f >> composition)
 
     print(result)  # 25
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+# can be run as-is
