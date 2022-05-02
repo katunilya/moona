@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
@@ -241,6 +241,11 @@ class BaseContext(ABC, Bindable):
         """
         return handler(self)
 
+    @abstractmethod
+    def copy(self) -> BaseContext:
+        """Creates deepcopy of the context."""
+        ...
+
 
 @dataclass
 class LifespanContext(BaseContext):
@@ -265,7 +270,6 @@ class LifespanContext(BaseContext):
     asgi_spec_version: str
     receive: Receive
     send: Send
-    finished: bool
 
     @staticmethod
     def create(scope: Scope, receive: Receive, send: Send) -> LifespanContext:
@@ -285,7 +289,24 @@ class LifespanContext(BaseContext):
             asgi_spec_version=scope["asgi"].get("spec_version", "1.0"),
             receive=receive,
             send=send,
-            finished=False,
+        )
+
+    def copy(self) -> LifespanContext:
+        """Create a deepcopy of `LifespanContext`.
+
+        This handler is need for `choose` combinator. Without it side-effects might put
+        context in some broken state.
+
+        Returns:
+            LifespanContext: deepcopy.
+        """
+        return LifespanContext(
+            type_=self.type_,
+            asgi_version=self.asgi_version,
+            asgi_spec_version=self.asgi_spec_version,
+            receive=self.receive,
+            send=self.send,
+            complete=self.complete,
         )
 
 
@@ -337,7 +358,7 @@ class HTTPContext(BaseContext):
             send=send,
         )
 
-    def copy(self: "HTTPContext") -> "HTTPContext":
+    def copy(self: HTTPContext) -> HTTPContext:
         """Create complete copy of HTTPContext.
 
         This function is needed to avoid side effects due to reference nature of Python

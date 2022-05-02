@@ -1,6 +1,6 @@
 import pytest
 
-from mona.core import HTTPContext, Message
+from mona.core import HTTPContext, LifespanContext, Message
 
 
 @pytest.fixture
@@ -65,3 +65,15 @@ def send():
 @pytest.fixture
 def ctx(scope, receive, send) -> HTTPContext:
     return HTTPContext.create(scope, receive, send)
+
+
+@pytest.fixture
+def lifespan_ctx(receive, send) -> LifespanContext:
+    scope = {
+        "type": "lifespan",
+        "asgi": {
+            "version": "3.0",
+            "spec_version": "2.2",
+        },
+    }
+    return LifespanContext.create(scope, receive, send)

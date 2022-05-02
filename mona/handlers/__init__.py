@@ -43,4 +43,4 @@ from mona.handlers.status import (
     set_status_ok,
     set_status_unauthorized,
 )
-from mona.handlers.type import WrongRequestType, http
+from mona.handlers.type import WrongContextType, http
