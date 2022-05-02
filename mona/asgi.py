@@ -36,8 +36,8 @@ def create(handler: HTTPHandler) -> ASGIApp:
                 )
                 match result:
                     case HTTPContext() as ctx:
-                        await (ctx >> send_body_async)
+                        await (Future.create(ctx) >> send_body_async)
                     case ContextError() as err:
-                        await (err >> send_error_async)
+                        await (Future.create(err) >> send_error_async)
 
     return _asgi
