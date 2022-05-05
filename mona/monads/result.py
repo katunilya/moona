@@ -19,6 +19,17 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
 
     Railway-oriented programming concept. Stands for `Result` of some computation
     sequence. Can be of 2 types: `Success` and `Failure`.
+
+    Example::
+
+        def make_moderator_admin(id: int) -> Result[User, Exception]:
+            return (
+                get_user(id)
+                >> check_user_role_is('moderator')
+                >> set_user_role('admin')
+                >> update_user
+            )
+
     """
 
     value: TSuccess | TFailure
@@ -72,7 +83,6 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
 
         Changes input and output types for passed function to `Result`.
 
-
         Example::
 
             @Result.bindable
@@ -96,13 +106,13 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
 
         Example::
 
-                @safe
+                @Result.safe
                 def divide_one_by(x: int) -> int:
                     return 1 / x
 
                 divide_one_by(0)  # Failure(value=ZeroDivisionError('division by zero'))
 
-                @safe
+                @Result.safe
                 def divide_two_by(x: int) -> int | Exception:
                     match x:
                         case 0:
@@ -111,12 +121,6 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
                             return 2 / value
 
                 divide_two_by(0)  # Failure(value=ValueError('Cannot divide by zero'))
-
-        Args:
-            func (Callable[[TSuccess], VSuccess | Exception]): _description_
-
-        Returns:
-            Callable[[TSuccess], Result[VSuccess, Exception]]: _description_
         """
 
         @wraps(func)
@@ -160,7 +164,7 @@ class Result(Bindable, Alterable, Generic[TSuccess, TFailure], ABC):
     def safely_bound(
         func: Callable[[TSuccess], VSuccess | Exception]
     ) -> Callable[[Result[TSuccess, TFailure]], Result[VSuccess, Exception]]:
-        """Decorator for functions that combins `bound` and `safe`."""
+        """Decorator for functions that combines `bound` and `safe`."""
         return Result.bound(Result.safe(func))
 
 
