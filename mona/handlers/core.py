@@ -11,8 +11,7 @@ Handler = Callable[[ContextResult], ContextResult | Awaitable[ContextResult]]
 def error_handler(handler: Handler) -> Handler:
     """Decorator for `ContextError` handlers.
 
-    This decorator will run handler only when `ContextError` is
-    passed.
+    This decorator will run handler only when `ContextError` is passed.
     """
 
     @wraps(handler)
@@ -37,8 +36,7 @@ HTTPHandler = Callable[
 def http_handler(handler: HTTPHandler) -> HTTPHandler:
     """Decorator for `HTTPContext` handlers.
 
-    This decorator will run this handler only when `Success[HTTPContext]` is passed.
-    Provides needed for switching from `Success` state to `Success` or `Failure`.
+    This decorator will run this handler only when `HTTPContext` is passed.
     """
 
     @wraps(handler)
@@ -58,15 +56,15 @@ def http_handler(handler: HTTPHandler) -> HTTPHandler:
     return _http_handler
 
 
-def compose(*handlers: HTTPHandler) -> HTTPHandler:
-    """Combinator for `HTTPHandler`s for sequential execution.
+def compose(*handlers: Handler) -> Handler:
+    """Combinator for `Handler`s for sequential execution.
 
-    Passed `HTTPHandler`s are executed one-by-one in passed oreder. Suitable for both
-    sync and async handlers.
+    Passed `Handler`s are executed one-by-one in passed oreder. Suitable for both sync
+    and async handlers.
 
     Example::
 
-        handler: HTTPHandler = compose(
+        handler: Handler = compose(
             set_status(200_OK),
             set_header("Content-Type", "application/json"),
         )
@@ -79,59 +77,59 @@ def compose(*handlers: HTTPHandler) -> HTTPHandler:
     return Future.compose(*handlers)
 
 
-def choose(*handlers: HTTPHandler) -> HTTPHandler:
-    """Combinator for choosing the first handler that returns `Success`.
+def choose(*handlers: Handler) -> Handler:
+    """Combinator for choosing the first handler that returns `BaseContext`.
 
     Iterates through multiple passed `handlers` and returns first that returns
-    `Success`. If no handler returns `Success` than returns initial `HTTPContext` as
-    `Success`. If handlers are empty than return initial `HTTPContext` as `Success`
-    result.
+    `BaseContext`. If all handler return `ContextError` than returns initial
+    `BaseContext`. If handlers are empty than return initial `BaseContext`.
 
     Example::
 
         handler = choose(
             # returns result if method is "GET" and path is "/user"
-            get_dataclass('/user', User),
-            # returns result if method is "GET" and path is "/users"
-            get_dataclass('/users', Users),
+            get_dataclass('/user', User), # returns result if method is "GET" and path
+            is "/users" get_dataclass('/users', Users),
         )
 
-    Returns:
-        HTTPHandler: resulting `HTTPHandler`.
-    """
+    Note:
+        Handler `get_dataclass` from example are not real.
 
+    Returns:
+        Handler: resulting `Handler`.
+    """
+    # TODO replace with some more abstract @handler decorator
     @http_handler
-    async def _choose(result: HTTPContextResult) -> HTTPContextResult:
+    async def _choose(result: ContextResult) -> ContextResult:
         match handlers:
             case ():
                 return result
             case some_handlers:
                 for handler in some_handlers:
-                    match await (Future.create(result) >> HTTPContext.copy >> handler):
-                        case HTTPContext() as ctx:
-                            return ctx
+                    match await (Future.create(result.copy()) >> handler):
                         case ContextError():
                             continue
+                        case ctx:
+                            return ctx
                 return result
 
     return _choose
 
 
-def do(ctx: HTTPContextResult, *handlers: HTTPHandler) -> Future[HTTPContextResult]:
-    """Execute multiple handlers on passed `HTTPContext` or `HTTPContextError`.
+def do(ctx: ContextResult, *handlers: Handler) -> Future[ContextResult]:
+    """Execute multiple handlers on passed `BaseContext` or `ContextError`.
 
-    If `HTTPContext` passed than it is automatically wrapped into `Success`. If
-    `HTTPContextError` than it is wrapped into `Failure`.
+    Actually alias for `Future.do`.
 
     Note:
         This is possible syntax for executing multiple functions, but `>>` is more
         supported.
 
     Args:
-        ctx (HTTPContext | HTTPContextError | HTTPContextResult): to use as argument.
+        ctx (ContextResult): to use as argument.
 
     Returns:
-        Future[HTTPContextResult]: result.
+        Future[ContextResult]: result.
     """
     return Future.do(ctx, *handlers)
 
