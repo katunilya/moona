@@ -19,22 +19,34 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
     actual value and means that it is present in execution context. `Nothing` on the
     other hand describes emtpiness and lack of value. This is additional wrapping around
     `None` values.
+
+    Example::
+
+            user = {
+                "name": "John Doe"
+                "emails": {
+                    "primary_email": "john_doe@example.com",
+                }
+            }
+
+            primary_email = (
+                Some(user)
+                >> get("emails"),
+                >> get("primary_email")
+                << or_empty_str
+            )  # Some("john_doe@example.com")
+
+            primary_email = (
+                Some(user)
+                >> get("emails"),
+                >> get("secondary_email")  # Nothing appeared here!
+                << or_empty_str
+            )  # Some("")
     """
 
     value: TSome
 
     def __rshift__(self, func: Callable[[TSome], "Maybe[VSome]"]) -> "Maybe[VSome]":
-        """Dunder method for `>>` bind syntax.
-
-        Perform execution of `func` only when container is `Some`. In case container is
-        `Nothing` just return it.
-
-        Args:
-            func (Callable[[T], Maybe[V]]): to bind.
-
-        Returns:
-            Maybe[V]: result.
-        """
         match self:
             case Some(value):
                 return func(value)
@@ -42,17 +54,6 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
                 return nothing
 
     def __lshift__(self, func: Callable[[None], "Maybe[VSome]"]) -> "Maybe[VSome]":
-        """Dunder method for `<<` altering.
-
-        Perform execution of `func` only when container is `Nothing`. In case container
-        is `Some` just return it.
-
-        Args:
-            func (Callable[[TSome], Maybe[VSome]]): to alter.
-
-        Returns:
-            Maybe[VSome]: result.
-        """
         match self:
             case Nothing():
                 return func(None)
@@ -93,10 +94,10 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
         Example::
 
                 @Maybe.altered
-                def get_user(name: None) -> Maybe[User]:
-                    ...
+                def or_zero(_) -> Maybe[int]:
+                    return Some(0)
 
-                result get_user(Nothing())  # Nothing
+                or_zero(Nothing())  # Some(0)
         """
 
         @wraps(func)
