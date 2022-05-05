@@ -30,6 +30,9 @@ functional tools like _function composition_ and _curring_.
 
 In this way all the functions must be just:
 
+- Single-argument functions
+- Higher-order functions that return single-argument functions
+
 If we operate with single-argument functions we can apply them sequentially
 (compose). In case we need to provide more than one argument we should use HOF.
 
