@@ -46,6 +46,10 @@ test:
 check: check_flake8 check_isort test
 	@echo "✅ All checks are finished!"
 
+setup_pre_commit:
+	@echo "⚠️ Setting up pre-commit..."
+	@pre-commit install
+
 # ========================== Documentation Management ==========================
 
 docs:
@@ -54,5 +58,5 @@ docs:
 
 # ===================== Development Environment Management =====================
 
-setup: create_env activate_env install_all
+setup: create_env activate_env install_all setup_pre_commit
 	@echo "✨ Setup finished!"

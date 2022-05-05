@@ -30,10 +30,10 @@ jobs:
           poetry install
       - name: Check flake8
         run: |
-          poetry run flake8 . --count --show-source --statistics
+          poetry run flake8 mona --count --show-source --statistics
       - name: Check isort
         run: |
-          poetry run isort **/*.py --check-only --verbose
+          poetry run isort mona/**/*.py --check-only --verbose
       - name: Test with pytest
         run: |
           poetry run pytest
