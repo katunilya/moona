@@ -13,7 +13,7 @@ class Bindable(Protocol):
         """Dunder method for `func` binding.
 
         Args:
-            func (Callable): function to bind
+            func (Callable): function to bind.
         """
 
 
@@ -30,5 +30,5 @@ class Alterable(Protocol):
         """Dunder method for `func` altering.
 
         Args:
-            func (Callable): function to alter
+            func (Callable): function to alter.
         """
