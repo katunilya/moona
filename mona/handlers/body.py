@@ -48,7 +48,7 @@ def get_body_text_async(ctx: HTTPContext) -> Future[Safe[str]]:
     """
     return do(
         ctx,
-        receive_body_async,
+        get_body_bytes_async,
         Result.safely_bound(decode_utf_8),
     )
 
