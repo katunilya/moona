@@ -48,7 +48,7 @@ def get_body_text_async(ctx: HTTPContext) -> Future[Safe[str]]:
     """
     return do(
         ctx,
-        receive_body_async,
+        get_body_bytes_async,
         Result.safely_bound(decode_utf_8),
     )
 
@@ -85,6 +85,9 @@ def set_body_bytes(data: bytes) -> HTTPHandler:
 
     Also sets headers:
     * Content-Length: XXX
+
+    Args:
+        data (bytes): to set as response body.
     """
     set_content_length = set_header("Content-Length", str(len(data)))
 
@@ -102,6 +105,9 @@ def set_body_text(data: str) -> HTTPHandler:
     Also sets headers:
     * Content-Type: text/plain
     * Content-Length: XXX
+
+    Args:
+        data (str): to set as response body.
     """
     return toolz.compose_left(
         set_body_bytes(encode_utf_8(data)),
@@ -115,6 +121,9 @@ def set_body_json(data: BaseModel) -> HTTPHandler:
     Also sets headers:
     * Content-Type: application/json
     * Content-Length: XXX
+
+    Args:
+        data (BaseModel): to set as response body.
     """
     return toolz.compose_left(
         set_body_bytes(orjson.dumps(data.dict())),
@@ -196,6 +205,9 @@ def send_body_bytes_async(data: bytes) -> HTTPHandler:
 
     Also sets headers:
     * Content-Length: XXX
+
+    Args:
+        data (bytes): to set as response body.
     """
     return compose(
         set_body_bytes(data),
@@ -209,6 +221,9 @@ def send_body_text_async(data: str) -> HTTPHandler:
     Also sets headers:
     * Content-Type: text/plain
     * Content-Length: XXX
+
+    Args:
+        data (str): to set as response body.
     """
     return compose(
         set_body_text(data),
@@ -222,6 +237,9 @@ def send_body_json_async(data: BaseModel) -> HTTPHandler:
     Also sets headers:
     * Content-Type: application/json
     * Content-Length: XXX
+
+    Args:
+        data (BaseModel): to set as response body.
     """
     return compose(
         set_body_json(data),

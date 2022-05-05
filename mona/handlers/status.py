@@ -1,5 +1,5 @@
 from mona.core import HTTPContext
-from mona.handlers.core import HTTPHandler, http_handler
+from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 
 CONTINUE = 100
 SWITCHING_PROTOCOLS = 101
@@ -67,13 +67,73 @@ def set_status(code: int) -> HTTPHandler:
     return _status
 
 
-set_status_ok = set_status(OK)
-set_status_created = set_status(CREATED)
-set_status_bad_request = set_status(BAD_REQUEST)
-set_status_unauthorized = set_status(UNAUTHORIZED)
-set_status_forbidden = set_status(FORBIDDEN)
-set_status_not_found = set_status(NOT_FOUND)
-set_status_method_not_allowed = set_status(METHOD_NOT_ALLOWED)
-set_status_internal_server_error = set_status(INTERNAL_SERVER_ERROR)
-set_status_not_implemented = set_status(NOT_IMPLEMENTED)
-set_status_bad_gateway = set_status(BAD_GATEWAY)
+__set_status_ok = set_status(OK)
+__set_status_created = set_status(CREATED)
+__set_status_bad_request = set_status(BAD_REQUEST)
+__set_status_unauthorized = set_status(UNAUTHORIZED)
+__set_status_forbidden = set_status(FORBIDDEN)
+__set_status_not_found = set_status(NOT_FOUND)
+__set_status_method_not_allowed = set_status(METHOD_NOT_ALLOWED)
+__set_status_internal_server_error = set_status(INTERNAL_SERVER_ERROR)
+__set_status_not_implemented = set_status(NOT_IMPLEMENTED)
+__set_status_bad_gateway = set_status(BAD_GATEWAY)
+
+
+@http_handler
+def set_status_ok(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to OK."""
+    return __set_status_ok(ctx)
+
+
+@http_handler
+def set_status_created(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to CREATED."""
+    return __set_status_created(ctx)
+
+
+@http_handler
+def set_status_bad_request(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to BAD_REQUEST."""
+    return __set_status_bad_request(ctx)
+
+
+@http_handler
+def set_status_unauthorized(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to UNAUTHORIZED."""
+    return __set_status_unauthorized(ctx)
+
+
+@http_handler
+def set_status_forbidden(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to FORBIDDEN."""
+    return __set_status_forbidden(ctx)
+
+
+@http_handler
+def set_status_not_found(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to NOT_FOUND."""
+    return __set_status_not_found(ctx)
+
+
+@http_handler
+def set_status_method_not_allowed(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to METHOD_NOT_ALLOWED."""
+    return __set_status_method_not_allowed(ctx)
+
+
+@http_handler
+def set_status_internal_server_error(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to INTERNAL_SERVER_ERROR."""
+    return __set_status_internal_server_error(ctx)
+
+
+@http_handler
+def set_status_not_implemented(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to NOT_IMPLEMENTED."""
+    return __set_status_not_implemented(ctx)
+
+
+@http_handler
+def set_status_bad_gateway(ctx: HTTPContext) -> HTTPContextResult:
+    """Handler that sets `HTTPResponse` status to BAD_GATEWAY."""
+    return __set_status_bad_gateway(ctx)

@@ -16,9 +16,109 @@ ASGIApp = Callable[[Scope, Receive, Send], Awaitable[None]]
 ASGIData = tuple[Scope, Receive, Send]
 
 
+class BaseContext(ABC, Bindable):
+    """Base class for each kind of Context handled by application.
+
+    Mainly there are 3 kinds:
+    * `HTTPContext` for "http" request scopes
+    * `LifespanContext` for "lifetime" request scopes
+    * `WebsocketContext` (not implemented)
+    """
+
+    def __rshift__(
+        self,
+        handler: Callable[
+            [BaseContext | ContextError],
+            BaseContext | ContextError | Awaitable[BaseContext | ContextError],
+        ],
+    ) -> BaseContext | ContextError | Awaitable[BaseContext | ContextError]:
+        """Binding for `BaseContext`.
+
+        Remember that for piplines with async handlers one must use `Future`.
+
+        Args:
+            handler (Callable[[BaseContext | ContextError], BaseContext | ContextError |
+            Awaitable[BaseContext | ContextError]]): sync handler to execute with this
+            ctx.
+
+        Returns:
+            BaseContext | ContextError | Awaitable[BaseContext | ContextError]: result
+            of handler.
+        """
+        return handler(self)
+
+    @abstractmethod
+    def copy(self) -> BaseContext:
+        """Creates deepcopy of the context."""
+
+
+# Lifespan
+@dataclass
+class LifespanContext(BaseContext):
+    """Context for handling actions performed on startup and shutdown.
+
+    It contains all the information required based on ASGI Lifespan Specification.
+
+    Note:
+        https://asgi.readthedocs.io/en/latest/specs/lifespan.html
+
+    Attributes:
+        type_ (str): type of context. Must be "lifespan".
+        asgi_version (str): version of the ASGI spec.
+        asgi_spec_version (str): The version of this spec being used. Optional; if
+        missing defaults to "1.0".
+        receive (Receive): ASGI receive function.
+        send (Send): ASGI send function.
+    """
+
+    type_: str
+    asgi_version: str
+    asgi_spec_version: str
+    receive: Receive
+    send: Send
+
+    @staticmethod
+    def create(scope: Scope, receive: Receive, send: Send) -> LifespanContext:
+        """Creates an instance of `LifespanContext` from ASGI args.
+
+        Args:
+            scope (Scope): ASGI scope.
+            receive (Receive): ASGI receive function.
+            send (Send): ASGI send function.
+
+        Returns:
+            LifespanContext: result.
+        """
+        return LifespanContext(
+            type_=scope["type"],
+            asgi_version=scope["asgi"]["version"],
+            asgi_spec_version=scope["asgi"].get("spec_version", "1.0"),
+            receive=receive,
+            send=send,
+        )
+
+    def copy(self) -> LifespanContext:
+        """Create a deepcopy of `LifespanContext`.
+
+        This handler is needed for `choose` combinator. Without it side-effects might
+        put context in some broken state.
+
+        Returns:
+            LifespanContext: deepcopy.
+        """
+        return LifespanContext(
+            type_=self.type_,
+            asgi_version=self.asgi_version,
+            asgi_spec_version=self.asgi_spec_version,
+            receive=self.receive,
+            send=self.send,
+        )
+
+
+# HTTP and Websocket
 @dataclass
 class ClientInfo:
-    """Information related to client that send the request.
+    """Information related to client that sent the request.
 
     Based on ASGI specification client in HTTP and Websocket connection scope is a pair
     of host and port where host is IPv4 or IPv6 address or unix socketand port is remote
@@ -105,7 +205,7 @@ class HTTPRequest:
     client: ClientInfo
 
     @staticmethod
-    def create(scope: Scope) -> "HTTPRequest":
+    def create(scope: Scope) -> HTTPRequest:
         """Create `HTTPRequest` object from ASGI scope.
 
         Args:
@@ -141,7 +241,7 @@ class HTTPRequest:
             client,
         )
 
-    def copy(self: "HTTPRequest") -> "HTTPRequest":
+    def copy(self: HTTPRequest) -> HTTPRequest:
         """Create a deepcopy of `HTTPRequest`.
 
         Returns:
@@ -186,7 +286,7 @@ class HTTPResponse:
     body: bytes
 
     @staticmethod
-    def empty() -> "HTTPResponse":
+    def empty() -> HTTPResponse:
         """Create empty `HTTPResponse`.
 
         Empty `HTTPResponse` has 200 OK status code, empty dictionary for headers and
@@ -201,112 +301,16 @@ class HTTPResponse:
             body=b"",
         )
 
-    def copy(self: "HTTPResponse") -> "HTTPResponse":
+    def copy(self: HTTPResponse) -> HTTPResponse:
         """Create a deepcopy of `HTTPResponse`.
 
         Returns:
-            HTTPResponse: deepcopy of HTTPResponse.
+            HTTPResponse: deepcopy of `HTTPResponse`.
         """
         return HTTPResponse(
             self.status,
             self.headers.copy(),
             self.body,
-        )
-
-
-class BaseContext(ABC, Bindable):
-    """Base class for each kind of Context handled by application.
-
-    Mainly there are 3 kinds:
-    * `HTTPContext` (implemented)
-    * `LifespanContext` (in progress)
-    * `WebsocketContext` (not implemented)
-    """
-
-    def __rshift__(
-        self,
-        handler: Callable[[BaseContext | ContextError], BaseContext | ContextError],
-    ) -> BaseContext | ContextError:
-        """Binding for `BaseContext`.
-
-        This must be used only for sync handler for easier to read syntax. For async
-        functions use `Future`.
-
-        Args:
-            handler (Callable[[BaseContext | ContextError], BaseContext |
-            ContextError]): sync handler to execute with this ctx.
-
-        Returns:
-            BaseContext | ContextError: result of handler.
-        """
-        return handler(self)
-
-    @abstractmethod
-    def copy(self) -> BaseContext:
-        """Creates deepcopy of the context."""
-        ...
-
-
-@dataclass
-class LifespanContext(BaseContext):
-    """Context for handling actions performed on startup and shutdown.
-
-    It contains all the information required based on ASGI Lifespan Specification.
-
-    Note:
-        https://asgi.readthedocs.io/en/latest/specs/lifespan.html
-
-    Attributes:
-        type_ (str): type of context. Must be "lifespan".
-        asgi_version (str): version of the ASGI spec.
-        asgi_spec_version (str): The version of this spec being used. Optional; if
-        missing defaults to "1.0".
-        receive (Receive): ASGI receive function.
-        send (Send): ASGI send function.
-    """
-
-    type_: str
-    asgi_version: str
-    asgi_spec_version: str
-    receive: Receive
-    send: Send
-
-    @staticmethod
-    def create(scope: Scope, receive: Receive, send: Send) -> LifespanContext:
-        """Creates an instance of LifespanContext from ASGI args.
-
-        Args:
-            scope (Scope): ASGI scope.
-            receive (Receive): ASGI receive function.
-            send (Send): ASGI send function.
-
-        Returns:
-            LifespanContext: result.
-        """
-        return LifespanContext(
-            type_=scope["type"],
-            asgi_version=scope["asgi"]["version"],
-            asgi_spec_version=scope["asgi"].get("spec_version", "1.0"),
-            receive=receive,
-            send=send,
-        )
-
-    def copy(self) -> LifespanContext:
-        """Create a deepcopy of `LifespanContext`.
-
-        This handler is need for `choose` combinator. Without it side-effects might put
-        context in some broken state.
-
-        Returns:
-            LifespanContext: deepcopy.
-        """
-        return LifespanContext(
-            type_=self.type_,
-            asgi_version=self.asgi_version,
-            asgi_spec_version=self.asgi_spec_version,
-            receive=self.receive,
-            send=self.send,
-            complete=self.complete,
         )
 
 
@@ -340,7 +344,7 @@ class HTTPContext(BaseContext):
     closed: bool = False
 
     @staticmethod
-    def create(scope: Scope, receive: Receive, send: Send) -> "HTTPContext":
+    def create(scope: Scope, receive: Receive, send: Send) -> HTTPContext:
         """Create context from ASGI function args.
 
         Args:
@@ -349,7 +353,7 @@ class HTTPContext(BaseContext):
             send (Send): ASGI send.
 
         Returns:
-            HTTPContext: for storing info about request
+            HTTPContext: for storing info about request.
         """
         return HTTPContext(
             request=HTTPRequest.create(scope),
@@ -359,13 +363,13 @@ class HTTPContext(BaseContext):
         )
 
     def copy(self: HTTPContext) -> HTTPContext:
-        """Create complete copy of HTTPContext.
+        """Create complete copy of `HTTPContext`.
 
         This function is needed to avoid side effects due to reference nature of Python
         when using `choose` combinator.
 
         Returns:
-            HTTPContext: copy.
+            HTTPContext: deepcopy if `HTTPContext`.
         """
         return HTTPContext(
             request=self.request.copy(),
@@ -378,6 +382,7 @@ class HTTPContext(BaseContext):
         )
 
 
+# ContextError
 class ContextError(Exception, BaseContext):
     """Base class for `Exception`s that happen during handling `HTTPContext`.
 
@@ -395,7 +400,7 @@ class ContextError(Exception, BaseContext):
     def __init__(
         self,
         ctx: BaseContext,
-        message: str = "Internal Server Error happened during handling request.",
+        message: str = "Internal Server Error.",
         status=500,
     ) -> None:
         self.ctx = ctx

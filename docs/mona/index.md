@@ -5,9 +5,7 @@
 - [Mona](../README.md#mona) / [Modules](../MODULES.md#mona-modules) / Mona
     - Modules
         - [Asgi](asgi.md#asgi)
-        - [Context](context.md#context)
-        - [Future](future.md#future)
-        - [Handler](handler.md#handler)
-        - [Req](req/index.md#req)
-        - [Res](res/index.md#res)
-        - [State](state.md#state)
+        - [Core](core.md#core)
+        - [Handlers](handlers/index.md#handlers)
+        - [Monads](monads/index.md#monads)
+        - [Utils](utils.md#utils)

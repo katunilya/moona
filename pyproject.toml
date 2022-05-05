@@ -1,9 +1,30 @@
 [tool.poetry]
 name = "mona"
-version = "0.2.1"
+version = "0.2.2"
 description = "ASGI server with functional approach in mind"
 authors = ["Katun Ilya <katun.ilya@gmail.com>"]
 license = "MIT"
+readme="README.md"
+repository="https://github.com/katunilya/mona"
+homepage="https://katunilya.github.io/mona/"
+documentation="https://katunilya.github.io/mona/"
+keywords=[
+    "ASGI",
+    "functional",
+    "monad",
+    "railroad",
+    "framework"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"

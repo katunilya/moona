@@ -14,7 +14,7 @@ class WrongPathError(ContextError):
 
 
 def route(path: str) -> HTTPHandler:
-    """`HTTPContext` handler that `Success`fully processes ctx only on right path.
+    """`HTTPContext` handler that processes ctx only on right path.
 
     Request path must be exactly the same as path passed as an argument to the handler
     HOF. In order to keep them of the same format paths (bth in request and in handler)
@@ -55,7 +55,7 @@ def subroute(path: str) -> HTTPHandler:
 
 
 def ci_route(path: str) -> HTTPHandler:
-    """`HTTPContext` handler that `Success`fully processes ctx only on right path.
+    """`HTTPContext` handler that processes ctx only on right path.
 
     Request path must be case-insensitive to path passed as an argument to the handler
     HOF. In order to keep them of the same format paths (bth in request and in handler)

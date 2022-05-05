@@ -15,24 +15,38 @@ class Future(Bindable, Generic[T]):
 
     `Future` allows running async function inside synchronous functions. Can execute
     both sync and async functions and produce next `Future`s.
+
+    Example::
+
+            f = (
+                Future.create(3)
+                >> (lambda x: x + 1)
+                >> async_inc
+                >> async_power_2
+            )  # Future (awaitable)
+            print(await f)  # 25
     """
 
     value: Awaitable[T]
 
     def __await__(self) -> Generator[None, None, T]:
-        """Dunder function that makes `Future` awaitable."""
         return self.value.__await__()
 
     async def __bind(self, function: Callable[[T], Awaitable[V] | V]) -> V:
         result = function(await self.value)
         return await result if isawaitable(result) else result
 
-    def __rshift__(self, func: Callable[[T], V | Awaitable[V]]) -> "Future[V]":
+    def __rshift__(self, func: Callable[[T], Awaitable[V] | V]) -> "Future[V]":
         return Future(self.__bind(func))
 
     @staticmethod
     async def identity(value: T) -> T:
         """Asynchronously returns passed `value`.
+
+        Example::
+
+                f = Future.identity(3)  # awaitable 3
+                print(await f)  # 3
 
         Args:
             value (T): to return asynchronously
@@ -47,6 +61,7 @@ class Future(Bindable, Generic[T]):
         """Create future from some present value (not awaitable).
 
         Example::
+
                 f = Future.create(1)
                 print(await f)  # 1
 
@@ -89,12 +104,12 @@ class Future(Bindable, Generic[T]):
 
         Example::
 
-                composition = future.compose(
+                composition = Future.compose(
                     async_plus_1,
                     sync_plus_1,
                 )  # asynchronous function that executes async_func, than sync_func
 
-                result = await (Future.from_value(3) >> composition)  # 5
+                result = await (Future.create(3) >> composition)  # 5
 
         Returns:
             Callable[[T], Awaitable[V]]: function composition
@@ -115,8 +130,24 @@ class Future(Bindable, Generic[T]):
     ) -> "Future[V]":
         """Execute multiple sync and async function on some `Future` container.
 
+        Basically this is for running some pipeline on some value. Supports both sync
+        and `Future` values. Sequentially executes functions one-by-one via composition.
+        Useful for cases when `funcs` are not known and come as first-class citizens and
+        must be executed. In case functions to run are know use `>>` syntax for more
+        readable pipeline execution syntax.
+
+        Example::
+
+                f = Future.do(
+                    3,
+                    lambda x: x + 1,
+                    async_inc,
+                    async_power_2
+                )  # Future (awaitable)
+                print(await f)  # 25
+
         Args:
-            cnt (Future[T]): to use as argument for functions.
+            cnt (T | Future[T]): to use as argument for functions.
 
         Returns:
             Future[V]: result.

@@ -145,4 +145,4 @@ cython_debug/
 #   ignored. However if you find that configuration of VS Code for your project starts to be machine
 #   specific than firstly attempt to get rid of this problem and that create local .gitignore in
 #   .vscode folder that will ignore machine spcific files.
-# .vscode
+.vscode
