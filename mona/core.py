@@ -53,6 +53,8 @@ class BaseContext(ABC, Bindable):
 
 
 # Lifespan
+# TODO add slots=True
+# TODO add static methods for send/receive events
 @dataclass
 class LifespanContext(BaseContext):
     """Context for handling actions performed on startup and shutdown.
@@ -116,6 +118,7 @@ class LifespanContext(BaseContext):
 
 
 # HTTP and Websocket
+# TODO add slots=True
 @dataclass
 class ClientInfo:
     """Information related to client that sent the request.
@@ -132,6 +135,7 @@ class ClientInfo:
     port: int | None = None
 
 
+# TODO add slots=True
 @dataclass
 class ServerInfo:
     """Information related to server that received the request.
@@ -148,6 +152,7 @@ class ServerInfo:
     port: int | None = None
 
 
+# TODO add slots=True instead of explicit slots
 @dataclass
 class HTTPRequest:
     """Information related to HTTP request from ASGI Connection Scope object.
@@ -263,6 +268,7 @@ class HTTPRequest:
         )
 
 
+# TODO add slots=True instead of explicit slots
 @dataclass
 class HTTPResponse:
     """Information related to HTTP Response sent by the application.
@@ -314,6 +320,9 @@ class HTTPResponse:
         )
 
 
+# TODO add staticmethods for send/receive
+# TODO add getter/setter methods for status, headers, body, etc.
+# TODO add slots=True
 @dataclass
 class HTTPContext(BaseContext):
     """Object that contains entire information related to HTTP Request.
