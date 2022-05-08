@@ -106,7 +106,7 @@ def choose(*handlers: Handler) -> Handler:
                 return result
             case some_handlers:
                 for handler in some_handlers:
-                    match await (Future.create(result.copy()) >> handler):
+                    match await handler(result.copy()):
                         case ContextError():
                             continue
                         case ctx:
@@ -114,24 +114,6 @@ def choose(*handlers: Handler) -> Handler:
                 return result
 
     return _choose
-
-
-def do(ctx: ContextResult, *handlers: Handler) -> Future[ContextResult]:
-    """Execute multiple handlers on passed `BaseContext` or `ContextError`.
-
-    Actually alias for `Future.do`.
-
-    Note:
-        This is possible syntax for executing multiple functions, but `>>` is more
-        supported.
-
-    Args:
-        ctx (ContextResult): to use as argument.
-
-    Returns:
-        Future[ContextResult]: result.
-    """
-    return Future.do(ctx, *handlers)
 
 
 LifespanContextResult = LifespanContext | ContextError
