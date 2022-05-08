@@ -17,6 +17,6 @@ def send_error_async(err: ContextError) -> Future[HTTPContext]:
     """
     return (
         Future.create(err.ctx)
-        .sbind(set_status(err.status))
-        .abind(send_body_text_async(err.message))
+        .then(set_status(err.status))
+        .then_future(send_body_text_async(err.message))
     )

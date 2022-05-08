@@ -38,10 +38,26 @@ class Future(Bindable, Generic[T]):
     async def __bind_sync(self, func: Callable[[T], V]) -> V:
         return func(await self.value)
 
-    def abind(self, func: Callable[[T], Awaitable[V]]) -> Future[V]:
+    def then_future(self, func: Callable[[T], Awaitable[V]]) -> Future[V]:
+        """`Future` bind function for async `func`s.
+
+        Args:
+            func (Callable[[T], Awaitable[V]]): to execute.
+
+        Returns:
+            Future[V]: execution result.
+        """
         return Future(self.__bind_async(func))
 
-    def sbind(self, func: Callable[[T], V]) -> Future[V]:
+    def then(self, func: Callable[[T], V]) -> Future[V]:
+        """`Future` bind function for sync `func`s.
+
+        Args:
+            func (Callable[[T], V]): to execute.
+
+        Returns:
+            Future[V]: execution result.
+        """
         return Future(self.__bind_sync(func))
 
     @staticmethod
@@ -77,6 +93,3 @@ class Future(Bindable, Generic[T]):
             Future[T]: result
         """
         return Future(Future.identity(value))
-
-    __rshift__ = abind
-    __gt__ = sbind
