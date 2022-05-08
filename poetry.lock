@@ -10,17 +10,6 @@ python-versions = ">=3.7"
 tests = ["pytest", "pytest-asyncio", "mypy (>=0.800)"]
 
 [[package]]
-name = "astpretty"
-version = "2.1.0"
-description = "Pretty print the output of python stdlib `ast.parse`."
-category = "dev"
-optional = false
-python-versions = ">=3.6.1"
-
-[package.extras]
-typed = ["typed-ast"]
-
-[[package]]
 name = "asyncio"
 version = "3.4.3"
 description = "reference implementation of PEP 3156"
@@ -159,17 +148,6 @@ pycodestyle = ">=2.8.0,<2.9.0"
 pyflakes = ">=2.4.0,<2.5.0"
 
 [[package]]
-name = "flake8-annotations-complexity"
-version = "0.0.7"
-description = "A flake8 extension that checks for type annotations complexity"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-flake8 = "*"
-
-[[package]]
 name = "flake8-bandit"
 version = "3.0.0"
 description = "Automated security testing with bandit and flake8."
@@ -260,18 +238,6 @@ python-versions = ">=3.6,<4.0"
 attrs = "*"
 eradicate = ">=2.0,<3.0"
 flake8 = ">=3.5,<5"
-
-[[package]]
-name = "flake8-expression-complexity"
-version = "0.0.11"
-description = "A flake8 extension that checks expressions complexity"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-astpretty = "*"
-flake8 = "*"
 
 [[package]]
 name = "flake8-isort"
@@ -753,16 +719,12 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "9912b81d677ab6cb82b2e36aaadf97431baaae29f123b99918581c1e67bd5fd7"
+content-hash = "8c9f5b8d980cf9788bd2bf614051c48c2854b6546f9ffadfc767c80d794f59c4"
 
 [metadata.files]
 asgiref = [
     {file = "asgiref-3.5.1-py3-none-any.whl", hash = "sha256:45a429524fba18aba9d512498b19d220c4d628e75b40cf5c627524dbaebc5cc1"},
     {file = "asgiref-3.5.1.tar.gz", hash = "sha256:fddeea3c53fa99d0cdb613c3941cc6e52d822491fc2753fba25768fb5bf4e865"},
-]
-astpretty = [
-    {file = "astpretty-2.1.0-py2.py3-none-any.whl", hash = "sha256:f81f14b5636f7af81fadb1e3c09ca7702ce4615500d9cc6d6829befb2dec2e3c"},
-    {file = "astpretty-2.1.0.tar.gz", hash = "sha256:8a801fcda604ec741f010bb36d7cbadc3ec8a182ea6fb83e20ab663463e75ff6"},
 ]
 asyncio = [
     {file = "asyncio-3.4.3-cp33-none-win32.whl", hash = "sha256:b62c9157d36187eca799c378e572c969f0da87cd5fc42ca372d92cdb06e7e1de"},
@@ -835,10 +797,6 @@ flake8 = [
     {file = "flake8-4.0.1-py2.py3-none-any.whl", hash = "sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d"},
     {file = "flake8-4.0.1.tar.gz", hash = "sha256:806e034dda44114815e23c16ef92f95c91e4c71100ff52813adf7132a6ad870d"},
 ]
-flake8-annotations-complexity = [
-    {file = "flake8_annotations_complexity-0.0.7-py3-none-any.whl", hash = "sha256:a1410f5b964927032471ce99932d1670d28ea323b50400b45cc14575be070508"},
-    {file = "flake8_annotations_complexity-0.0.7.tar.gz", hash = "sha256:2ecd93375e3dee0d4e11e476087a52fa985c47bc049015ff04a9de38fc0c4dfd"},
-]
 flake8-bandit = [
     {file = "flake8_bandit-3.0.0-py2.py3-none-any.whl", hash = "sha256:61b617f4f7cdaa0e2b1e6bf7b68afb2b619a227bb3e3ae00dd36c213bd17900a"},
     {file = "flake8_bandit-3.0.0.tar.gz", hash = "sha256:54d19427e6a8d50322a7b02e1841c0a7c22d856975f3459803320e0e18e2d6a1"},
@@ -866,10 +824,6 @@ flake8-docstrings = [
 flake8-eradicate = [
     {file = "flake8-eradicate-1.2.1.tar.gz", hash = "sha256:e486f8ab7e2dba3667223688e9239158fbf4ecaa88125e2283bcda81171412b7"},
     {file = "flake8_eradicate-1.2.1-py3-none-any.whl", hash = "sha256:00d77faefb64cef18b3c1b48a004c3a2ad663aa3cf85650f422437d25ece6441"},
-]
-flake8-expression-complexity = [
-    {file = "flake8_expression_complexity-0.0.11-py3-none-any.whl", hash = "sha256:b56bac37f7dd5d3d102a7111c89f6579c2cbd897b868147794c9ed12aadc627c"},
-    {file = "flake8_expression_complexity-0.0.11.tar.gz", hash = "sha256:4dd8909fecbc20f53814cdcef9d0b04f61532764278d9b6e8026686812e96631"},
 ]
 flake8-isort = [
     {file = "flake8-isort-4.1.1.tar.gz", hash = "sha256:d814304ab70e6e58859bc5c3e221e2e6e71c958e7005239202fee19c24f82717"},
