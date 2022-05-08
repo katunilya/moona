@@ -204,7 +204,7 @@ def send_body_bytes_async(data: bytes) -> HTTPHandler:
 
     @http_handler
     def _send_body_bytes_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return (Future.create(ctx) > set_body_bytes(data)) >> send_body_async
+        return Future.create(ctx).sbind(set_body_bytes(data)).abind(send_body_async)
 
     return _send_body_bytes_async
 
@@ -222,7 +222,7 @@ def send_body_text_async(data: str) -> HTTPHandler:
 
     @http_handler
     def _send_body_text_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return (Future.create(ctx) > set_body_text(data)) >> send_body_async
+        return Future.create(ctx).sbind(set_body_text(data)).abind(send_body_async)
 
     return _send_body_text_async
 
@@ -240,6 +240,6 @@ def send_body_json_async(data: BaseModel) -> HTTPHandler:
 
     @http_handler
     def _send_body_json_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return (Future.create(ctx) > set_body_json(data)) >> send_body_async
+        return Future.create(ctx).sbind(set_body_json(data)).abind(send_body_async)
 
     return _send_body_json_async
