@@ -12,7 +12,7 @@ from mona.handlers.body import (
     set_body_json,
     set_body_text,
 )
-from mona.handlers.core import choose, compose, do, error_handler, http_handler
+from mona.handlers.core import choose, error_handler, http_handler
 from mona.handlers.events import (
     receive_body_async,
     send_body_async,
