@@ -20,9 +20,9 @@ class Future(Bindable, Generic[T]):
 
             f = (
                 Future.create(3)
-                > (lambda x: x + 1)
-                >> async_inc
-                >> async_power_2
+                .then(lambda x: x + 1)
+                .then_future(async_inc)
+                .then_future(async_power_2)
             )  # Future (awaitable)
             print(await f)  # 25
     """
