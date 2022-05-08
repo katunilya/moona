@@ -117,11 +117,11 @@ def create_async_binding(data):
 @pytest.mark.parametrize(
     "func, result",
     [
-        (create_sync_binding(b""), b""),
+        # (create_sync_binding(b""), b""),
         (create_async_binding(b""), b""),
-        (create_sync_binding(b"Hello, World!"), b"Hello, World!"),
+        # (create_sync_binding(b"Hello, World!"), b"Hello, World!"),
         (create_async_binding(b"Hello, World!"), b"Hello, World!"),
-        (create_sync_binding(b'{"name":"John Doe"}'), b'{"name":"John Doe"}'),
+        # (create_sync_binding(b'{"name":"John Doe"}'), b'{"name":"John Doe"}'),
         (create_async_binding(b'{"name":"John Doe"}'), b'{"name":"John Doe"}'),
     ],
 )
@@ -135,11 +135,11 @@ async def test_bind_body_bytes_async(ctx: HTTPContext, func, result):
 @pytest.mark.parametrize(
     "func, result",
     [
-        (create_sync_binding(""), b""),
+        # (create_sync_binding(""), b""),
         (create_async_binding(""), b""),
-        (create_sync_binding("Hello, World!"), b"Hello, World!"),
+        # (create_sync_binding("Hello, World!"), b"Hello, World!"),
         (create_async_binding("Hello, World!"), b"Hello, World!"),
-        (create_sync_binding('{"name":"John Doe"}'), b'{"name":"John Doe"}'),
+        # (create_sync_binding('{"name":"John Doe"}'), b'{"name":"John Doe"}'),
         (create_async_binding('{"name":"John Doe"}'), b'{"name":"John Doe"}'),
     ],
 )
@@ -154,10 +154,10 @@ async def test_bind_body_text_async(ctx: HTTPContext, func, result):
 @pytest.mark.parametrize(
     "func, result",
     [
-        (
-            create_sync_binding(User(name="John Doe", age=33)),
-            b'{"name":"John Doe","age":33}',
-        ),
+        # (
+        #     create_sync_binding(User(name="John Doe", age=33)),
+        #     b'{"name":"John Doe","age":33}',
+        # ),
         (
             create_async_binding(User(name="John Doe", age=33)),
             b'{"name":"John Doe","age":33}',

@@ -5,7 +5,7 @@ import toolz
 from pydantic import BaseModel
 
 from mona.core import ContextError, HTTPContext
-from mona.handlers.core import HTTPContextResult, HTTPHandler, compose, do, http_handler
+from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 from mona.handlers.events import receive_body_async, send_body_async
 from mona.handlers.header import set_header
 from mona.monads.future import Future
@@ -28,10 +28,8 @@ def get_body_bytes_async(ctx: HTTPContext) -> Future[Safe[bytes]]:
     Returns:
         Future[Safe[bytes]]: async result.
     """
-    return do(
-        ctx,
-        receive_body_async,
-        Result.safely_bound(lambda ctx_: ctx_.request.body),
+    return Future(receive_body_async(ctx)) > Result.safely_bound(
+        lambda ctx_: ctx_.request.body
     )
 
 
@@ -46,11 +44,7 @@ def get_body_text_async(ctx: HTTPContext) -> Future[Safe[str]]:
     Returns:
         Future[Safe[str]]: async result.
     """
-    return do(
-        ctx,
-        get_body_bytes_async,
-        Result.safely_bound(decode_utf_8),
-    )
+    return Future(get_body_bytes_async(ctx)) > Result.safely_bound(decode_utf_8)
 
 
 def get_body_json_async(
@@ -71,10 +65,8 @@ def get_body_json_async(
     """
 
     def _get_json_body(ctx: HTTPContext) -> Future[Safe[BaseModel]]:
-        return do(
-            ctx,
-            get_body_bytes_async,
-            Result.safely_bound(deserialize(target_type)),
+        return Future(get_body_bytes_async(ctx)) > Result.safely_bound(
+            deserialize(target_type)
         )
 
     return _get_json_body
@@ -142,7 +134,7 @@ def bind_body_bytes_async(
     """
 
     @http_handler
-    async def _bind_body_bytes(ctx: HTTPContext) -> HTTPContextResult:
+    async def _bind_body_bytes_async(ctx: HTTPContext) -> HTTPContextResult:
         result: Safe[bytes] = await (Future.create(ctx) >> func)
 
         match result:
@@ -151,7 +143,7 @@ def bind_body_bytes_async(
             case Failure(err):
                 return ContextError(ctx, str(err))
 
-    return _bind_body_bytes
+    return _bind_body_bytes_async
 
 
 def bind_body_text_async(
@@ -209,10 +201,12 @@ def send_body_bytes_async(data: bytes) -> HTTPHandler:
     Args:
         data (bytes): to set as response body.
     """
-    return compose(
-        set_body_bytes(data),
-        send_body_async,
-    )
+
+    @http_handler
+    def _send_body_bytes_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
+        return (Future.create(ctx) > set_body_bytes(data)) >> send_body_async
+
+    return _send_body_bytes_async
 
 
 def send_body_text_async(data: str) -> HTTPHandler:
@@ -225,10 +219,12 @@ def send_body_text_async(data: str) -> HTTPHandler:
     Args:
         data (str): to set as response body.
     """
-    return compose(
-        set_body_text(data),
-        send_body_async,
-    )
+
+    @http_handler
+    def _send_body_text_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
+        return (Future.create(ctx) > set_body_text(data)) >> send_body_async
+
+    return _send_body_text_async
 
 
 def send_body_json_async(data: BaseModel) -> HTTPHandler:
@@ -241,7 +237,9 @@ def send_body_json_async(data: BaseModel) -> HTTPHandler:
     Args:
         data (BaseModel): to set as response body.
     """
-    return compose(
-        set_body_json(data),
-        send_body_async,
-    )
+
+    @http_handler
+    def _send_body_json_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
+        return (Future.create(ctx) > set_body_json(data)) >> send_body_async
+
+    return _send_body_json_async
