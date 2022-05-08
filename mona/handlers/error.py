@@ -6,7 +6,7 @@ from mona.monads.future import Future
 
 
 @error_handler
-def send_error_async(err: ContextError) -> HTTPContext:
+def send_error_async(err: ContextError) -> Future[HTTPContext]:
     """Default handler for all `HTTPContextErrors`.
 
     Sets response status to `err.status`, response body to `err.message`.
@@ -17,6 +17,6 @@ def send_error_async(err: ContextError) -> HTTPContext:
     """
     return (
         Future.create(err.ctx)
-        >> set_status(err.status)
-        >> send_body_text_async(err.message)
+        .sbind(set_status(err.status))
+        .abind(send_body_text_async(err.message))
     )
