@@ -46,6 +46,3 @@ class Pipe(Generic[X]):
             X: internal value.
         """
         return self.value
-
-    __rshift__ = then_future
-    __gt__ = then
