@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import wraps
 from typing import Awaitable, Callable, Generator, Generic, TypeVar
 
 from mona.monads.core import Bindable
@@ -145,3 +146,13 @@ class Future(Bindable, Generic[T]):
             Future[T]: result
         """
         return Future(Future.identity(value))
+
+    @staticmethod
+    def returns(func: Callable[[T], Awaitable[V]]) -> Callable[[T], Future[V]]:
+        """Decorator for wrapping awaitable value returned from `func` to `Future`."""
+
+        @wraps(func)
+        def _wrapper(value: T) -> Future[V]:
+            return Future(func(value))
+
+        return _wrapper
