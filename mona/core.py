@@ -6,8 +6,6 @@ from typing import Any, Awaitable, Callable
 
 from toolz import keymap
 
-from mona.monads.core import Bindable
-
 Message = dict[str, Any]
 Scope = Message
 Receive = Callable[[], Awaitable[Message]]
@@ -16,7 +14,7 @@ ASGIApp = Callable[[Scope, Receive, Send], Awaitable[None]]
 ASGIData = tuple[Scope, Receive, Send]
 
 
-class BaseContext(ABC, Bindable):
+class BaseContext(ABC):
     """Base class for each kind of Context handled by application.
 
     Mainly there are 3 kinds:
