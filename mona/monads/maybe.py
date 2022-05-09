@@ -9,6 +9,10 @@ TSome = TypeVar("TSome")
 VSome = TypeVar("VSome")
 
 
+async def __this(x: TSome) -> TSome:
+    return x
+
+
 @dataclass(frozen=True, slots=True)
 class FutureMaybe(Generic[TSome]):
     """Container for async optional value."""
@@ -102,11 +106,67 @@ class FutureMaybe(Generic[TSome]):
         """
         return FutureMaybe(self.__otherwise_future(func))
 
-    # TODO if_some for async function
-    # TODO if_nothing for async functions
-    # TODO returns for async functions
-    # TODO if_some_returns for async functions
-    # TODO if_nothing_returns for async functions
+    @staticmethod
+    def if_some(
+        func: Callable[[TSome], Awaitable[Maybe[VSome]]]
+    ) -> Callable[[Maybe[TSome]], Awaitable[Maybe[VSome]]]:
+        """Decorator for async `func` to run only on `Some`."""
+
+        @wraps(func)
+        def _wrapper(cnt: Maybe[TSome]) -> Awaitable[Maybe[VSome]]:
+            match cnt:
+                case Some(value):
+                    return func(value)
+                case Nothing() as nothing:
+                    return __this(nothing)
+
+        return _wrapper
+
+    @staticmethod
+    def if_nothing(
+        func: Callable[[Nothing], Awaitable[Maybe[VSome]]]
+    ) -> Callable[[Maybe[TSome]], Awaitable[Maybe[VSome]]]:
+        """Decorator for async `func` to run only on `Nothing`."""
+
+        @wraps(func)
+        def _wrapper(cnt: Maybe[TSome]) -> Awaitable[Maybe[VSome]]:
+            match cnt:
+                case Some() as some:
+                    return __this(some)
+                case Nothing(value):
+                    return func(value)
+
+        return _wrapper
+
+    @staticmethod
+    def returns(
+        func: Callable[[TSome], Awaitable[VSome | None]]
+    ) -> Callable[[TSome], Awaitable[Maybe[VSome]]]:
+        """Decorator for functions that return `None` to return `Nothing` instead."""
+
+        @wraps(func)
+        async def _wrapper(arg: TSome) -> Maybe[VSome]:
+            match await func(arg):
+                case None:
+                    return Nothing()
+                case value:
+                    return Some(value)
+
+        return _wrapper
+
+    @staticmethod
+    def if_some_returns(
+        func: Callable[[TSome], Awaitable[VSome | None]]
+    ) -> Callable[[Maybe[TSome]], Awaitable[Maybe[VSome]]]:
+        """Decorater that combines `if_some` and `returns`."""
+        return FutureMaybe.if_some(FutureMaybe.returns(func))
+
+    @staticmethod
+    def if_nothing_returns(
+        func: Callable[[Nothing], Awaitable[VSome | None]]
+    ) -> Callable[[Nothing], Awaitable[Maybe[VSome]]]:
+        """Decorater that combines `if_some` and `returns`."""
+        return FutureMaybe.if_nothing(FutureMaybe.returns(func))
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,16 +189,16 @@ class Maybe(Generic[TSome], ABC):
 
             primary_email = (
                 Some(user)
-                >> get("emails"),
-                >> get("primary_email")
-                << or_empty_str
+                .then(get("emails"),)
+                .then(get("primary_email"))
+                .otherwise(empty_str)
             )  # Some("john_doe@example.com")
 
             primary_email = (
                 Some(user)
-                >> get("emails"),
-                >> get("secondary_email")  # Nothing appeared here!
-                << or_empty_str
+                .then(get("emails"),)
+                .then(get("primary_email"))
+                .otherwise(empty_str)
             )  # Some("")
     """
 
@@ -237,7 +297,7 @@ class Maybe(Generic[TSome], ABC):
 
         @wraps(func)
         def _if_some(cnt: Maybe[TSome]) -> Maybe[VSome]:
-            return cnt >> func
+            return cnt.then(func)
 
         return _if_some
 
@@ -260,7 +320,7 @@ class Maybe(Generic[TSome], ABC):
 
         @wraps(func)
         def _if_nothing(cnt: Maybe[TSome]) -> Maybe[VSome]:
-            return cnt << func
+            return cnt.otherwise(func)
 
         return _if_nothing
 
