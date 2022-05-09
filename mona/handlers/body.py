@@ -10,7 +10,7 @@ from mona.handlers.events import receive_body_async, send_body_async
 from mona.handlers.header import set_header
 from mona.monads.future import Future
 from mona.monads.pipe import Pipe
-from mona.monads.result import Failure, Result, Safe, Success
+from mona.monads.result import Bad, Ok, Result, Safe
 from mona.utils import decode_utf_8, deserialize, encode_utf_8
 
 T = TypeVar("T")
@@ -60,7 +60,7 @@ def get_body_text_async(ctx: HTTPContext) -> Future[Safe[str]]:
     Returns:
         Future[Safe[str]]: async result.
     """
-    return Future(get_body_bytes_async(ctx)).then(Result.safe(decode_utf_8))
+    return Future(get_body_bytes_async(ctx)).then(Result.returns(decode_utf_8))
 
 
 def get_body_json_async(
@@ -82,7 +82,7 @@ def get_body_json_async(
 
     def _get_json_body(ctx: HTTPContext) -> Future[Safe[BaseModel]]:
         return Future(get_body_bytes_async(ctx)).then(
-            Result.safe(deserialize(target_type))
+            Result.returns(deserialize(target_type))
         )
 
     return _get_json_body
@@ -117,7 +117,7 @@ def set_body_text(data: str) -> HTTPHandler:
     Args:
         data (str): to set as response body.
     """
-    body = Pipe(data).then(Result.safe(encode_utf_8))
+    body = Pipe(data).then(Result.returns(encode_utf_8))
 
     def _set_body_text(ctx: HTTPContext) -> HTTPContext:
         return (
@@ -160,9 +160,9 @@ def bind_body_bytes_async(
         result: Safe[bytes] = await (Future.from_value(ctx) >> func)
 
         match result:
-            case Success(data):
+            case Ok(data):
                 return ctx >> set_body_bytes(data)
-            case Failure(err):
+            case Bad(err):
                 return ContextError(ctx, str(err))
 
     return _bind_body_bytes_async
@@ -183,9 +183,9 @@ def bind_body_text_async(
         result: Safe[str] = await (Future.from_value(ctx) >> func)
 
         match result:
-            case Success(data):
+            case Ok(data):
                 return ctx >> set_body_text(data)
-            case Failure(err):
+            case Bad(err):
                 return ContextError(ctx, str(err))
 
     return _bind_body_text
@@ -206,9 +206,9 @@ def bind_body_json_async(
         result: Safe[BaseModel] = await (Future.from_value(ctx) >> func)
 
         match result:
-            case Success(data):
+            case Ok(data):
                 return ctx >> set_body_json(data)
-            case Failure(err):
+            case Bad(err):
                 return ContextError(ctx, str(err))
 
     return _bind_body_json

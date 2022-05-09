@@ -1,6 +1,6 @@
 import pytest
 
-from mona.monads.result import Failure, Result, Success
+from mona.monads.result import Bad, Ok, Result
 
 
 @pytest.mark.parametrize(
@@ -16,9 +16,9 @@ from mona.monads.result import Failure, Result, Success
     ],
 )
 def test_successfull(value):
-    result = Result.successfull(value)
+    result = Result.ok(value)
     assert isinstance(result, Result)
-    assert isinstance(result, Success)
+    assert isinstance(result, Ok)
     assert result.value == value
 
 
@@ -35,47 +35,47 @@ def test_successfull(value):
     ],
 )
 def test_failed(value):
-    result = Result.failed(value)
+    result = Result.bad(value)
     assert isinstance(result, Result)
-    assert isinstance(result, Failure)
+    assert isinstance(result, Bad)
     assert result.value == value
 
 
 @pytest.mark.parametrize(
     "value, func, assert_result",
     [
-        (Success(1), lambda x: Success(x + 1), Success(2)),
-        (Success(1), lambda x: Failure(x + 1), Failure(2)),
-        (Failure(1), lambda x: Success(x + 1), Success(1)),
-        (Failure(1), lambda x: Failure(x + 1), Success(1)),
+        (Ok(1), lambda x: Ok(x + 1), Ok(2)),
+        (Ok(1), lambda x: Bad(x + 1), Bad(2)),
+        (Bad(1), lambda x: Ok(x + 1), Ok(1)),
+        (Bad(1), lambda x: Bad(x + 1), Ok(1)),
     ],
 )
 def test_bound(value, func, assert_result: Result):
-    result = Result.bound(func)(value)
+    result = Result.if_ok(func)(value)
     assert result.value == assert_result.value
 
 
 @pytest.mark.parametrize(
     "value, func, assert_result",
     [
-        (Success(1), lambda x: Success(x + 1), Success(1)),
-        (Success(1), lambda x: Failure(x + 1), Success(1)),
-        (Failure(1), lambda x: Success(x + 1), Success(2)),
-        (Failure(1), lambda x: Failure(x + 1), Failure(2)),
+        (Ok(1), lambda x: Ok(x + 1), Ok(1)),
+        (Ok(1), lambda x: Bad(x + 1), Ok(1)),
+        (Bad(1), lambda x: Ok(x + 1), Ok(2)),
+        (Bad(1), lambda x: Bad(x + 1), Bad(2)),
     ],
 )
 def test_altered(value, func, assert_result: Result):
-    result = Result.altered(func)(value)
+    result = Result.if_bad(func)(value)
     assert result.value == assert_result.value
 
 
 @pytest.mark.parametrize(
     "value, func, assert_result",
     [
-        (Success(1), lambda x: x + 1, 2),
-        (Failure(1), lambda x: x + 1, Failure(1)),
-        (Success(1), lambda x: Success(x + 1), Success(2)),
-        (Failure(1), lambda x: Success(x + 1), Failure(1)),
+        (Ok(1), lambda x: x + 1, 2),
+        (Bad(1), lambda x: x + 1, Bad(1)),
+        (Ok(1), lambda x: Ok(x + 1), Ok(2)),
+        (Bad(1), lambda x: Ok(x + 1), Bad(1)),
     ],
 )
 def test_bind(value, func, assert_result):
@@ -85,10 +85,10 @@ def test_bind(value, func, assert_result):
 @pytest.mark.parametrize(
     "value, func, assert_result",
     [
-        (Success(1), lambda x: x + 1, Success(1)),
-        (Failure(1), lambda x: x + 1, 2),
-        (Success(1), lambda x: Success(x + 1), Success(1)),
-        (Failure(1), lambda x: Success(x + 1), Success(2)),
+        (Ok(1), lambda x: x + 1, Ok(1)),
+        (Bad(1), lambda x: x + 1, 2),
+        (Ok(1), lambda x: Ok(x + 1), Ok(1)),
+        (Bad(1), lambda x: Ok(x + 1), Ok(2)),
     ],
 )
 def test_alter(value, func, assert_result):
@@ -98,34 +98,34 @@ def test_alter(value, func, assert_result):
 @pytest.mark.parametrize(
     "value, func, assert_result",
     [
-        (Success(1), lambda x: 10 // x, Success(10)),
-        (Success(2), lambda x: 10 // x, Success(5)),
-        (Success(0), lambda x: 10 // x, ZeroDivisionError),
+        (Ok(1), lambda x: 10 // x, Ok(10)),
+        (Ok(2), lambda x: 10 // x, Ok(5)),
+        (Ok(0), lambda x: 10 // x, ZeroDivisionError),
     ],
 )
 def test_safe(value, func, assert_result):
-    result = value >> Result.safe(func)
+    result = value >> Result.returns(func)
 
     match result:
-        case Failure(value=Exception() as err):
+        case Bad(value=Exception() as err):
             assert isinstance(err, assert_result)
-        case Success() as value:
+        case Ok() as value:
             assert value == assert_result
 
 
 @pytest.mark.parametrize(
     "value, func, assert_result",
     [
-        (Success(1), lambda x: 10 // x, Success(10)),
-        (Success(2), lambda x: 10 // x, Success(5)),
-        (Success(0), lambda x: 10 // x, ZeroDivisionError),
+        (Ok(1), lambda x: 10 // x, Ok(10)),
+        (Ok(2), lambda x: 10 // x, Ok(5)),
+        (Ok(0), lambda x: 10 // x, ZeroDivisionError),
     ],
 )
 def test_safely_bound(value, func, assert_result):
-    result = Result.safely_bound(func)(value)
+    result = Result.if_ok_safe(func)(value)
 
     match result:
-        case Failure(value=Exception() as err):
+        case Bad(value=Exception() as err):
             assert isinstance(err, assert_result)
-        case Success() as value:
+        case Ok() as value:
             assert value == assert_result
