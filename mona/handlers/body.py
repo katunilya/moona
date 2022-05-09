@@ -16,7 +16,24 @@ from mona.utils import decode_utf_8, deserialize, encode_utf_8
 T = TypeVar("T")
 
 
-def get_body_bytes_async(ctx: HTTPContext) -> Future[Safe[bytes]]:
+def get_body_bytes(ctx: HTTPContext) -> bytes | None:
+    """Get `HTTPContext` request body.
+
+    When request is `None` than `Nothing` is returned. When request is b"" which means
+    that it had been received, but was empty `Nothing` is returned, too. Only if body is
+    some non-empty byte string then `Some` is returned.
+
+    Returns:
+        Maybe[bytes]: optional request body.
+    """
+    match ctx.request.body:
+        case None | b"":
+            return None
+        case value:
+            return value
+
+
+def get_body_bytes_async(ctx: HTTPContext) -> Future[bytes]:
     """Try to get `HTTPRequest` body as raw `bytes`.
 
     If request body was not received than it will be. Than it will be extracted as
@@ -29,11 +46,7 @@ def get_body_bytes_async(ctx: HTTPContext) -> Future[Safe[bytes]]:
     Returns:
         Future[Safe[bytes]]: async result.
     """
-    return (
-        Future(receive_body_async(ctx))
-        .then(lambda ctx_: ctx_.request.body)
-        .then(Success)
-    )
+    return Future(receive_body_async(ctx)).then(get_body_bytes)
 
 
 def get_body_text_async(ctx: HTTPContext) -> Future[Safe[str]]:
@@ -144,7 +157,7 @@ def bind_body_bytes_async(
 
     @http_handler
     async def _bind_body_bytes_async(ctx: HTTPContext) -> HTTPContextResult:
-        result: Safe[bytes] = await (Future.create(ctx) >> func)
+        result: Safe[bytes] = await (Future.from_value(ctx) >> func)
 
         match result:
             case Success(data):
@@ -167,7 +180,7 @@ def bind_body_text_async(
 
     @http_handler
     async def _bind_body_text(ctx: HTTPContext) -> HTTPContextResult:
-        result: Safe[str] = await (Future.create(ctx) >> func)
+        result: Safe[str] = await (Future.from_value(ctx) >> func)
 
         match result:
             case Success(data):
@@ -190,7 +203,7 @@ def bind_body_json_async(
 
     @http_handler
     async def _bind_body_json(ctx: HTTPContext) -> HTTPContextResult:
-        result: Safe[BaseModel] = await (Future.create(ctx) >> func)
+        result: Safe[BaseModel] = await (Future.from_value(ctx) >> func)
 
         match result:
             case Success(data):
@@ -214,7 +227,9 @@ def send_body_bytes_async(data: bytes) -> HTTPHandler:
     @http_handler
     def _send_body_bytes_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
         return (
-            Future.create(ctx).then(set_body_bytes(data)).then_future(send_body_async)
+            Future.from_value(ctx)
+            .then(set_body_bytes(data))
+            .then_future(send_body_async)
         )
 
     return _send_body_bytes_async
@@ -233,7 +248,11 @@ def send_body_text_async(data: str) -> HTTPHandler:
 
     @http_handler
     def _send_body_text_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return Future.create(ctx).then(set_body_text(data)).then_future(send_body_async)
+        return (
+            Future.from_value(ctx)
+            .then(set_body_text(data))
+            .then_future(send_body_async)
+        )
 
     return _send_body_text_async
 
@@ -251,6 +270,10 @@ def send_body_json_async(data: BaseModel) -> HTTPHandler:
 
     @http_handler
     def _send_body_json_async(ctx: HTTPContext) -> Future[HTTPContextResult]:
-        return Future.create(ctx).then(set_body_json(data)).then_future(send_body_async)
+        return (
+            Future.from_value(ctx)
+            .then(set_body_json(data))
+            .then_future(send_body_async)
+        )
 
     return _send_body_json_async

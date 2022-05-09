@@ -34,17 +34,18 @@ def create(handler: Handler) -> ASGIApp:
         match scope:
             case {"type": "lifespan"}:
                 await (
-                    Future.create(LifespanContext.create(scope, receive, send))
+                    Future.from_value(LifespanContext.create(scope, receive, send))
                     >> handler
                 )
             case {"type": "http"}:
                 result: HTTPContextResult = await (
-                    Future.create(HTTPContext.create(scope, receive, send)) >> handler
+                    Future.from_value(HTTPContext.create(scope, receive, send))
+                    >> handler
                 )
                 match result:
                     case HTTPContext() as ctx:
-                        await (Future.create(ctx) >> send_body_async)
+                        await (Future.from_value(ctx) >> send_body_async)
                     case ContextError() as err:
-                        await (Future.create(err) >> send_error_async)
+                        await (Future.from_value(err) >> send_error_async)
 
     return _asgi

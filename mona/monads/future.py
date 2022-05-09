@@ -78,12 +78,12 @@ class Future(Bindable, Generic[T]):
         return value
 
     @staticmethod
-    def create(value: T) -> Future[T]:
+    def from_value(value: T) -> Future[T]:
         """Create future from some present value (not awaitable).
 
         Example::
 
-                f = Future.create(1)
+                f = Future.from_value(1)
                 print(await f)  # 1
 
         Args:

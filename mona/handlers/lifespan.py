@@ -23,7 +23,7 @@ def lifespan_async(
         while True:
             match await ctx.receive():
                 case {"type": "lifespan.startup"}:
-                    result = await (Future.create(ctx) >> on_startup)
+                    result = await (Future.from_value(ctx) >> on_startup)
                     match result:
                         case LifespanContext():
                             await ctx.send({"type": "lifespan.startup.complete"})
@@ -35,7 +35,7 @@ def lifespan_async(
                                 }
                             )
                 case {"type": "lifespan.shutdown"}:
-                    result = await (Future.create(ctx) >> on_shutdown)
+                    result = await (Future.from_value(ctx) >> on_shutdown)
                     match result:
                         case LifespanContext():
                             await ctx.send({"type": "lifespan.shutdown.complete"})

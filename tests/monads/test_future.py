@@ -37,7 +37,7 @@ async def test_identity(value):
     ],
 )
 async def test_create(value):
-    result = Future.create(value)
+    result = Future.from_value(value)
     assert inspect.isawaitable(result)
     assert isinstance(result, Future)
     assert await result == value
@@ -68,7 +68,7 @@ async def async_strip(x: str) -> str:
     ],
 )
 async def test_bind_async(value, func, assert_result):
-    result = Future.create(value) >> func
+    result = Future.from_value(value) >> func
     assert inspect.isawaitable(result)
     assert isinstance(result, Future)
     assert await result == assert_result
@@ -87,7 +87,7 @@ async def test_bind_async(value, func, assert_result):
     ],
 )
 async def test_bind_sync(value, func, assert_result):
-    result = Future.create(value) > func
+    result = Future.from_value(value) > func
     assert inspect.isawaitable(result)
     assert isinstance(result, Future)
     assert await result == assert_result
