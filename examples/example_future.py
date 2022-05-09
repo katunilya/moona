@@ -18,7 +18,7 @@ async def main():
     print(await f)  # 3
 
     # Future can be also created from present value via Future.create
-    f = Future.create(3)  # create some Future from sync value
+    f = Future.from_value(3)  # create some Future from sync value
 
     composition = Future.compose(
         async_inc,

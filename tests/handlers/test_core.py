@@ -48,6 +48,6 @@ def fail_handler(ctx: HTTPContext) -> ContextError:
 )
 async def test_choose(ctx: HTTPContext, funcs, result_type):
     assert isinstance(
-        await (Future.create(ctx) >> choose(*funcs)),
+        await (Future.from_value(ctx) >> choose(*funcs)),
         result_type,
     )
