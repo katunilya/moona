@@ -63,7 +63,7 @@ class Pipe(Generic[X]):
         """
         return func(self.value)
 
-    def then_result_future(
+    def then_future_result(
         self, func: Callable[[X], Awaitable[Result[TOk, TBad]]]
     ) -> FutureResult[TOk, TBad]:
         """Execute passed async `func` on `Pipe` value and return `FutureResult`.
@@ -76,7 +76,7 @@ class Pipe(Generic[X]):
         """
         return FutureResult(func(self.value))
 
-    def then_maybe_future(
+    def then_future_maybe(
         self, func: Callable[[X], Awaitable[Maybe[Y]]]
     ) -> FutureMaybe[Y]:
         """Execute passed async `func` on `Pipe` value and return `MaybeFuture`.
