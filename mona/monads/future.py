@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import Awaitable, Callable, Generator, Generic, TypeVar
 
 from mona.monads.core import Bindable
+from mona.monads.maybe import FutureMaybe, Maybe
+from mona.monads.result import FutureResult, Result, TBad, TOk
 
 T = TypeVar("T")
 V = TypeVar("V")
@@ -32,25 +34,14 @@ class Future(Bindable, Generic[T]):
     def __await__(self) -> Generator[None, None, T]:
         return self.value.__await__()
 
-    async def __bind_async(self, func: Callable[[T], Awaitable[V]]) -> V:
+    async def __then_future(self, func: Callable[[T], Awaitable[V]]) -> V:
         return await func(await self.value)
 
-    async def __bind_sync(self, func: Callable[[T], V]) -> V:
+    async def __then(self, func: Callable[[T], V]) -> V:
         return func(await self.value)
 
-    def then_future(self, func: Callable[[T], Awaitable[V]]) -> Future[V]:
-        """`Future` bind function for async `func`s.
-
-        Args:
-            func (Callable[[T], Awaitable[V]]): to execute.
-
-        Returns:
-            Future[V]: execution result.
-        """
-        return Future(self.__bind_async(func))
-
     def then(self, func: Callable[[T], V]) -> Future[V]:
-        """`Future` bind function for sync `func`s.
+        """Execute sync `func` on `Future` value and return `Future`.
 
         Args:
             func (Callable[[T], V]): to execute.
@@ -58,7 +49,68 @@ class Future(Bindable, Generic[T]):
         Returns:
             Future[V]: execution result.
         """
-        return Future(self.__bind_sync(func))
+        return Future(self.__then(func))
+
+    def then_result(
+        self, func: Callable[[T], Result[TOk, TBad]]
+    ) -> FutureResult[TOk, TBad]:
+        """Execute sync `func` on `Future` value and return `FutureResult`.
+
+        Args:
+            func (Callable[[T], Result[TOk, TBad]]): to execute.
+
+        Returns:
+            FutureResult[TOk, TBad]: result.
+        """
+        return FutureResult(self.__then(func))
+
+    def then_maybe(self, func: Callable[[T], Maybe[V]]) -> FutureMaybe[V]:
+        """Execute sync `func` on `Future` value and return `FutureMaybe`.
+
+        Args:
+            func (Callable[[T], Maybe[V]]): to execute.
+
+        Returns:
+            FutureMaybe[V]: result.
+        """
+        return FutureMaybe(self.__then(func))
+
+    def then_future(self, func: Callable[[T], Awaitable[V]]) -> Future[V]:
+        """Execute async `func` on `Future` value and return `Future`.
+
+        Args:
+            func (Callable[[T], Awaitable[V]]): to execute.
+
+        Returns:
+            Future[V]: execution result.
+        """
+        return Future(self.__then_future(func))
+
+    def then_future_result(
+        self, func: Callable[[T], Awaitable[Result[TOk, TBad]]]
+    ) -> FutureResult[TOk, TBad]:
+        """Execute async `func` on `Future` value and return `FutureResult`.
+
+        Args:
+            func (Callable[[T], Awaitable[Result[TOk, TBad]]]): to execute.
+
+        Returns:
+            FutureResult[TOk, TBad]: result.
+        """
+        return FutureResult(self.__then_future(func))
+
+    def then_future_maybe(
+        self, func: Callable[[T], Awaitable[Maybe[V]]]
+    ) -> FutureMaybe[V]:
+        """Execute async `func` on `Future` value and return `FutureMaybe`.
+
+        Args:
+            func (Callable[[T], Awaitable[Maybe[V]]]): to execute.
+
+        Returns:
+            FutureMaybe[V]: result.
+        """
+        return FutureResult(self.__then_future(func))
 
     @staticmethod
     async def identity(value: T) -> T:
