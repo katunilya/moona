@@ -5,16 +5,14 @@ from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Awaitable, Callable, Generator, Generic, TypeVar
 
-from mona.monads.core import Alterable, Bindable
-
 TOk = TypeVar("TOk")
-TBad = TypeVar("TBad")
+TError = TypeVar("TError")
 VOk = TypeVar("VOk")
-VBad = TypeVar("VBad")
+VError = TypeVar("VError")
 
 
 @dataclass(frozen=True, slots=True)
-class FutureResult(Generic[TOk, TBad], ABC):
+class FutureResult(Generic[TOk, TError], ABC):
     """Container for async `Result`.
 
     Works with both sync and async functions.
@@ -29,109 +27,251 @@ class FutureResult(Generic[TOk, TBad], ABC):
             )
     """
 
-    value: Awaitable[Result[TOk, TBad]]
+    value: Awaitable[Result[TOk, TError]]
 
-    def __await__(self) -> Generator[None, None, Result[TOk, TBad]]:
+    def __await__(self) -> Generator[None, None, Result[TOk, TError]]:
         return self.value.__await__()
 
     async def __then(
-        self, func: Callable[[TOk], Result[VOk, VBad]]
-    ) -> Result[TOk, TBad]:
+        self, func: Callable[[TOk], Result[VOk, VError]]
+    ) -> Result[TOk, TError]:
         match await self.value:
             case Ok(value):
                 return func(value)
-            case Bad() as bad:
+            case Error() as bad:
                 return bad
 
-    def then(self, func: Callable[[TOk], Result[VOk, VBad]]) -> FutureResult[TOk, TBad]:
+    def then(
+        self, func: Callable[[TOk], Result[VOk, VError]]
+    ) -> FutureResult[TOk, TError]:
         """Execute sync `func` if async result is `Ok`.
 
         Args:
-            func (Callable[[TOk], Result[VOk, VBad]]): to execute.
+            func (Callable[[TOk], Result[VOk, VError]]): to execute.
 
         Returns:
-            FutureResult[TOk, TBad]: result.
+            FutureResult[TOk, TError]: result.
         """
         return FutureResult(self.__then(func))
 
     async def __otherwise(
-        self, func: Callable[[TBad], Result[VOk, VBad]]
-    ) -> Result[VOk, VBad]:
+        self, func: Callable[[TError], Result[VOk, VError]]
+    ) -> Result[VOk, VError]:
         match await self.value:
-            case Bad(value):
+            case Error(value):
                 return func(value)
             case Ok() as ok:
                 return ok
 
     def otherwise(
-        self, func: Callable[[TBad], Result[VOk, VBad]]
-    ) -> FutureResult[TOk, TBad]:
+        self, func: Callable[[TError], Result[VOk, VError]]
+    ) -> FutureResult[TOk, TError]:
         """Execute sync `func` if async result is `Bad`.
 
         Args:
-            func (Callable[[TBad], Result[VOk, VBad]]): to execute.
+            func (Callable[[TError], Result[VOk, VError]]): to execute.
 
         Returns:
-            FutureResult[TOk, TBad]: result.
+            FutureResult[TOk, TError]: result.
         """
         return FutureResult(self.__otherwise(func))
 
     async def __then_future(
-        self, func: Callable[[TOk], Awaitable[Result[VOk, VBad]]]
-    ) -> Result[TOk, TBad]:
+        self, func: Callable[[TOk], Awaitable[Result[VOk, VError]]]
+    ) -> Result[TOk, TError]:
         match await self.value:
             case Ok(value):
                 return await func(value)
-            case Bad() as bad:
+            case Error() as bad:
                 return bad
 
     def then_future(
-        self, func: Callable[[TOk], Awaitable[Result[VOk, VBad]]]
-    ) -> FutureResult[TOk, TBad]:
+        self, func: Callable[[TOk], Awaitable[Result[VOk, VError]]]
+    ) -> FutureResult[TOk, TError]:
         """Execute async `func` if async result is `Ok`.
 
         Args:
-            func (Callable[[TOk], Awaitable[Result[VOk, VBad]]]): to execute.
+            func (Callable[[TOk], Awaitable[Result[VOk, VError]]]): to execute.
 
         Returns:
-            FutureResult[TOk, TBad]: result.
+            FutureResult[TOk, TError]: result.
         """
         return FutureResult(self.__then_future(func))
 
     async def __otherwise_future(
-        self, func: Callable[[TBad], Awaitable[Result[VOk, VBad]]]
-    ) -> Result[TOk, TBad]:
+        self, func: Callable[[TError], Awaitable[Result[VOk, VError]]]
+    ) -> Result[TOk, TError]:
         match await self.value:
-            case Bad(value):
+            case Error(value):
                 return await func(value)
             case Ok() as ok:
                 return ok
 
     def otherwise_future(
-        self, func: Callable[[TBad], Awaitable[Result[VOk, VBad]]]
-    ) -> FutureResult[TOk, TBad]:
+        self, func: Callable[[TError], Awaitable[Result[VOk, VError]]]
+    ) -> FutureResult[TOk, TError]:
         """Execute async `func` if async result if `Bad`..
 
         Args:
-            func (Callable[[TBad], Awaitable[Result[VOk, VBad]]]): to execute.
+            func (Callable[[TError], Awaitable[Result[VOk, VError]]]): to execute.
 
         Returns:
-            FutureResult[TOk, TBad]: result.
+            FutureResult[TOk, TError]: result.
         """
         return FutureResult(self.__otherwise_future(func))
 
-    # TODO if_ok for async function
-    # TODO if_bad for async functions
-    # TODO returns for async functions
-    # TODO excepts for async functions
-    # TODO if_ok_returns for async functions
-    # TODO if_bad_returns for async functions
-    # TODO if_ok_excepts for async functions
-    # TODO if_bad_excepts for async functions
+    @staticmethod
+    def if_ok(
+        func: Callable[[TOk], Awaitable[Result[VOk, VError]]]
+    ) -> Callable[[Result[TOk, TError]], Awaitable[Result[VOk, VError]]]:
+        """Decorator that executes async `func` only if `Ok` is passed."""
+
+        @wraps(func)
+        async def _wrapper(cnt: Result[TOk, TError]) -> Result[VOk, VError]:
+            match cnt:
+                case Ok(value):
+                    return await func(value)
+                case Error() as err:
+                    return err
+
+        return _wrapper
+
+    @staticmethod
+    def if_error(
+        func: Callable[[TError], Awaitable[Result[VOk, VError]]]
+    ) -> Callable[[Result[TOk, TError]], Awaitable[Result[VOk, VError]]]:
+        """Decorator that executes async `func` only if `Error` is passed."""
+
+        @wraps(func)
+        async def _wrapper(cnt: Result[TOk, TError]) -> Result[VOk, VError]:
+            match cnt:
+                case Ok() as ok:
+                    return ok
+                case Error(value):
+                    return await func(value)
+
+        return _wrapper
+
+    @staticmethod
+    def returns(
+        func: Callable[[TOk], Awaitable[VOk | Exception]]
+    ) -> Callable[[TOk], Awaitable[Result[VOk, Exception]]]:
+        """Decorator that wraps async result of `func` into `Result`.
+
+        If `Exception` is returned, than it is wrapped into `Error`. If something else
+        is returned that it is wrapped into `Ok`.
+        """
+
+        @wraps(func)
+        async def _wrapper(arg: TOk) -> Result[VOk, VError]:
+            match await func(arg):
+                case Exception() as exc:
+                    return Error(exc)
+                case value:
+                    return Ok(value)
+
+        return _wrapper
+
+    @staticmethod
+    def excepts(
+        func: Callable[[TOk], Awaitable[VOk]]
+    ) -> Callable[[TOk], Awaitable[Result[VOk, Exception]]]:
+        """Decorator that excepts `Exception` to be raised from async `func`.
+
+        If `Exception` is raised that it is excepted and wrapped into `Error`. Otherwise
+        result is wrapped into `Ok`.
+        """
+
+        @wraps(func)
+        async def _wrapper(arg: TOk) -> Result[VOk, VError]:
+            try:
+                return Ok(await func(arg))
+            except Exception() as exc:
+                return Error(exc)
+
+        return _wrapper
+
+    @staticmethod
+    def if_ok_returns(
+        func: Callable[[TOk], Awaitable[VOk | Exception]]
+    ) -> Callable[[Result[TOk, TError]], Awaitable[Result[VOk, Exception]]]:
+        """Decorator that combines `if_ok` and `returns`."""
+
+        @wraps(func)
+        async def _wrapper(arg: Result[TOk, TError]) -> Result[VOk, VError]:
+            match arg:
+                case Ok(value):
+                    match await func(value):
+                        case Exception() as exc:
+                            return Error(exc)
+                        case result:
+                            return Ok(result)
+                case Error() as err:
+                    return err
+
+        return _wrapper
+
+    @staticmethod
+    def if_error_returns(
+        func: Callable[[TError], Awaitable[VOk | Exception]]
+    ) -> Callable[[Result[TOk, TError]], Awaitable[Result[VOk, Exception]]]:
+        """Decorator that combines `if_error` and `returns`."""
+
+        @wraps(func)
+        async def _wrapper(arg: Result[TOk, TError]) -> Result[VOk, VError]:
+            match arg:
+                case Error(value):
+                    match await func(value):
+                        case Exception() as exc:
+                            return Error(exc)
+                        case result:
+                            return Ok(result)
+                case Ok() as ok:
+                    return ok
+
+        return _wrapper
+
+    @staticmethod
+    def if_ok_excepts(
+        func: Callable[[TOk], Awaitable[VOk]]
+    ) -> Callable[[Result[TOk, TError]], Awaitable[Result[VOk, Exception]]]:
+        """Decorator that combines `if_ok` and `excepts`."""
+
+        @wraps(func)
+        async def _wrapper(arg: Result[TOk, TError]) -> Result[VOk, VError]:
+            match arg:
+                case Ok(value):
+                    try:
+                        return Ok(await func(value))
+                    except Exception as exc:
+                        return Error(exc)
+                case Error() as err:
+                    return err
+
+        return _wrapper
+
+    @staticmethod
+    def if_error_excepts(
+        func: Callable[[TError], Awaitable[VOk]]
+    ) -> Callable[[Result[TOk, TError]], Awaitable[Result[VOk, Exception]]]:
+        """Decorator that combines `if_error` and `excepts`."""
+
+        @wraps(func)
+        async def _wrapper(arg: Result[TOk, TError]) -> Result[VOk, VError]:
+            match arg:
+                case Error(value):
+                    try:
+                        return Ok(await func(value))
+                    except Exception as exc:
+                        return Error(exc)
+                case Ok() as ok:
+                    return ok
+
+        return _wrapper
 
 
 @dataclass(frozen=True, slots=True)
-class Result(Bindable, Alterable, Generic[TOk, TBad], ABC):
+class Result(Generic[TOk, TError], ABC):
     """Base abstract container for computation `Result`.
 
     Railway-oriented programming concept. Stands for `Result` of some computation
@@ -148,94 +288,96 @@ class Result(Bindable, Alterable, Generic[TOk, TBad], ABC):
             )
     """
 
-    value: TOk | TBad
+    value: TOk | TError
 
-    def then(self, func: Callable[[TOk], Result[VOk, VBad]]) -> Result[VOk, VBad]:
+    def then(self, func: Callable[[TOk], Result[VOk, VError]]) -> Result[VOk, VError]:
         """Binding for sync function that handle `Ok`.
 
         Executes passed function only when container is `Ok`, otherwise just returns
         container.
 
         Args:
-            func (Callable[[TOk], Result[VOk, VBad]]): to execute.
+            func (Callable[[TOk], Result[VOk, VError]]): to execute.
 
         Returns:
-            Result[VOk, VBad]: result of function execution or initial monad container
+            Result[VOk, VError]: result of function execution or initial monad container
             if one was `Bad`.
         """
         match self:
             case Ok(value):
                 return func(value)
-            case Bad() as bad:
+            case Error() as bad:
                 return bad
 
-    def otherwise(self, func: Callable[[TBad], Result[VOk, VBad]]) -> Result[VOk, VBad]:
+    def otherwise(
+        self, func: Callable[[TError], Result[VOk, VError]]
+    ) -> Result[VOk, VError]:
         """Binding for sync function that handle `Bad`.
 
         Executes passed function only when container is `Bad`, otherwise just returns
         container.
 
         Args:
-            func (Callable[[TBad], Result[VOk, VBad]]): to execute.
+            func (Callable[[TError], Result[VOk, VError]]): to execute.
 
         Returns:
-            Result[VOk, VBad]: result if function execution or initial monad container
+            Result[VOk, VError]: result if function execution or initial monad container
             if one is `Ok`.
         """
         match self:
-            case Bad(value):
+            case Error(value):
                 return func(value)
             case Ok() as ok:
                 return ok
 
     async def __then_future(
-        self, func: Callable[[TOk], Awaitable[Result[VOk, VBad]]]
-    ) -> Result[VOk, VBad]:
+        self, func: Callable[[TOk], Awaitable[Result[VOk, VError]]]
+    ) -> Result[VOk, VError]:
         match self:
             case Ok(value):
                 return await func(value)
-            case Bad() as bad:
+            case Error() as bad:
                 return bad
 
     def then_future(
-        self, func: Callable[[TOk], Awaitable[Result[VOk, VBad]]]
-    ) -> FutureResult[VOk, VBad]:
+        self, func: Callable[[TOk], Awaitable[Result[VOk, VError]]]
+    ) -> FutureResult[VOk, VError]:
         """Execute async `func` if `Result` value is `Ok` and return `FutureResult`.
 
         Args:
-            func (Callable[[TOk], Awaitable[Result[VOk, VBad]]]): to execute.
+            func (Callable[[TOk], Awaitable[Result[VOk, VError]]]): to execute.
 
         Returns:
-            FutureResult[VOk, VBad]: result.
+            FutureResult[VOk, VError]: result.
         """
         return FutureResult(self.__then_future(func))
 
     async def __otherwise_future(
-        self, func: Callable[[TBad], Awaitable[Result[VOk, VBad]]]
-    ) -> Result[VOk, VBad]:
+        self, func: Callable[[TError], Awaitable[Result[VOk, VError]]]
+    ) -> Result[VOk, VError]:
         match self:
-            case Bad(value):
+            case Error(value):
                 return await func(value)
             case Ok() as ok:
                 return ok
 
     def otherwise_future(
-        self, func: Callable[[TBad], Awaitable[Result[VOk, VBad]]]
-    ) -> FutureResult[VOk, VBad]:
-        """Execute async `func` if `Result` value is `Bad` and return `FutureResult`.
+        self, func: Callable[[TError], Awaitable[Result[VOk, VError]]]
+    ) -> FutureResult[VOk, VError]:
+        """Execute async `func` if `Result` value is `Error` and return `FutureResult`.
 
         Args:
-            func (Callable[[TBad], Awaitable[Result[VOk, VBad]]]): to execute.
+            func (Callable[[TError], Awaitable[Result[VOk, VError]]]): to execute.
 
         Returns:
-            FutureResult[VOk, VBad]: result.
+            FutureResult[VOk, VError]: result.
         """
         return FutureResult(self.__otherwise_future(func))
 
     @staticmethod
     def if_ok(
-        func: Callable[[TOk], "Result[VOk, VBad]"],
-    ) -> Callable[["Result[TOk, TBad]"], "Result[VOk, VBad]"]:
+        func: Callable[[TOk], "Result[VOk, VError]"],
+    ) -> Callable[["Result[TOk, TError]"], "Result[VOk, VError]"]:
         """Decorator for functions that will be executed only with `Success` `Result`.
 
         Changes input and output types for passed function to `Result`.
@@ -250,22 +392,22 @@ class Result(Bindable, Alterable, Generic[TOk, TBad], ABC):
         """
 
         @wraps(func)
-        def _if_ok(cnt: "Result[TOk, TBad]") -> "Result[TOk, TBad]":
+        def _if_ok(cnt: "Result[TOk, TError]") -> "Result[TOk, TError]":
             return cnt >> func
 
         return _if_ok
 
     @staticmethod
-    def if_bad(
-        func: Callable[[TBad], "Result[VOk, VBad]"],
-    ) -> Callable[["Result[TOk, TBad]"], "Result[VOk, VBad]"]:
+    def if_error(
+        func: Callable[[TError], "Result[VOk, VError]"],
+    ) -> Callable[["Result[TOk, TError]"], "Result[VOk, VError]"]:
         """Decorator for functions that will be executed only with `Failure` `Result`.
 
         Changes input and output types for passed function to `Result`.
 
         Example::
 
-            @Result.if_bad
+            @Result.if_error
             def handle_error(err: Exception) -> str:
                 ...
 
@@ -273,7 +415,7 @@ class Result(Bindable, Alterable, Generic[TOk, TBad], ABC):
         """
 
         @wraps(func)
-        def _if_bad(cnt: "Result[TOk, TBad]") -> "Result[TOk, TBad]":
+        def _if_bad(cnt: "Result[TOk, TError]") -> "Result[TOk, TError]":
             return cnt << func
 
         return _if_bad
@@ -301,7 +443,7 @@ class Result(Bindable, Alterable, Generic[TOk, TBad], ABC):
         def _wrapper(value: TOk):
             match func(value):
                 case Exception() as error:
-                    return Bad(error)
+                    return Error(error)
                 case value:
                     return Ok(value)
 
@@ -324,39 +466,39 @@ class Result(Bindable, Alterable, Generic[TOk, TBad], ABC):
             try:
                 return Ok(func(value))
             except Exception as err:
-                return Bad(err)
+                return Error(err)
 
         return _wrapper
 
     @staticmethod
     def if_ok_returns(
         func: Callable[[TOk], VOk | Exception]
-    ) -> Callable[[Result[TOk, TBad]], Result[VOk, Exception]]:
+    ) -> Callable[[Result[TOk, TError]], Result[VOk, Exception]]:
         """Decorator for functions that combines `if_ok` and `returns`."""
         return Result.if_ok(Result.returns(func))
 
     @staticmethod
-    def if_bad_returns(
+    def if_error_returns(
         func: Callable[[TOk], VOk | Exception]
-    ) -> Callable[[Result[TOk, TBad]], Result[VOk, Exception]]:
+    ) -> Callable[[Result[TOk, TError]], Result[VOk, Exception]]:
         """Decorator for functions that combines `if_bad` and `returns`."""
-        return Result.if_bad(Result.returns(func))
+        return Result.if_error(Result.returns(func))
 
     @staticmethod
     def if_ok_excepts(
         func: Callable[[TOk], VOk]
-    ) -> Callable[[Result[TOk, TBad]], Result[VOk, Exception]]:
+    ) -> Callable[[Result[TOk, TError]], Result[VOk, Exception]]:
         """Decorator for functions that combines `if_ok` and `excepts`."""
         return Result.if_ok(Result.excepts(func))
 
     @staticmethod
-    def if_bad_excepts(
+    def if_error_excepts(
         func: Callable[[TOk], VOk]
-    ) -> Callable[[Result[TOk, TBad]], Result[VOk, Exception]]:
+    ) -> Callable[[Result[TOk, TError]], Result[VOk, Exception]]:
         """Decorator for functions that combines `if_bad` and `excepts`."""
-        return Result.if_bad(Result.excepts(func))
+        return Result.if_error(Result.excepts(func))
 
-    def unpack(self) -> TOk | TBad:
+    def unpack(self) -> TOk | TError:
         """Returns internal container value processed by `Result` monad."""
         return self.value
 
@@ -369,7 +511,7 @@ class Ok(Result[TOk, Any]):
 
 
 @dataclass(frozen=True, slots=True)
-class Bad(Result[Any, TBad]):
+class Error(Result[Any, TError]):
     """Container that marks underlying value is `Bad` and connot be processed next."""
 
-    value: TBad
+    value: TError

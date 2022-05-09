@@ -6,7 +6,7 @@ from typing import Awaitable, Callable, Generator, Generic, TypeVar
 
 from mona.monads.core import Bindable
 from mona.monads.maybe import FutureMaybe, Maybe
-from mona.monads.result import FutureResult, Result, TBad, TOk
+from mona.monads.result import FutureResult, Result, TError, TOk
 
 T = TypeVar("T")
 V = TypeVar("V")
@@ -53,8 +53,8 @@ class Future(Bindable, Generic[T]):
         return Future(self.__then(func))
 
     def then_result(
-        self, func: Callable[[T], Result[TOk, TBad]]
-    ) -> FutureResult[TOk, TBad]:
+        self, func: Callable[[T], Result[TOk, TError]]
+    ) -> FutureResult[TOk, TError]:
         """Execute sync `func` on `Future` value and return `FutureResult`.
 
         Args:
@@ -88,8 +88,8 @@ class Future(Bindable, Generic[T]):
         return Future(self.__then_future(func))
 
     def then_future_result(
-        self, func: Callable[[T], Awaitable[Result[TOk, TBad]]]
-    ) -> FutureResult[TOk, TBad]:
+        self, func: Callable[[T], Awaitable[Result[TOk, TError]]]
+    ) -> FutureResult[TOk, TError]:
         """Execute async `func` on `Future` value and return `FutureResult`.
 
         Args:
