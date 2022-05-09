@@ -24,7 +24,7 @@ class FutureFunc(Generic[X, Y]):
             func (Callable[[Y], Z]): to compose with.
 
         Returns:
-            FutureChain[X, Z]: result function.
+            FutureFunc[X, Z]: result function.
         """
 
         def _then(arg: X) -> Future[Z]:
@@ -39,7 +39,7 @@ class FutureFunc(Generic[X, Y]):
             self (Callable[[Y], Awaitable[Z]]): to compose with.
 
         Returns:
-            FutureChain[X, Z]: result function.
+            FutureFunc[X, Z]: result function.
         """
 
         def _then_future(arg: X) -> Future[Z]:
@@ -52,7 +52,7 @@ class FutureFunc(Generic[X, Y]):
 class Func(Generic[X, Y]):
     """Sync function composition abstraction.
 
-    Compatible with `FutureChain`.
+    Compatible with `FutureFunc`.
     """
 
     value: Callable[[X], Y]
@@ -67,7 +67,7 @@ class Func(Generic[X, Y]):
             func (Callable[[Y], Z]): to compose with.
 
         Returns:
-            Chain[X, Z]: result function.
+            Func[X, Z]: result function.
         """
 
         def _then(arg: X) -> Z:
@@ -82,7 +82,7 @@ class Func(Generic[X, Y]):
             func (Callable[[Y], Awaitable[Z]]): to compose with.
 
         Returns:
-            FutureChain[X, Z]: result function.
+            FutureFunc[X, Z]: result function.
         """
 
         def _then_future(arg: X) -> Future[Z]:
