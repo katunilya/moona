@@ -188,6 +188,50 @@ class Result(Bindable, Alterable, Generic[TOk, TBad], ABC):
             case Ok() as ok:
                 return ok
 
+    async def __then_future(
+        self, func: Callable[[TOk], Awaitable[Result[VOk, VBad]]]
+    ) -> Result[VOk, VBad]:
+        match self:
+            case Ok(value):
+                return await func(value)
+            case Bad() as bad:
+                return bad
+
+    def then_future(
+        self, func: Callable[[TOk], Awaitable[Result[VOk, VBad]]]
+    ) -> FutureResult[VOk, VBad]:
+        """Execute async `func` if `Result` value is `Ok` and return `FutureResult`.
+
+        Args:
+            func (Callable[[TOk], Awaitable[Result[VOk, VBad]]]): to execute.
+
+        Returns:
+            FutureResult[VOk, VBad]: result.
+        """
+        return FutureResult(self.__then_future(func))
+
+    async def __otherwise_future(
+        self, func: Callable[[TBad], Awaitable[Result[VOk, VBad]]]
+    ) -> Result[VOk, VBad]:
+        match self:
+            case Bad(value):
+                return await func(value)
+            case Ok() as ok:
+                return ok
+
+    def otherwise_future(
+        self, func: Callable[[TBad], Awaitable[Result[VOk, VBad]]]
+    ) -> FutureResult[VOk, VBad]:
+        """Execute async `func` if `Result` value is `Bad` and return `FutureResult`.
+
+        Args:
+            func (Callable[[TBad], Awaitable[Result[VOk, VBad]]]): to execute.
+
+        Returns:
+            FutureResult[VOk, VBad]: result.
+        """
+        return FutureResult(self.__otherwise_future(func))
+
     @staticmethod
     def if_ok(
         func: Callable[[TOk], "Result[VOk, VBad]"],
