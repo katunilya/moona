@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from functools import wraps
 from typing import Awaitable, Callable, Generator, Generic, TypeVar
 
-from mona.monads.core import Bindable
 from mona.monads.maybe import FutureMaybe, Maybe
 from mona.monads.result import FutureResult, Result, TError, TOk
 
@@ -13,7 +12,7 @@ V = TypeVar("V")
 
 
 @dataclass(frozen=True)
-class Future(Bindable, Generic[T]):
+class Future(Generic[T]):
     """Container for performing asynchronous operations on some value in sync context.
 
     `Future` allows running async function inside synchronous functions. Can execute
