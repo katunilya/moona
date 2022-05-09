@@ -3,7 +3,7 @@ from typing import Awaitable, Callable, Generic, TypeVar
 
 from mona.monads.future import Future
 from mona.monads.maybe import FutureMaybe, Maybe
-from mona.monads.result import FutureResult, Result, TBad, TOk
+from mona.monads.result import FutureResult, Result, TError, TOk
 
 X = TypeVar("X")
 Y = TypeVar("Y")
@@ -41,7 +41,9 @@ class Pipe(Generic[X]):
         """
         return Future(func(self.value))
 
-    def then_result(self, func: Callable[[X], Result[TOk, TBad]]) -> Result[TOk, TBad]:
+    def then_result(
+        self, func: Callable[[X], Result[TOk, TError]]
+    ) -> Result[TOk, TError]:
         """Execute passed sync `func` on `Pipe` value and return `Result`.
 
         Args:
@@ -64,8 +66,8 @@ class Pipe(Generic[X]):
         return func(self.value)
 
     def then_future_result(
-        self, func: Callable[[X], Awaitable[Result[TOk, TBad]]]
-    ) -> FutureResult[TOk, TBad]:
+        self, func: Callable[[X], Awaitable[Result[TOk, TError]]]
+    ) -> FutureResult[TOk, TError]:
         """Execute passed async `func` on `Pipe` value and return `FutureResult`.
 
         Args:

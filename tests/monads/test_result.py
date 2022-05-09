@@ -1,6 +1,6 @@
 import pytest
 
-from mona.monads.result import Bad, Ok, Result
+from mona.monads.result import Error, Ok, Result
 
 
 @pytest.mark.parametrize(
@@ -37,7 +37,7 @@ def test_successfull(value):
 def test_failed(value):
     result = Result.bad(value)
     assert isinstance(result, Result)
-    assert isinstance(result, Bad)
+    assert isinstance(result, Error)
     assert result.value == value
 
 
@@ -45,9 +45,9 @@ def test_failed(value):
     "value, func, assert_result",
     [
         (Ok(1), lambda x: Ok(x + 1), Ok(2)),
-        (Ok(1), lambda x: Bad(x + 1), Bad(2)),
-        (Bad(1), lambda x: Ok(x + 1), Ok(1)),
-        (Bad(1), lambda x: Bad(x + 1), Ok(1)),
+        (Ok(1), lambda x: Error(x + 1), Error(2)),
+        (Error(1), lambda x: Ok(x + 1), Ok(1)),
+        (Error(1), lambda x: Error(x + 1), Ok(1)),
     ],
 )
 def test_bound(value, func, assert_result: Result):
@@ -59,13 +59,13 @@ def test_bound(value, func, assert_result: Result):
     "value, func, assert_result",
     [
         (Ok(1), lambda x: Ok(x + 1), Ok(1)),
-        (Ok(1), lambda x: Bad(x + 1), Ok(1)),
-        (Bad(1), lambda x: Ok(x + 1), Ok(2)),
-        (Bad(1), lambda x: Bad(x + 1), Bad(2)),
+        (Ok(1), lambda x: Error(x + 1), Ok(1)),
+        (Error(1), lambda x: Ok(x + 1), Ok(2)),
+        (Error(1), lambda x: Error(x + 1), Error(2)),
     ],
 )
 def test_altered(value, func, assert_result: Result):
-    result = Result.if_bad(func)(value)
+    result = Result.if_error(func)(value)
     assert result.value == assert_result.value
 
 
@@ -73,9 +73,9 @@ def test_altered(value, func, assert_result: Result):
     "value, func, assert_result",
     [
         (Ok(1), lambda x: x + 1, 2),
-        (Bad(1), lambda x: x + 1, Bad(1)),
+        (Error(1), lambda x: x + 1, Error(1)),
         (Ok(1), lambda x: Ok(x + 1), Ok(2)),
-        (Bad(1), lambda x: Ok(x + 1), Bad(1)),
+        (Error(1), lambda x: Ok(x + 1), Error(1)),
     ],
 )
 def test_bind(value, func, assert_result):
@@ -86,9 +86,9 @@ def test_bind(value, func, assert_result):
     "value, func, assert_result",
     [
         (Ok(1), lambda x: x + 1, Ok(1)),
-        (Bad(1), lambda x: x + 1, 2),
+        (Error(1), lambda x: x + 1, 2),
         (Ok(1), lambda x: Ok(x + 1), Ok(1)),
-        (Bad(1), lambda x: Ok(x + 1), Ok(2)),
+        (Error(1), lambda x: Ok(x + 1), Ok(2)),
     ],
 )
 def test_alter(value, func, assert_result):
@@ -107,7 +107,7 @@ def test_safe(value, func, assert_result):
     result = value >> Result.returns(func)
 
     match result:
-        case Bad(value=Exception() as err):
+        case Error(value=Exception() as err):
             assert isinstance(err, assert_result)
         case Ok() as value:
             assert value == assert_result
@@ -125,7 +125,7 @@ def test_safely_bound(value, func, assert_result):
     result = Result.if_ok_safe(func)(value)
 
     match result:
-        case Bad(value=Exception() as err):
+        case Error(value=Exception() as err):
             assert isinstance(err, assert_result)
         case Ok() as value:
             assert value == assert_result

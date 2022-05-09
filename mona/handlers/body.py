@@ -10,7 +10,7 @@ from mona.handlers.events import receive_body_async, send_body_async
 from mona.handlers.header import set_header
 from mona.monads.future import Future
 from mona.monads.pipe import Pipe
-from mona.monads.result import Bad, Ok, Result, Safe
+from mona.monads.result import Error, Ok, Result, Safe
 from mona.utils import decode_utf_8, deserialize, encode_utf_8
 
 T = TypeVar("T")
@@ -162,7 +162,7 @@ def bind_body_bytes_async(
         match result:
             case Ok(data):
                 return ctx >> set_body_bytes(data)
-            case Bad(err):
+            case Error(err):
                 return ContextError(ctx, str(err))
 
     return _bind_body_bytes_async
@@ -185,7 +185,7 @@ def bind_body_text_async(
         match result:
             case Ok(data):
                 return ctx >> set_body_text(data)
-            case Bad(err):
+            case Error(err):
                 return ContextError(ctx, str(err))
 
     return _bind_body_text
@@ -208,7 +208,7 @@ def bind_body_json_async(
         match result:
             case Ok(data):
                 return ctx >> set_body_json(data)
-            case Bad(err):
+            case Error(err):
                 return ContextError(ctx, str(err))
 
     return _bind_body_json
