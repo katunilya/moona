@@ -174,6 +174,50 @@ class Maybe(Generic[TSome], ABC):
             case Some() as some:
                 return some
 
+    async def __then_future(
+        self, func: Callable[[TSome], Awaitable[Maybe[VSome]]]
+    ) -> Maybe[VSome]:
+        match self:
+            case Some(value):
+                return await func(value)
+            case Nothing() as nothing:
+                return nothing
+
+    def then_future(
+        self, func: Callable[[TSome], Awaitable[Maybe[VSome]]]
+    ) -> FutureMaybe[VSome]:
+        """Execute async `func` if value is `Some` and return `FutureMaybe`.
+
+        Args:
+            func (Callable[[TSome], Awaitable[Maybe[VSome]]]): to execute.
+
+        Returns:
+            FutureMaybe[VSome]: result.
+        """
+        return FutureMaybe(self.__then_future(func))
+
+    async def __otherwise_future(
+        self, func: Callable[[Nothing], Awaitable[Maybe[VSome]]]
+    ) -> Maybe[VSome]:
+        match self:
+            case Nothing() as nothing:
+                return await func(nothing)
+            case Some() as some:
+                return some
+
+    def otherwise_future(
+        self, func: Callable[[Nothing], Awaitable[Maybe[VSome]]]
+    ) -> FutureMaybe[VSome]:
+        """Execute async `func` if value is `Nothing` and return `FutureMaybe`.
+
+        Args:
+            func (Callable[[Nothing], Awaitable[Maybe[VSome]]]): to execute.
+
+        Returns:
+            FutureMaybe[VSome]: result.
+        """
+        return FutureMaybe(self.__otherwise_future(func))
+
     @staticmethod
     def if_some(
         func: Callable[[TSome], Maybe[VSome]]
