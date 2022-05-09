@@ -175,7 +175,7 @@ class Maybe(Generic[TSome], ABC):
 
     `Maybe` container has 2 variations: `Some` and `Nothing`. `Some` stands for some
     actual value and means that it is present in execution context. `Nothing` on the
-    other hand describes emtpiness and lack of value. This is additional wrapping around
+    other hand describes emptiness and lack of value. This is additional wrapping around
     `None` values.
 
     Example::
