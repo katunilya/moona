@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Awaitable, Callable, Generic, TypeVar
 
 from mona.monads.future import Future
+from mona.monads.result import Result, TBad, TOk
 
 X = TypeVar("X")
 Y = TypeVar("Y")
@@ -38,6 +39,17 @@ class Pipe(Generic[X]):
             Future[Y]: execution result.
         """
         return Future(func(self.value))
+
+    def then_result(self, func: Callable[[X], Result[TOk, TBad]]) -> Result[TOk, TBad]:
+        """Execute passed sync function on `Pipe` object value and return `Result`.
+
+        Args:
+            func (Callable[[X], Result[TOk, TBad]]): to execute.
+
+        Returns:
+            Result[TOk, TBad]: _description_
+        """
+        return func(self.value)
 
     def unpack(self) -> X:
         """Return internal `Pipe` value.

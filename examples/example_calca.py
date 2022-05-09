@@ -1,6 +1,7 @@
 from math import factorial, sqrt
 
 import mona
+from mona.core import HTTPContext
 from mona.handlers import (
     GET,
     bind_body_text_async,
@@ -11,26 +12,29 @@ from mona.handlers import (
     route,
     send_body_async,
 )
-from mona.monads import Result
+from mona.handlers.core import HTTPContextResult
+from mona.monads.func import FutureFunc
+from mona.monads.future import Future
+from mona.monads.pipe import Pipe
+from mona.monads.result import Result
 
 
 def fibonacci(n: int) -> int:  # noqa
     return int((((1 + sqrt(5)) ** n) - ((1 - sqrt(5))) ** n) / (2**n * sqrt(5)))
 
 
-fibonacci_handler = compose(
-    GET,
-    route("/fibonacci"),
-    bind_body_text_async(
-        compose(
-            get_body_text_async,
-            Result.safely_bound(int),
-            Result.safely_bound(fibonacci),
-            Result.safely_bound(str),
-        )
-    ),
-    send_body_async,
-)
+h = FutureFunc(get_body_text_async).then(int).then(fibonacci).then(str)
+
+
+def fibonacci_handler(ctx: HTTPContext) -> Future[HTTPContextResult]:  # noqa
+    return (
+        Pipe(ctx)
+        .then(GET)
+        .then(route("/fibonacci"))
+        .then_future(bind_body_text_async())
+        .then_future(send_body_async)
+    )
+
 
 factorial_handler = compose(
     GET,
@@ -38,9 +42,9 @@ factorial_handler = compose(
     bind_body_text_async(
         compose(
             get_body_text_async,
-            Result.safely_bound(int),
-            Result.safely_bound(factorial),
-            Result.safely_bound(str),
+            Result.if_ok_safe(int),
+            Result.if_ok_safe(factorial),
+            Result.if_ok_safe(str),
         )
     ),
     send_body_async,

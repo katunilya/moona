@@ -32,7 +32,7 @@ class FutureFunc(Generic[X, Y]):
 
         return FutureFunc(_then)
 
-    def then_future(self, func: Callable[[Y]]) -> "FutureFunc[X, Z]":
+    def then_future(self, func: Callable[[Y], Awaitable[Z]]) -> "FutureFunc[X, Z]":
         """Compose this function with the async next one sequentially.
 
         Args:

@@ -395,6 +395,52 @@ print(maybe)  # Nothing(value=None, _Nothing__instance=...)
 # can be run as-is
 ```
 
+### Monad Interface Compatibility Map
+
+```mermaid
+flowchart LR;
+    pipe(Pipe)
+    future(Future)
+    result(Result)
+    maybe(Maybe)
+    future_result(FutureResult)
+    future_maybe(FutureMaybe)
+
+    pipe -- then f: x->y --> pipe 
+    pipe -- then_future async f: x->y --> future 
+    pipe -- then_result f: x->result y --> result
+    pipe -- then_maybe f: x->maybe y --> maybe
+    pipe -- then_result_future async f: x->result y --> future_result
+    pipe -- then_maybe_future async f: x->maybe y --> future_maybe
+    
+    future -- then f: x->y --> future 
+    future -- then_future async f: x->y --> future
+    future -- then_result f: x->result y --> future_result
+    future -- then_maybe f: x->maybe y --> future_maybe
+    future -- then_result_future async f: x->result y --> future_result
+    future -- then_maybe_future async f: x->maybe y --> future_maybe
+
+    result -- then f: ok->result y --> result
+    result -- then_future async f: ok->result y --> future_result
+    result -- otherwise f: bad->result y --> result
+    result -- otherwise_future async f: bad->result y --> future_result
+
+    maybe -- then f: some->maybe y --> maybe
+    maybe -- then_future async f: some->maybe y --> future_maybe
+    maybe -- otherwise f: nothing->maybe y --> maybe
+    maybe -- otherwise_future async f: nothing->maybe y --> future_maybe
+
+    future_result -- then f: ok->result y --> future_result
+    future_result -- then_future async f: ok->result y --> future_result
+    future_result -- otherwise f: bad->result y --> future_result
+    future_result -- otherwise_future async f: bad->result y --> future_result
+
+    future_maybe -- then f: some->maybe y --> future_maybe
+    future_maybe -- then_future async f: some->maybe y --> future_maybe
+    future_maybe -- otherwise f: nothing->maybe y --> future_maybe
+    future_maybe -- otherwise_future async f: nothing->maybe y --> future_maybe
+```
+
 ### ASGI Handlers
 
 This are core concepts of `mona`. Based on them entire application is just a so

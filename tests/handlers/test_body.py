@@ -101,14 +101,14 @@ async def test_send_body_json_async(ctx: HTTPContext):
 
 def create_sync_binding(data):
     def sync_binding(ctx: HTTPContext):
-        return Result.successfull(data)
+        return Result.ok(data)
 
     return sync_binding
 
 
 def create_async_binding(data):
     async def async_binding(ctx: HTTPContext):
-        return Result.successfull(data)
+        return Result.ok(data)
 
     return async_binding
 
