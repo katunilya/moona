@@ -46,7 +46,7 @@ def test_alter(cnt: Maybe, func: Callable, result: Maybe):
     ],
 )
 def test_bound(cnt, func, result):
-    assert Maybe.bound(func)(cnt) == result
+    assert Maybe.if_some(func)(cnt) == result
 
 
 @pytest.mark.parametrize(
@@ -58,7 +58,7 @@ def test_bound(cnt, func, result):
     ],
 )
 def test_altered(cnt, func, result):
-    assert Maybe.altered(func)(cnt) == result
+    assert Maybe.if_nothing(func)(cnt) == result
 
 
 @pytest.mark.parametrize(
@@ -82,7 +82,7 @@ def test_choose(funcs, cnt, result):
     ],
 )
 def test_no_none(cnt, func, result):
-    assert cnt >> Maybe.noneless(func) == result
+    assert cnt >> Maybe.returns(func) == result
 
 
 @pytest.mark.parametrize("value", [1, 2, 3, object(), {}, []])

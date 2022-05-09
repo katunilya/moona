@@ -2,17 +2,115 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
-from functools import reduce, wraps
-from typing import Any, Callable, Generic, TypeVar
-
-from mona.monads.core import Alterable, Bindable
+from functools import wraps
+from typing import Any, Awaitable, Callable, Generator, Generic, TypeVar
 
 TSome = TypeVar("TSome")
 VSome = TypeVar("VSome")
 
 
-@dataclass(frozen=True)
-class Maybe(Bindable, Alterable, Generic[TSome], ABC):
+@dataclass(frozen=True, slots=True)
+class FutureMaybe(Generic[TSome]):
+    """Container for async optional value."""
+
+    value: Awaitable[Maybe[TSome]]
+
+    def __await__(self) -> Generator[None, None, Maybe[TSome]]:
+        return self.value.__await__()
+
+    async def __then(
+        self, func: Callable[[TSome], Maybe[VSome]]
+    ) -> Awaitable[Maybe[VSome]]:
+        match await self.value:
+            case Some(value):
+                return func(value)
+            case Nothing() as nothing:
+                return nothing
+
+    def then(self, func: Callable[[TSome], Maybe[VSome]]) -> FutureMaybe[VSome]:
+        """Execute sync `func` if async value is `Some`.
+
+        Args:
+            func (Callable[[TSome], Maybe[VSome]]): to execute.
+
+        Returns:
+            FutureMaybe[VSome]: maybe result.
+        """
+        return FutureMaybe(self.__then(func))
+
+    async def __otherwise(
+        self, func: Callable[[Nothing], Maybe[VSome]]
+    ) -> Awaitable[Maybe[VSome]]:
+        match await self.value:
+            case Nothing() as nothing:
+                return func(nothing)
+            case Some() as some:
+                return some
+
+    def otherwise(self, func: Callable[[Nothing], Maybe[VSome]]) -> FutureMaybe[VSome]:
+        """Execute sync `func` if async value is `Nothing`.
+
+        Args:
+            func (Callable[[Nothing], Maybe[VSome]]): to execute.
+
+        Returns:
+            FutureMaybe[VSome]: maybe result.
+        """
+        return FutureMaybe(self.__otherwise(func))
+
+    async def __then_future(
+        self, func: Callable[[TSome], Awaitable[Maybe[VSome]]]
+    ) -> Awaitable[Maybe[VSome]]:
+        match await self.value:
+            case Some(value):
+                return await func(value)
+            case Nothing() as nothing:
+                return nothing
+
+    def then_future(
+        self, func: Callable[[TSome], Awaitable[Maybe[VSome]]]
+    ) -> FutureMaybe[VSome]:
+        """Execute async `func` if async value is `Some`.
+
+        Args:
+            func (Callable[[TSome], Awaitable[Maybe[VSome]]]): to execute.
+
+        Returns:
+            FutureMaybe[VSome]: maybe result.
+        """
+        return FutureMaybe(self.__then_future(func))
+
+    async def __otherwise_future(
+        self, func: Callable[[Nothing], Awaitable[Maybe[VSome]]]
+    ) -> Maybe[VSome]:
+        match await self.value:
+            case Nothing() as nothing:
+                return func(nothing)
+            case Some() as some:
+                return some
+
+    def otherwise_future(
+        self, func: Callable[[Nothing], Awaitable[Maybe[VSome]]]
+    ) -> FutureMaybe[VSome]:
+        """Execute async `func` if async value is `Nothing`.
+
+        Args:
+            func (Callable[[Nothing], Awaitable[Maybe[VSome]]]): to execute.
+
+        Returns:
+            FutureMaybe[VSome]: maybe result.
+        """
+        return FutureMaybe(self.__otherwise_future(func))
+
+    # TODO if_some for async function
+    # TODO if_nothing for async functions
+    # TODO returns for async functions
+    # TODO if_some_returns for async functions
+    # TODO if_nothing_returns for async functions
+
+
+@dataclass(frozen=True, slots=True)
+class Maybe(Generic[TSome], ABC):
     """General purpose container for optional value.
 
     `Maybe` container has 2 variations: `Some` and `Nothing`. `Some` stands for some
@@ -46,14 +144,30 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
 
     value: TSome
 
-    def __rshift__(self, func: Callable[[TSome], "Maybe[VSome]"]) -> "Maybe[VSome]":
+    def then(self, func: Callable[[TSome], Maybe[VSome]]) -> Maybe[VSome]:
+        """Execute sync `func` if value is `Some`.
+
+        Args:
+            func (Callable[[TSome], Maybe[VSome]]): to execute.
+
+        Returns:
+            Maybe[VSome]: maybe result.
+        """
         match self:
             case Some(value):
                 return func(value)
             case Nothing() as nothing:
                 return nothing
 
-    def __lshift__(self, func: Callable[[None], "Maybe[VSome]"]) -> "Maybe[VSome]":
+    def otherwise(self, func: Callable[[Nothing], Maybe[VSome]]) -> Maybe[VSome]:
+        """Execute sync `func` if value is `Nothing`.
+
+        Args:
+            func (Callable[[Nothing], Maybe[VSome]]): to execute.
+
+        Returns:
+            Maybe[VSome]: maybe result.
+        """
         match self:
             case Nothing():
                 return func(None)
@@ -61,16 +175,16 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
                 return some
 
     @staticmethod
-    def bound(
-        func: Callable[[TSome], "Maybe[VSome]"]
-    ) -> Callable[["Maybe[TSome]"], "Maybe[VSome]"]:
+    def if_some(
+        func: Callable[[TSome], Maybe[VSome]]
+    ) -> Callable[[Maybe[TSome]], Maybe[VSome]]:
         """Decorator for functions that will be executed only with `Some` value.
 
         Changes input type to `Maybe`.
 
         Example::
 
-                @Maybe.bound
+                @Maybe.if_some
                 def get_user(name: str) -> Maybe[User]:
                     ...
 
@@ -78,22 +192,22 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
         """
 
         @wraps(func)
-        def _bound(cnt: "Maybe[TSome]") -> "Maybe[VSome]":
+        def _if_some(cnt: Maybe[TSome]) -> Maybe[VSome]:
             return cnt >> func
 
-        return _bound
+        return _if_some
 
     @staticmethod
-    def altered(
-        func: Callable[[TSome], "Maybe[VSome]"]
-    ) -> Callable[["Maybe[TSome]"], "Maybe[VSome]"]:
+    def if_nothing(
+        func: Callable[[TSome], Maybe[VSome]]
+    ) -> Callable[[Maybe[TSome]], Maybe[VSome]]:
         """Decorator for functions that will be executed only with `Nothing`.
 
         Changes input type to `Maybe`.
 
         Example::
 
-                @Maybe.altered
+                @Maybe.if_nothing
                 def or_zero(_) -> Maybe[int]:
                     return Some(0)
 
@@ -101,52 +215,15 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
         """
 
         @wraps(func)
-        def _altered(cnt: "Maybe[TSome]") -> "Maybe[VSome]":
+        def _if_nothing(cnt: Maybe[TSome]) -> Maybe[VSome]:
             return cnt << func
 
-        return _altered
+        return _if_nothing
 
     @staticmethod
-    def _continue_on_some(
-        cur: Callable[[TSome], VSome], nxt: Callable[[TSome], VSome]
-    ) -> Callable[[TSome], VSome]:
-        def __continue_on_some(val: TSome):
-            match cur(val):
-                case Some(result):
-                    return result
-                case Nothing():
-                    return nxt(val)
-
-        return __continue_on_some
-
-    @staticmethod
-    def choose(*funcs: Callable[[TSome], VSome]) -> Callable[[TSome], VSome]:
-        """Return first `Some` result from passed functions.
-
-        If `funcs` is empty, than return `Nothing`.
-        If no `func` can return `Some` than return `Nothing`.
-
-        Example::
-
-                result = Some(1) >> choose(
-                    lambda x: Nothing(),
-                    lambda x: Some(2)
-                )  # Some(2)
-        """
-
-        def _choose(value: TSome):
-            match funcs:
-                case ():
-                    return Nothing()
-                case _:
-                    return reduce(Maybe._continue_on_some, funcs)(value)
-
-        return _choose
-
-    @staticmethod
-    def noneless(
+    def returns(
         func: Callable[[TSome], VSome | None]
-    ) -> Callable[[TSome], "Maybe[VSome]"]:
+    ) -> Callable[[TSome], Maybe[VSome]]:
         """Decorator for functions that might return `None`.
 
         When decorated function returns `None` it is converted to `Nothing`, otherwise
@@ -154,7 +231,7 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
 
         Example::
 
-                @Maybe.noneless
+                @Maybe.returns
                 def func(x: int) -> int | None:
                     return x if x > 10 else None
 
@@ -171,38 +248,16 @@ class Maybe(Bindable, Alterable, Generic[TSome], ABC):
 
         return _wrapper
 
-    @staticmethod
-    def some(value: TSome) -> Some[TSome]:
-        """Wraps passed value into `Some` container.
 
-        Args:
-            value (TSome): to wrap.
-
-        Returns:
-            Some[TSome]: container.
-        """
-        return Some(value)
-
-    @staticmethod
-    def nothing(_: Any) -> Nothing:
-        """Converts `Any` value into nothing.
-
-        Returns:
-            Nothing: container.
-        """
-        return Nothing()
-
-
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Some(Maybe[TSome]):
     """`Maybe` container for values that are actually present."""
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Nothing(Maybe[Any]):
     """Singleton `Maybe` container marking value absence."""
 
-    __slots__ = ()
     __instance: "Nothing | None" = None
 
     def __new__(cls, *args, **kwargs) -> "Nothing":  # noqa
