@@ -98,3 +98,8 @@ class Pipe(Generic[X]):
             X: internal value.
         """
         return self.value
+
+    @staticmethod
+    def this(value: X) -> X:
+        """Sync identity function."""
+        return value

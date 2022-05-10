@@ -352,6 +352,45 @@ class Maybe(Generic[TSome], ABC):
 
         return _wrapper
 
+    def unpack(self) -> TSome | None:
+        """Unpacks underlying value of container."""
+        match self:
+            case Nothing():
+                return None
+            case Some(value):
+                return value
+
+    @staticmethod
+    def unit(value: TSome | None) -> Maybe[TSome]:
+        """Wraps value into `Some` if value is not `None`, otherwise in `Nothing`.
+
+        Args:
+            value (TSome | None): value to wrap.
+
+        Returns:
+            Maybe[TSome]: result.
+        """
+        match value:
+            case None:
+                return Nothing()
+            case _:
+                return Some(value)
+
+    def otherwise_replace(self, value: VSome) -> Some[TSome] | Some[VSome]:
+        """If this container is `Nothing` than replace it with `Some` value.
+
+        Args:
+            value (VSome): to replace with
+
+        Returns:
+            Some[TSome] | Some[VSome]: result.
+        """
+        match self:
+            case Some():
+                return self
+            case Nothing():
+                return Some(value)
+
 
 @dataclass(frozen=True, slots=True)
 class Some(Maybe[TSome]):
@@ -374,3 +413,22 @@ class Nothing(Maybe[Any]):
 
     def __init__(self) -> None:  # noqa
         super().__init__(None)
+
+
+# Utility functions
+
+
+def if_dict_not_empty(data: dict) -> Maybe[dict]:  # noqa
+    match data:
+        case {}:
+            return Nothing()
+        case values:
+            return Some(values)
+
+
+def if_list_not_empty(data: list) -> Maybe[list]:  # noqa
+    match data:
+        case []:
+            return Nothing()
+        case values:
+            return Some(values)

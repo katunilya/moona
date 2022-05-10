@@ -1,4 +1,4 @@
-from mona.core import ContextError, LifespanContext
+from mona.core import ErrorContext, LifespanContext
 from mona.handlers.core import LifespanHandler, lifespan_handler
 from mona.monads.future import Future
 
@@ -21,14 +21,14 @@ def lifespan_async(
         # This infinite loop ensures that lifespan scope persists over entire
         # application life cycle. Specific for "lifespan" scope.
         while True:
-            match await ctx.receive():
+            match await ctx.__receive():
                 case {"type": "lifespan.startup"}:
                     result = await (Future.from_value(ctx) >> on_startup)
                     match result:
                         case LifespanContext():
-                            await ctx.send({"type": "lifespan.startup.complete"})
-                        case ContextError() as err:
-                            await ctx.send(
+                            await ctx.__send({"type": "lifespan.startup.complete"})
+                        case ErrorContext() as err:
+                            await ctx.__send(
                                 {
                                     "type": "lifespan.startup.failed",
                                     "message": err.message,
@@ -38,9 +38,9 @@ def lifespan_async(
                     result = await (Future.from_value(ctx) >> on_shutdown)
                     match result:
                         case LifespanContext():
-                            await ctx.send({"type": "lifespan.shutdown.complete"})
-                        case ContextError() as err:
-                            await ctx.send(
+                            await ctx.__send({"type": "lifespan.shutdown.complete"})
+                        case ErrorContext() as err:
+                            await ctx.__send(
                                 {
                                     "type": "lifespan.shutdown.failed",
                                     "message": err.message,
