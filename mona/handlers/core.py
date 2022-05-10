@@ -1,10 +1,10 @@
 from functools import wraps
 from typing import Awaitable, Callable
 
-from mona.core import BaseContext, ContextError, HTTPContext, LifespanContext
+from mona.core import BaseContext, ErrorContext, HTTPContext, LifespanContext
 from mona.monads.future import Future
 
-ContextResult = BaseContext | ContextError
+ContextResult = BaseContext | ErrorContext
 Handler = Callable[[ContextResult], ContextResult | Awaitable[ContextResult]]
 
 
@@ -19,7 +19,7 @@ def error_handler(handler: Handler) -> Handler:
         result: ContextResult,
     ) -> ContextResult | Awaitable[ContextResult]:
         match result:
-            case ContextError() as err:
+            case ErrorContext() as err:
                 return handler(err)
             case other:
                 return other
@@ -27,7 +27,7 @@ def error_handler(handler: Handler) -> Handler:
     return _error_handler
 
 
-HTTPContextResult = HTTPContext | ContextError
+HTTPContextResult = HTTPContext | ErrorContext
 HTTPHandler = Callable[
     [HTTPContextResult], HTTPContextResult | Awaitable[HTTPContextResult]
 ]
@@ -107,7 +107,7 @@ def choose(*handlers: Handler) -> Handler:
             case some_handlers:
                 for handler in some_handlers:
                     match await handler(result.copy()):
-                        case ContextError():
+                        case ErrorContext():
                             continue
                         case ctx:
                             return ctx
@@ -116,7 +116,7 @@ def choose(*handlers: Handler) -> Handler:
     return _choose
 
 
-LifespanContextResult = LifespanContext | ContextError
+LifespanContextResult = LifespanContext | ErrorContext
 LifespanHandler = Callable[
     [LifespanContextResult], LifespanContextResult | Awaitable[LifespanContextResult]
 ]

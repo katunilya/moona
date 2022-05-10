@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from mona.core import ContextError, HTTPContext
+from mona.core import ErrorContext, HTTPContext
 from mona.handlers.core import HTTPContextResult, HTTPHandler, http_handler
 
 
-class WrongHTTPMethodError(ContextError):
+class WrongHTTPMethodError(ErrorContext):
     """`HTTPContext` is handled via wrong handler based on method mismatch."""
 
     def __init__(self, ctx: HTTPContext, method: str) -> None:

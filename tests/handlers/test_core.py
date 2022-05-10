@@ -1,18 +1,18 @@
 import pytest
 
-from mona.core import ContextError, HTTPContext
+from mona.core import ErrorContext, HTTPContext
 from mona.handlers.core import choose, error_handler, http_handler
 from mona.monads.future import Future
 
 
 def test_http_handler(ctx: HTTPContext):
     assert ctx >> http_handler(lambda x: x) == ctx
-    assert isinstance(ContextError(ctx) >> http_handler(lambda _: ctx), ContextError)
+    assert isinstance(ErrorContext(ctx) >> http_handler(lambda _: ctx), ErrorContext)
 
 
 def test_error_handler(ctx: HTTPContext):
     assert ctx >> error_handler(lambda x: None) == ctx
-    assert ContextError(ctx) >> error_handler(lambda x: ctx) == ctx
+    assert ErrorContext(ctx) >> error_handler(lambda x: ctx) == ctx
 
 
 @http_handler
@@ -26,8 +26,8 @@ async def async_success_handler(ctx: HTTPContext) -> HTTPContext:
 
 
 @http_handler
-def fail_handler(ctx: HTTPContext) -> ContextError:
-    return ContextError(ctx)
+def fail_handler(ctx: HTTPContext) -> ErrorContext:
+    return ErrorContext(ctx)
 
 
 @pytest.mark.asyncio
