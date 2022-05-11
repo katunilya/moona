@@ -22,7 +22,7 @@ async def test_then_future():
         Pipeline(3)
         .then(lambda x: x + 1)
         .then(lambda x: x**2)
-        .then_future(Future.identity)
+        .then_future(Future.this)
         .then(lambda x: x / 2)
         .then(lambda x: x - 2)
         .then(lambda x: x * 3)

@@ -110,7 +110,7 @@ def async_handler(
             case HTTPContext():
                 return Future(func(ctx))
             case other:
-                return Future.identity(other)
+                return Future.this(other)
 
     return _wrapper
 

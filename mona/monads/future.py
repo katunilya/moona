@@ -113,7 +113,7 @@ class Future(Generic[T]):
         return FutureResult(self.__then_future(func))
 
     @staticmethod
-    async def identity(value: T) -> T:
+    async def this(value: T) -> T:
         """Asynchronously returns passed `value`.
 
         Example::
@@ -144,7 +144,7 @@ class Future(Generic[T]):
         Returns:
             Future[T]: result
         """
-        return Future(Future.identity(value))
+        return Future(Future.this(value))
 
     @staticmethod
     def returns(func: Callable[[T], Awaitable[V]]) -> Callable[[T], Future[V]]:
