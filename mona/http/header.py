@@ -2,7 +2,7 @@ import toolz
 
 from mona.http.core import HTTPContext, HTTPContextHandler, get_response_body, handler
 from mona.monads.maybe import Maybe
-from mona.monads.pipe import Pipe
+from mona.monads.pipe import Pipeline
 from mona.utils import decode_utf_8, encode_utf_8
 
 
@@ -47,12 +47,12 @@ def set_content_type(value: str) -> HTTPContextHandler:
 
 def set_content_type_text(ctx: HTTPContext) -> HTTPContext:
     """Sets "Content-Type" header to "text/plain"."""
-    return Pipe(ctx).then(set_content_type("text/plain"))
+    return Pipeline(ctx).then(set_content_type("text/plain")).finish()
 
 
 def set_content_type_json(ctx: HTTPContext) -> HTTPContext:
     """Sets "Content-Type" header to "application/json"."""
-    return Pipe(ctx).then(set_content_type("application/json"))
+    return Pipeline(ctx).then(set_content_type("application/json")).finish()
 
 
 def set_content_length(value: int | None = None) -> HTTPContext:
@@ -68,17 +68,15 @@ def set_content_length(value: int | None = None) -> HTTPContext:
             Maybe.unit(value)
             .then(Maybe.returns(str))
             .then(Maybe.returns(encode_utf_8))
-            .otherwise_replace(
-                Pipe(ctx)
+            .return_some_or(
+                Pipeline(ctx)
                 .then(get_response_body)
                 .then_maybe(Maybe.unit)
                 .then(Maybe.returns(len))
                 .then(Maybe.returns(str))
                 .then(Maybe.returns(encode_utf_8))
-                .otherwise_replace(b"0")
-                .value
+                .return_some_or(b"0")
             )
-            .value
         )
         return ctx
 
