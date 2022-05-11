@@ -11,7 +11,7 @@ Z = TypeVar("Z")
 
 
 @dataclass(slots=True)
-class Pipe(Generic[X]):
+class Pipeline(Generic[X]):
     """Abstraction for creating pipelines with sync and async functions.
 
     Sync equivalent of `Future` with compatibility features.
@@ -19,7 +19,7 @@ class Pipe(Generic[X]):
 
     value: X
 
-    def then(self, func: Callable[[X], Y]) -> "Pipe[Y]":
+    def then(self, func: Callable[[X], Y]) -> "Pipeline[Y]":
         """Execute passed sync `func` on `Pipe` value and return next `Pipe`.
 
         Args:
@@ -28,7 +28,7 @@ class Pipe(Generic[X]):
         Returns:
             Pipe[Y]: execution result.
         """
-        return Pipe(func(self.value))
+        return Pipeline(func(self.value))
 
     def then_future(self, func: Callable[[X], Awaitable[Y]]) -> Future[Y]:
         """Execute passed async `func` on `Pipe` value and return `Future`.
@@ -91,7 +91,7 @@ class Pipe(Generic[X]):
         """
         return FutureMaybe(func(self.value))
 
-    def unpack(self) -> X:
+    def finish(self) -> X:
         """Return internal `Pipe` value.
 
         Returns:

@@ -1,25 +1,25 @@
 import pytest
 
 from mona.monads.future import Future
-from mona.monads.pipe import Pipe
+from mona.monads.pipe import Pipeline
 
 
 def test_then():
     assert (
-        Pipe(3)
+        Pipeline(3)
         .then(lambda x: x + 1)
         .then(lambda x: x**2)
         .then(lambda x: x / 2)
         .then(lambda x: x - 2)
         .then(lambda x: x * 3)
-        .unpack()
+        .finish()
     ) == 18
 
 
 @pytest.mark.asyncio
 async def test_then_future():
     result = await (
-        Pipe(3)
+        Pipeline(3)
         .then(lambda x: x + 1)
         .then(lambda x: x**2)
         .then_future(Future.identity)

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Awaitable, Callable
 
 from mona.core import BaseContext, Message, Receive, Scope, Send
-from mona.monads.pipe import Pipe
+from mona.monads.pipe import Pipeline
 
 
 @dataclass(slots=True)
@@ -66,7 +66,7 @@ class LifespanContext(BaseContext):
         Note:
             [Docs](https://asgi.readthedocs.io/en/latest/specs/lifespan.html#startup-complete-send-event)
         """
-        return Pipe(self).then_future(
+        return Pipeline(self).then_future(
             LifespanContext.send({"type": "lifespan.startup.complete"})
         )
 
@@ -76,7 +76,7 @@ class LifespanContext(BaseContext):
         Note:
             [Docs](https://asgi.readthedocs.io/en/latest/specs/lifespan.html#shutdown-complete-send-event)
         """
-        return Pipe(self).then_future(
+        return Pipeline(self).then_future(
             LifespanContext.send({"type": "lifespan.shutdown.complete"})
         )
 

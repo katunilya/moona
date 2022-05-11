@@ -15,7 +15,7 @@ from mona.handlers import (
 from mona.handlers.core import HTTPContextResult
 from mona.monads.func import FutureFunc
 from mona.monads.future import Future
-from mona.monads.pipe import Pipe
+from mona.monads.pipe import Pipeline
 from mona.monads.result import Result
 
 
@@ -28,7 +28,7 @@ h = FutureFunc(get_body_text_async).then(int).then(fibonacci).then(str)
 
 def fibonacci_handler(ctx: HTTPContext) -> Future[HTTPContextResult]:  # noqa
     return (
-        Pipe(ctx)
+        Pipeline(ctx)
         .then(GET)
         .then(route("/fibonacci"))
         .then_future(bind_body_text_async())

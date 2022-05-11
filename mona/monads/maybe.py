@@ -391,6 +391,24 @@ class Maybe(Generic[TSome], ABC):
             case Nothing():
                 return Some(value)
 
+    def return_some_or(self, value: VSome) -> TSome | VSome:
+        """Return underlying value if self is `Some` or passed value.
+
+        Combination of otherwise_replace and unpack that guarantees that `Some` is
+        returned.
+
+        Args:
+            value (VSome): to return if self is `Nothing`.
+
+        Returns:
+            TSome | VSome: some result.
+        """
+        match self:
+            case Nothing():
+                return value
+            case Some(internal_value):
+                return internal_value
+
 
 @dataclass(frozen=True, slots=True)
 class Some(Maybe[TSome]):

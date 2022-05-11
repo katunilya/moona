@@ -11,7 +11,7 @@ from mona.handlers.core import Handler, HTTPContextResult
 from mona.handlers.error import send_error_async
 from mona.handlers.events import send_body_async
 from mona.monads.future import Future
-from mona.monads.pipe import Pipe
+from mona.monads.pipe import Pipeline
 
 
 def create(handler: Handler) -> ASGIApp:
@@ -35,7 +35,7 @@ def create(handler: Handler) -> ASGIApp:
         match scope:
             case {"type": "lifespan"}:
                 await (
-                    Pipe(LifespanContext.create(scope, receive, send)).then_future(
+                    Pipeline(LifespanContext.create(scope, receive, send)).then_future(
                         handler
                     )
                 )
