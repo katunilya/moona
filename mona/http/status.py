@@ -1,5 +1,4 @@
-from mona.handlers.core import http_handler
-from mona.http.core import HTTPContext, HTTPContextHandler
+from mona.http.core import HTTPContext, HTTPContextHandler, handler
 from mona.monads.pipe import Pipeline
 
 CONTINUE = 100
@@ -64,7 +63,7 @@ def set_status(code: int) -> HTTPContextHandler:
         code (int): to set.
     """
 
-    @http_handler
+    @handler
     def _handler(ctx: HTTPContext) -> HTTPContext:
         ctx.response_status = code
         return ctx

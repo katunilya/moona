@@ -1,6 +1,5 @@
 from mona.core import ErrorContext
-from mona.handlers.core import http_handler
-from mona.http.core import HTTPContext, HTTPContextHandler
+from mona.http.core import HTTPContext, HTTPContextHandler, handler
 from mona.monads.pipe import Pipeline
 
 
@@ -22,7 +21,7 @@ def if_method(value: str) -> HTTPContextHandler:
         value (str): to compare with.
     """
 
-    @http_handler
+    @handler
     def _handler(ctx: HTTPContext) -> HTTPContext | ErrorContext:
         match ctx.request_method == value:
             case True:
