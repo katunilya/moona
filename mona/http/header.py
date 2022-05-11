@@ -65,13 +65,13 @@ def set_content_length(value: int | None = None) -> HTTPContext:
     @handler
     def _handler(ctx: HTTPContext) -> HTTPContext:
         ctx.response_headers[b"content-type"] = (
-            Maybe.unit(value)
+            Maybe.this(value)
             .then(Maybe.returns(str))
             .then(Maybe.returns(encode_utf_8))
             .return_some_or(
                 Pipeline(ctx)
                 .then(get_response_body)
-                .then_maybe(Maybe.unit)
+                .then_maybe(Maybe.this)
                 .then(Maybe.returns(len))
                 .then(Maybe.returns(str))
                 .then(Maybe.returns(encode_utf_8))

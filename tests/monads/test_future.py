@@ -18,7 +18,7 @@ from mona.monads.future import Future
     ],
 )
 async def test_identity(value):
-    result = Future.identity(value)
+    result = Future.this(value)
     assert inspect.isawaitable(result)
     assert not isinstance(result, Future)
     assert await result == value
@@ -59,8 +59,8 @@ async def async_strip(x: str) -> str:
 @pytest.mark.parametrize(
     "value, func, assert_result",
     [
-        (1, Future.identity, 1),
-        ("1", Future.identity, "1"),
+        (1, Future.this, 1),
+        ("1", Future.this, "1"),
         (3, async_plus_1, 4),
         (3, async_multiply_3, 9),
         ("John Doe", async_strip, "John Doe"),

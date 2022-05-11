@@ -361,7 +361,7 @@ class Maybe(Generic[TSome], ABC):
                 return value
 
     @staticmethod
-    def unit(value: TSome | None) -> Maybe[TSome]:
+    def this(value: TSome | None) -> Maybe[TSome]:
         """Wraps value into `Some` if value is not `None`, otherwise in `Nothing`.
 
         Args:
