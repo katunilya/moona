@@ -3,8 +3,9 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Awaitable, Callable, Generator, Generic, TypeVar
+from typing import Any, Awaitable, Callable, Generator, Generic, Sized, TypeVar
 
+T = TypeVar("T")
 TSome = TypeVar("TSome")
 VSome = TypeVar("VSome")
 
@@ -450,3 +451,14 @@ def if_list_not_empty(data: list) -> Maybe[list]:  # noqa
             return Nothing()
         case values:
             return Some(values)
+
+
+TSized = TypeVar("TSized", bound=Sized)
+
+
+def if_not_empty(data: TSized) -> Maybe[TSized]:  # noqa
+    match len(data) > 0:
+        case True:
+            return Some(data)
+        case False:
+            return Nothing()
