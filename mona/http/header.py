@@ -55,7 +55,7 @@ def set_content_type_json(ctx: HTTPContext) -> HTTPContext:
     return Pipeline(ctx).then(set_content_type("application/json")).finish()
 
 
-def set_content_length(value: int | None = None) -> HTTPContext:
+def set_content_length(value: int | None = None) -> HTTPContextHandler:
     """Sets "Content-Length" response header.
 
     Args:
