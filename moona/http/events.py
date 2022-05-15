@@ -41,7 +41,7 @@ def start_response(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None
                 >> send_message_async(
                     {
                         "type": "http.response.start",
-                        "headers": ctx.response_headers,
+                        "headers": list(ctx.response_headers.items()),
                         "status": ctx.response_status,
                     }
                 )
