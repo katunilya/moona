@@ -1,7 +1,7 @@
 import pytest
 
-from mona.monads.future import Future
-from mona.monads.pipe import Pipeline
+from moona.monads.future import Future
+from moona.monads.pipe import Pipeline
 
 
 def test_then():

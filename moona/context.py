@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC
-from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
 Message = dict[str, Any]
@@ -21,17 +20,5 @@ class BaseContext(ABC):
     * `WebsocketContext` (not implemented)
     """
 
-
-@dataclass(slots=True)
-class ErrorContext(Exception):  # noqa
-    """Base class for `Exception`s that happen during handling `BaseContext`.
-
-    Attributes:
-        ctx (BaseContext): context that failed to be processed.
-        message (str): message to respond.
-        status (int): status code for response to send.
-    """
-
-    ctx: BaseContext
-    message: str = "Internal Server Error."
-    status: int = 500
+    send: Send
+    receive: Receive

@@ -2,7 +2,7 @@ from typing import Callable
 
 import pytest
 
-from mona.monads.maybe import Maybe, Nothing, Some
+from moona.monads.maybe import Maybe, Nothing, Some
 
 
 @pytest.mark.parametrize(

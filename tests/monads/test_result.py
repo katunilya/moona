@@ -1,6 +1,6 @@
 import pytest
 
-from mona.monads.result import Error, Ok, Result
+from moona.monads.result import Error, Ok, Result
 
 
 @pytest.mark.parametrize(

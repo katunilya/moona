@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "mona"
+name = "moona"
 version = "0.2.2"
 description = "ASGI server with functional approach in mind"
 authors = ["Katun Ilya <katun.ilya@gmail.com>"]
 license = "MIT"
 readme="README.md"
-repository="https://github.com/katunilya/mona"
-homepage="https://katunilya.github.io/mona/"
-documentation="https://katunilya.github.io/mona/"
+repository="https://github.com/katunilya/moona"
+homepage="https://katunilya.github.io/moona/"
+documentation="https://katunilya.github.io/moona/"
 keywords=[
     "ASGI",
     "functional",

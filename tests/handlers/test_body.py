@@ -1,8 +1,8 @@
 import pytest
 from pydantic import BaseModel
 
-from mona.core import HTTPContext
-from mona.handlers.body import (
+from moona.context import HTTPContext
+from moona.handlers.body import (
     bind_body_bytes_async,
     bind_body_json_async,
     bind_body_text_async,
@@ -13,7 +13,7 @@ from mona.handlers.body import (
     set_body_json,
     set_body_text,
 )
-from mona.monads.result import Result
+from moona.monads.result import Result
 
 
 @pytest.mark.parametrize(

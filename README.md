@@ -1,6 +1,6 @@
-# mona
+# moona
 
-`mona` is an ASGI server framework that provides a set of guidelines on software
+`moona` is an ASGI server framework that provides a set of guidelines on software
 development inspired by functional programming and monads. It's core design is
 hugely inspired by Finite State Machines and Railroad Architecture approach.
 
@@ -25,7 +25,7 @@ functions:
 > immutable data, however in Python nearly everything is mutable, but this
 > "feature" is a good marker of most important argument.
 
-This "requirements" I follow in `mona` are important for better usage of such
+This "requirements" I follow in `moona` are important for better usage of such
 functional tools like _function composition_ and _curring_.
 
 In this way all the functions must be just:
@@ -66,9 +66,9 @@ IMHO ASGI specification is not something hard to grasp and understand and it is
 important to understand application lifecycle and events that happen during
 service execution.
 
-In this way `mona` does nothing except what you said. If you forgot to set a
+In this way `moona` does nothing except what you said. If you forgot to set a
 header than this is your problem, if you forgot to send a body, this is your
-problem (well, `mona` does it for you actually, but that is required for
+problem (well, `moona` does it for you actually, but that is required for
 persisting successful processing path).
 
 ### Everything is monad
@@ -178,21 +178,21 @@ However most enterprise languages are imperative and decorativeness becomes just
 another code style that hides all imperative instructions under well named
 functions and elegant constructions.
 
-This is the Saint Graal of `mona` underlying concepts. Code should be written as
+This is the Saint Graal of `moona` underlying concepts. Code should be written as
 some pipeline that tells what actually happens in the system and what we get as
 a result. Monads, single-argument functions, curring are just tools that can
 provide this experience in good hands.
 
-No we are ready to get right to `mona`.
+No we are ready to get right to `moona`.
 
 ## ✨ Overview
 
-`mona` is monad-based railroad-oriented ASGI framework. This 2 core qualities
+`moona` is monad-based railroad-oriented ASGI framework. This 2 core qualities
 are provided via monads and interface for building application with `Handlers`.
 
 ### Monads
 
-Let's start with some monads that `mona` provides.
+Let's start with some monads that `moona` provides.
 
 #### Future
 
@@ -443,10 +443,10 @@ flowchart LR;
 
 ### ASGI Handlers
 
-This are core concepts of `mona`. Based on them entire application is just a so
+This are core concepts of `moona`. Based on them entire application is just a so
 called `Handler` - sync or async function that takes `BaseContext` or
 `ContextError`and return `BaseContext` or `ContextError`. The simplest "Hello,
-World!" server written in `mona`:
+World!" server written in `moona`:
 
 ```python
 import mona
@@ -466,13 +466,13 @@ app = mona.create(
 This example provides server that return `Hello, World!!!` for any request. See
 more examples in [examples folder](/examples/). Also check out full API
 specification on official [Documentation
-Page](https://katunilya.github.io/mona/).
+Page](https://katunilya.github.io/moona/).
 
 > Documentation is generated via [handsdown](https://github.com/vemel/handsdown)
 
 ## ⬇️ Install
 
-`mona` is currently at a very dynamic and stormy development stage and lacks
+`moona` is currently at a very dynamic and stormy development stage and lacks
 multiple important features, so it is not published in PyPi currently and can be
 installed as raw package from GitHub directly.
 
@@ -480,16 +480,16 @@ I suggest using [poetry](https://github.com/python-poetry/poetry) for package
 management. Having project environment setup execute:
 
 ```sh
-poetry add git+https://github.com/katunilya/mona
+poetry add git+https://github.com/katunilya/moona
 ```
 
 Another way is to build package from source:
 
 ```sh
-git clone https://github.com/katunilya/mona
-cd mona
+git clone https://github.com/katunilya/moona
+cd moona
 poetry build
-pip install dist/mona-0.2.2.tar.gz
+pip install dist/moona-0.2.2.tar.gz
 ```
 
 ## 🏗️ Develop

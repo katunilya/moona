@@ -1,8 +1,8 @@
 import pytest
 
-from mona.core import HTTPContext
-from mona.handlers.header import get_header, remove_header, set_header
-from mona.monads.maybe import Maybe
+from moona.context import HTTPContext
+from moona.handlers.header import get_header, remove_header, set_header
+from moona.monads.maybe import Maybe
 
 
 @pytest.mark.parametrize(

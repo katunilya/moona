@@ -1,6 +1,6 @@
-import mona
-from mona.core import LifespanContext
-from mona.handlers.lifespan import lifespan_async
+import moona
+from moona.context import LifespanContext
+from moona.handlers.lifespan import lifespan_async
 
 
 def on_startup(ctx: LifespanContext) -> LifespanContext:  # noqa
@@ -13,7 +13,7 @@ def on_shutdown(ctx: LifespanContext) -> LifespanContext:  # noqa
     return ctx
 
 
-app = mona.create(lifespan_async(on_startup, on_shutdown))
+app = moona.create(lifespan_async(on_startup, on_shutdown))
 
 # INFO:     Started server process [7737]
 # INFO:     Waiting for application startup.

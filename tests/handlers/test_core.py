@@ -1,8 +1,8 @@
 import pytest
 
-from mona.core import ErrorContext, HTTPContext
-from mona.handlers.core import choose, error_handler, http_handler
-from mona.monads.future import Future
+from moona.context import ErrorContext, HTTPContext
+from moona.handlers.core import choose, error_handler, http_handler
+from moona.monads.future import Future
 
 
 def test_http_handler(ctx: HTTPContext):
