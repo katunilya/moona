@@ -1,7 +1,7 @@
 import pytest
 
-from mona.core import HTTPContext
-from mona.handlers.method import (
+from moona.context import HTTPContext
+from moona.handlers.method import (
     CONNECT,
     DELETE,
     GET,

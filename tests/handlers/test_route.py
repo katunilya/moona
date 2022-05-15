@@ -1,7 +1,7 @@
 import pytest
 
-from mona.core import HTTPContext
-from mona.handlers.route import WrongPathError, ci_route, ci_subroute, route, subroute
+from moona.context import HTTPContext
+from moona.handlers.route import WrongPathError, ci_route, ci_subroute, route, subroute
 
 
 @pytest.mark.parametrize(

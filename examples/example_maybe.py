@@ -1,6 +1,6 @@
 from typing import Any, Callable
 
-from mona.monads.maybe import Maybe, Nothing, Some
+from moona.monads.maybe import Maybe, Nothing, Some
 
 
 def get_key(key: Any) -> Callable[[dict], Maybe]:

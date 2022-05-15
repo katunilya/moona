@@ -1,8 +1,8 @@
 from math import factorial, sqrt
 
-import mona
-from mona.core import HTTPContext
-from mona.handlers import (
+import moona
+from moona.context import HTTPContext
+from moona.handlers import (
     GET,
     bind_body_text_async,
     choose,
@@ -12,11 +12,11 @@ from mona.handlers import (
     route,
     send_body_async,
 )
-from mona.handlers.core import HTTPContextResult
-from mona.monads.func import FutureFunc
-from mona.monads.future import Future
-from mona.monads.pipe import Pipeline
-from mona.monads.result import Result
+from moona.handlers.core import HTTPContextResult
+from moona.monads.func import FutureFunc
+from moona.monads.future import Future
+from moona.monads.pipe import Pipeline
+from moona.monads.result import Result
 
 
 def fibonacci(n: int) -> int:  # noqa
@@ -50,7 +50,7 @@ factorial_handler = compose(
     send_body_async,
 )
 
-app = mona.create(
+app = moona.create(
     compose(
         http,
         choose(

@@ -1,7 +1,7 @@
 import pytest
 
-from mona.core import HTTPContext
-from mona.handlers.status import (
+from moona.context import HTTPContext
+from moona.handlers.status import (
     set_status,
     set_status_bad_gateway,
     set_status_bad_request,

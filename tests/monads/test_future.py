@@ -2,7 +2,7 @@ import inspect
 
 import pytest
 
-from mona.monads.future import Future
+from moona.monads.future import Future
 
 
 @pytest.mark.asyncio

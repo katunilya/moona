@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from mona.monads.result import Result
+from moona.monads.result import Result
 
 
 @dataclass
