@@ -1,4 +1,4 @@
-# moona
+<h1 align="center">🌙 moona</h2>
 
 `moona` is an ASGI server framework that provides a set of guidelines on software
 development inspired by functional programming and monads. It's core design is
