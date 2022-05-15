@@ -542,7 +542,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pymon"
-version = "0.0.1"
+version = "0.0.3"
 description = "Common simple python monads for more readable and maintainable pipeline-based code."
 category = "main"
 optional = false
@@ -553,7 +553,7 @@ develop = false
 type = "git"
 url = "https://github.com/katunilya/pymon.git"
 reference = "main"
-resolved_reference = "add5619e32840268d9840d3ba3a5c7f14c9f9656"
+resolved_reference = "ffdcd104f645597d699332b982d7c7ff115d43e0"
 
 [[package]]
 name = "pyparsing"
