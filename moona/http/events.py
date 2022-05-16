@@ -1,31 +1,13 @@
-from pymon.core import Future, Pipe, returns_future
+from pymon.core import Future, Pipe
 
-from moona.context import Message
-from moona.http.context import HTTPContext, set_closed, set_started
-from moona.http.handlers import HTTPFunc, handler, skip
-
-
-# funcs
-def send_message_async(message: Message) -> HTTPFunc:
-    """`HTTPFunc` that sends passed message to client.
-
-    Args:
-        message (Message): to send to the client.
-    """
-
-    @returns_future
-    async def func(ctx: HTTPContext) -> HTTPContext:
-        await ctx.send(message)
-        return ctx
-
-    return func
-
+from moona.http.context import HTTPContext, send_message, set_closed, set_started
+from moona.http.handlers import HTTPFunc, handle_func, handler, skip
 
 # handlers
 
 
 @handler
-def start_response(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def start(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
     """Send message to client and return `HTTPContext` that sent that.
 
     Args:
@@ -36,47 +18,31 @@ def start_response(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None
         case True:
             return nxt(ctx)
         case False:
-            return (
-                Pipe(ctx)
-                >> send_message_async(
-                    {
-                        "type": "http.response.start",
-                        "headers": list(ctx.response_headers.items()),
-                        "status": ctx.response_status,
-                    }
-                )
-                << set_started(True)
-                >> nxt
-            )
+            message = {
+                "type": "http.response.start",
+                "headers": list(ctx.response_headers.items()),
+                "status": ctx.response_status,
+            }
+            return Pipe(ctx) << set_started(True) >> send_message(message) >> nxt
 
 
-def send_body(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+@handle_func
+def respond(ctx: HTTPContext) -> Future[HTTPContext | None]:
     """Send response body to the client and close the context.
 
     Args:
         nxt (HTTPFunc): to execute next.
         ctx (HTTPContext): context to send body from.
     """
-
-    def _handler(_nxt: HTTPFunc, _ctx: HTTPContext) -> Future[HTTPContext | None]:
-        match _ctx.closed:
-            case True:
-                return _nxt(ctx)
-            case False:
-                return (
-                    Pipe(ctx)
-                    << set_closed(True)
-                    >> send_message_async(
-                        {"type": "http.response.body", "body": ctx.response_body}
-                    )
-                    >> _nxt
-                )
-
-    return (start_response >> _handler)(nxt, ctx)
+    return (
+        Pipe(ctx)
+        << set_closed(True)
+        >> send_message({"type": "http.response.body", "body": ctx.response_body})
+    )
 
 
 @handler
-async def receive_body(nxt: HTTPFunc, ctx: HTTPContext) -> HTTPContext | None:
+async def receive(nxt: HTTPFunc, ctx: HTTPContext) -> HTTPContext | None:
     """Receive request body from client.
 
     Args:
@@ -89,8 +55,8 @@ async def receive_body(nxt: HTTPFunc, ctx: HTTPContext) -> HTTPContext | None:
             ctx.request_body += msg["body"]
             match msg.get("more_body", False):
                 case True:
-                    return receive_body(nxt, ctx)
+                    return await receive(nxt, ctx)
                 case False:
-                    return nxt(ctx)
+                    return await nxt(ctx)
         case {"type": "http.disconnect"}:
-            return Pipe(ctx) << set_closed(True) >> skip
+            return await (Pipe(ctx) << set_closed(True) >> skip)
