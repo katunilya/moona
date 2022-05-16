@@ -1,7 +1,7 @@
 from pymon import Future
 
 from moona.http.context import HTTPContext
-from moona.http.handlers import HTTPFunc, handler1, skip
+from moona.http.handlers import HTTPFunc, handler, handler1, skip
 
 
 @handler1
@@ -25,6 +25,7 @@ def method(method: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext |
             return skip(ctx)
 
 
+@handler
 def GET(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with GET method.
 
@@ -35,6 +36,7 @@ def GET(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     return method("GET")(nxt, ctx)
 
 
+@handler
 def POST(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with POST method.
 
@@ -45,6 +47,7 @@ def POST(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     return method("POST")(nxt, ctx)
 
 
+@handler
 def PATCH(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with PATCH method.
 
@@ -55,6 +58,7 @@ def PATCH(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noq
     return method("PATCH")(nxt, ctx)
 
 
+@handler
 def PUT(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with PUT method.
 
@@ -65,6 +69,7 @@ def PUT(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     return method("PUT")(nxt, ctx)
 
 
+@handler
 def DELETE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with DELETE method.
 
@@ -75,6 +80,7 @@ def DELETE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # no
     return method("DELETE")(nxt, ctx)
 
 
+@handler
 def OPTIONS(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with OPTIONS method.
 
@@ -85,6 +91,7 @@ def OPTIONS(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # n
     return method("OPTIONS")(nxt, ctx)
 
 
+@handler
 def HEAD(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with HEAD method.
 
@@ -95,6 +102,7 @@ def HEAD(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     return method("HEAD")(nxt, ctx)
 
 
+@handler
 def TRACE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with TRACE method.
 
@@ -105,6 +113,7 @@ def TRACE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noq
     return method("TRACE")(nxt, ctx)
 
 
+@handler
 def CONNECT(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
     """Matches request with CONNECT method.
 
