@@ -25,12 +25,91 @@ def method(method: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext |
             return skip(ctx)
 
 
-GET = method("GET")
-POST = method("POST")
-PATCH = method("PATCH")
-PUT = method("PUT")
-DELETE = method("DELETE")
-OPTIONS = method("OPTIONS")
-HEAD = method("HEAD")
-TRACE = method("TRACE")
-CONNECT = method("CONNECT")
+def GET(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with GET method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("GET")(nxt, ctx)
+
+
+def POST(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with POST method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("POST")(nxt, ctx)
+
+
+def PATCH(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with PATCH method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("PATCH")(nxt, ctx)
+
+
+def PUT(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with PUT method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("PUT")(nxt, ctx)
+
+
+def DELETE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with DELETE method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("DELETE")(nxt, ctx)
+
+
+def OPTIONS(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with OPTIONS method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("OPTIONS")(nxt, ctx)
+
+
+def HEAD(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with HEAD method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("HEAD")(nxt, ctx)
+
+
+def TRACE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with TRACE method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("TRACE")(nxt, ctx)
+
+
+def CONNECT(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:  # noqa
+    """Matches request with CONNECT method.
+
+    Args:
+        nxt (HTTPFunc): to run next.
+        ctx (HTTPContext): to process.
+    """
+    return method("CONNECT")(nxt, ctx)
