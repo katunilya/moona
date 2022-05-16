@@ -1,6 +1,8 @@
 import pytest
 
-from moona.context import HTTPContext, LifespanContext, Message
+from moona.context import Message
+from moona.http import HTTPContext
+from moona.lifespan import LifespanContext
 
 
 @pytest.fixture
