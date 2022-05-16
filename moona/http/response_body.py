@@ -75,3 +75,18 @@ def json(data: BaseModel) -> HTTPHandler:
         data (BaseModel): response body.
     """
     return set_json(data) >> start >> respond
+
+
+def negotiate(data: bytes | str | BaseModel) -> HTTPHandler:
+    """Respond client with passed data based on its type.
+
+    Args:
+        data (bytes | str | BaseModel): to respond with.
+    """
+    match data:
+        case bytes():
+            return raw(data)
+        case str():
+            return text(data)
+        case BaseModel():
+            return json(data)
