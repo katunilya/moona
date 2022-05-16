@@ -1,15 +1,18 @@
 import httpx
-from pymon import Pipe
 
 from moona import asgi, lifespan
 
 
-def cheer(ctx: lifespan.LifespanContext) -> lifespan.LifespanContext:
+@lifespan.handle_func_sync
+def cheer(ctx: lifespan.LifespanContext) -> lifespan.LifespanContext:  # noqa
     print("Cheers to our server!!!")
     return ctx
 
 
-async def ping_anime(ctx: lifespan.LifespanContext) -> lifespan.LifespanContext:
+@lifespan.handle_func
+async def anime_quote(  # noqa
+    ctx: lifespan.LifespanContext,
+) -> lifespan.LifespanContext:
     async with httpx.AsyncClient() as client:
         response = await client.get("https://animechan.vercel.app/api/random")
     data = response.json()
@@ -17,14 +20,15 @@ async def ping_anime(ctx: lifespan.LifespanContext) -> lifespan.LifespanContext:
     return ctx
 
 
-async def bye(ctx: lifespan.LifespanContext) -> lifespan.LifespanContext:
+@lifespan.handle_func_sync
+def bye(ctx: lifespan.LifespanContext) -> lifespan.LifespanContext:  # noqa
     print("See you soon server!!!")
     return ctx
 
 
 app = asgi.create(
-    startup_handler=lifespan.handle_func(lambda ctx: Pipe(cheer(ctx)) >> ping_anime),
-    shutdown_handler=lifespan.handle_func(bye),
+    startup_handler=cheer >> anime_quote,
+    shutdown_handler=bye,
 )
 
 # INFO:     Started server process [2394]
