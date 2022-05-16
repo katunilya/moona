@@ -99,6 +99,32 @@ def handle_func(func: LifespanFunc) -> LifespanHandler:
     return _handler
 
 
+def func_handler_sync(
+    func: Callable[[LifespanContext], LifespanContext | None]
+) -> LifespanHandler:
+    """Converts sync `LifespanFunc` to `LifespanHandler`.
+
+    Args:
+        func (Callable[[LifespanContext], LifespanContext | None]): to convert to
+        `LifespanHandler`.
+
+    Returns:
+        LifespanHandler: result.
+    """
+
+    @handler
+    async def _handler(
+        nxt: LifespanFunc, ctx: LifespanContext
+    ) -> LifespanContext | None:
+        match func(ctx):
+            case None:
+                return None
+            case LifespanContext() as _ctx:
+                return await nxt(_ctx)
+
+    return _handler
+
+
 def __choose_reducer(f: LifespanFunc, s: LifespanFunc) -> LifespanFunc:
     @returns_future
     async def func(ctx: LifespanContext) -> LifespanFunc:
