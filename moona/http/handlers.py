@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from dataclasses import dataclass
 from typing import Callable, TypeVar
 
@@ -102,11 +101,35 @@ def handle_func(func: HTTPFunc) -> HTTPHandler:
     return _handler
 
 
+def handle_func_sync(func: Callable[[HTTPContext], HTTPContext | None]) -> HTTPHandler:
+    """Converts sync `HTTPFunc` to `HTTPHandler`.
+
+    Args:
+        func (Callable[[HTTPContext], HTTPContext | None]): to convert to `HTTPHandler`.
+
+    Returns:
+        HTTPHandler: result.
+    """
+
+    @handler
+    async def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> HTTPContext | None:
+        match func(ctx):
+            case None:
+                return None
+            case HTTPContext() as _ctx:
+                match _ctx.closed:
+                    case True:
+                        return _ctx
+                    case False:
+                        return await nxt(_ctx)
+
+    return _handler
+
+
 def __choose_reducer(f: HTTPFunc, s: HTTPFunc) -> HTTPFunc:
     @returns_future
     async def func(ctx: HTTPContext) -> HTTPFunc:
-        _ctx = deepcopy(ctx)
-        match await f(_ctx):
+        match await f(ctx):
             case None:
                 return await s(ctx)
             case some:
@@ -135,7 +158,7 @@ def choose(handlers: list[HTTPHandler]) -> HTTPHandler:
                     Pipe(handlers)
                     .then(cmap(hof_2))
                     .then(cmap(lambda h: h(nxt)))
-                    .then(creducel(__choose_reducer))
+                    .then(creducel(__choose_reducer, skip))
                     .finish()
                 )
                 return await func(ctx)
