@@ -99,7 +99,7 @@ def handle_func(func: LifespanFunc) -> LifespanHandler:
     return _handler
 
 
-def func_handler_sync(
+def handle_func_sync(
     func: Callable[[LifespanContext], LifespanContext | None]
 ) -> LifespanHandler:
     """Converts sync `LifespanFunc` to `LifespanHandler`.
