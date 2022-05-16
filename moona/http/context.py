@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import NamedTuple, TypeVar
 
-from pymon.core import hof_2, hof_3
+from pymon.core import Future, hof_2, hof_3, returns
 from toolz import keymap
 
-from moona.context import BaseContext, Receive, Scope, Send
+from moona.context import BaseContext, Message, Receive, Scope, Send
 
 T = TypeVar("T")
 
@@ -79,7 +79,20 @@ class HTTPContext(BaseContext):
         self.closed = False
 
 
-# funcs
+@hof_2
+def send_message(msg: Message, ctx: HTTPContext) -> Future[HTTPContext]:
+    """Sends message from `HTTPContext` to client.
+
+    Args:
+        msg (Message): to send.
+        ctx (HTTPContext): to send from.
+
+    Returns:
+        HTTPContext: context.
+    """
+    return Future(ctx.send(msg)) << returns(ctx)
+
+
 @hof_2
 def set_response_body(data: bytes, ctx: HTTPContext) -> HTTPContext:
     """Set response body.
@@ -140,3 +153,96 @@ def set_closed(value: bool, ctx: HTTPContext) -> HTTPContext:
     """Sync `HTTPContext` that sets `closed` to `value`."""
     ctx.closed = value
     return ctx
+
+
+# getters
+
+
+def get_request_method(ctx: HTTPContext):
+    """Returns `HTTPContext.request_method`."""
+    return ctx.request_method
+
+
+def get_request_path(ctx: HTTPContext):
+    """Returns `HTTPContext.request_path`."""
+    return ctx.request_path
+
+
+def get_request_query_string(ctx: HTTPContext):
+    """Returns `HTTPContext.request_query_string`."""
+    return ctx.request_query_string
+
+
+def get_request_headers(ctx: HTTPContext):
+    """Returns `HTTPContext.request_headers`."""
+    return ctx.request_headers
+
+
+def get_request_body(ctx: HTTPContext):
+    """Returns `HTTPContext.request_body`."""
+    return ctx.request_body
+
+
+def get_scope_type(ctx: HTTPContext):
+    """Returns `HTTPContext.scope_type`."""
+    return ctx.scope_type
+
+
+def get_asgi_version(ctx: HTTPContext):
+    """Returns `HTTPContext.asgi_version`."""
+    return ctx.asgi_version
+
+
+def get_asgi_spec_version(ctx: HTTPContext):
+    """Returns `HTTPContext.asgi_spec_version`."""
+    return ctx.asgi_spec_version
+
+
+def get_http_version(ctx: HTTPContext):
+    """Returns `HTTPContext.http_version`."""
+    return ctx.http_version
+
+
+def get_scheme(ctx: HTTPContext):
+    """Returns `HTTPContext.scheme`."""
+    return ctx.scheme
+
+
+def get_client(ctx: HTTPContext):
+    """Returns `HTTPContext.client`."""
+    return ctx.client
+
+
+def get_server(ctx: HTTPContext):
+    """Returns `HTTPContext.server`."""
+    return ctx.server
+
+
+def get_response_body(ctx: HTTPContext):
+    """Returns `HTTPContext.response_body`."""
+    return ctx.response_body
+
+
+def get_response_headers(ctx: HTTPContext):
+    """Returns `HTTPContext.response_headers`."""
+    return ctx.response_headers
+
+
+def get_response_status(ctx: HTTPContext):
+    """Returns `HTTPContext.response_status`."""
+    return ctx.response_status
+
+
+def get_received(ctx: HTTPContext):
+    """Returns `HTTPContext.received`."""
+    return ctx.received
+
+
+def get_started(ctx: HTTPContext):
+    """Returns `HTTPContext.started`."""
+    return ctx.started
+
+
+def get_closed(ctx: HTTPContext):
+    """Returns `HTTPContext.closed`."""
+    return ctx.closed
