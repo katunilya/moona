@@ -1,7 +1,12 @@
 import pytest
 
 from moona.http import HTTPContext, end
-from moona.http.response_headers import content_type, header
+from moona.http.response_headers import (
+    content_type,
+    content_type_application_json,
+    content_type_text_plain,
+    header,
+)
 
 
 @pytest.mark.asyncio
@@ -30,3 +35,15 @@ async def test_header(ctx: HTTPContext, s_name, s_value, b_name, b_value):
 async def test_content_type(ctx: HTTPContext, s_value, b_value):
     _ctx = await content_type(s_value)(end, ctx)
     assert _ctx.response_headers[b"content-type"] == b_value
+
+
+@pytest.mark.asyncio
+async def test_content_type_application_json(ctx: HTTPContext):
+    _ctx = await content_type_application_json(end, ctx)
+    assert _ctx.response_headers[b"content-type"] == b"application/json"
+
+
+@pytest.mark.asyncio
+async def test_content_type_text_plain(ctx: HTTPContext):
+    _ctx = await content_type_text_plain(end, ctx)
+    assert _ctx.response_headers[b"content-type"] == b"text/plain"
