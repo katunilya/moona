@@ -66,7 +66,7 @@ def send():
 
 @pytest.fixture
 def ctx(scope, receive, send) -> HTTPContext:
-    return HTTPContext.create(scope, receive, send)
+    return HTTPContext(scope, receive, send)
 
 
 @pytest.fixture
@@ -78,4 +78,4 @@ def lifespan_ctx(receive, send) -> LifespanContext:
             "spec_version": "2.2",
         },
     }
-    return LifespanContext.create(scope, receive, send)
+    return LifespanContext(scope, receive, send)
