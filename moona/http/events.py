@@ -1,6 +1,12 @@
 from pymon.core import Future, Pipe
 
-from moona.http.context import HTTPContext, send_message, set_closed, set_started
+from moona.http.context import (
+    HTTPContext,
+    send_message,
+    set_closed,
+    set_received,
+    set_started,
+)
 from moona.http.handlers import HTTPFunc, handle_func, handler, skip
 
 # handlers
@@ -49,14 +55,18 @@ async def receive(nxt: HTTPFunc, ctx: HTTPContext) -> HTTPContext | None:
         nxt (HTTPFunc): to execute next if body had been successfully received..
         ctx (HTTPContext): to write body to.
     """
-    msg = await ctx.receive()
-    match msg:
-        case {"type": "http.request"}:
-            ctx.request_body += msg["body"]
-            match msg.get("more_body", False):
-                case True:
-                    return await receive(nxt, ctx)
-                case False:
-                    return await nxt(ctx)
-        case {"type": "http.disconnect"}:
-            return await (Pipe(ctx) << set_closed(True) >> skip)
+    match ctx.received:
+        case False:
+            msg = await ctx.receive()
+            match msg:
+                case {"type": "http.request"}:
+                    ctx.request_body += msg["body"]
+                    match msg.get("more_body", False):
+                        case True:
+                            return await receive(nxt, ctx)
+                        case False:
+                            return await (Pipe(ctx) << set_received(True) >> nxt)
+                case {"type": "http.disconnect"}:
+                    return await (Pipe(ctx) << set_closed(True) >> skip)
+        case True:
+            return await nxt(ctx)
