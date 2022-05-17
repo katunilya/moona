@@ -1,5 +1,4 @@
 from logging.handlers import HTTPHandler
-from typing import overload
 
 from pymon import Future
 
@@ -7,9 +6,13 @@ from moona.http.context import HTTPContext
 from moona.http.handlers import HTTPFunc, handler, skip
 
 
-@overload
 def has_header(name: str) -> HTTPHandler:
-    raw_name = name.encode("UTF-8")
+    """Processes next `HTTPFunc` only when request has passed header.
+
+    Args:
+        name (str): to check for.
+    """
+    raw_name = name.encode("UTF-8").lower()
 
     @handler
     def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
@@ -22,7 +25,7 @@ def has_header(name: str) -> HTTPHandler:
     return _handler
 
 
-def has_header(name: str, value: str) -> HTTPHandler:
+def matches_header(name: str, value: str) -> HTTPHandler:
     """Processes next `HTTPFunc` only when request has valid headers.
 
     Args:
@@ -30,7 +33,7 @@ def has_header(name: str, value: str) -> HTTPHandler:
         value (str): to check. Optional. If not passed, than presence of header is
         checked.
     """
-    raw_name = name.encode("UTF-8")
+    raw_name = name.encode("UTF-8").lower()
     raw_value = value.encode("UTF-8")
 
     @handler
