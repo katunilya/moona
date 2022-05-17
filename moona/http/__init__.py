@@ -29,7 +29,7 @@ from .request_method import (
     method,
 )
 from .request_route import route, route_ci, subroute, subroute_ci
-from .response_body import json, raw, set_json, set_raw, set_text, text
+from .response_body import json, negotiate, raw, set_json, set_raw, set_text, text
 from .response_headers import (
     content_type,
     content_type_application_json,
