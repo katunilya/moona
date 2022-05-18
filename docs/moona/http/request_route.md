@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.request_route](https://github.com/katunilya/moona/blob/main/moona/http/request_route.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Route
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Route
     - [bind_params](#bind_params)
     - [bind_query](#bind_query)
     - [route](#route)

@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.asgi](https://github.com/katunilya/moona/blob/main/moona/asgi.py) module.
 
-- [Moona](../README.md#moona-index) / [Modules](../MODULES.md#moona-modules) / [Moona](index.md#moona) / Asgi
+- [Moona](../README.md#-moona) / [Modules](../MODULES.md#moona-modules) / [Moona](index.md#moona) / Asgi
     - [create](#create)
 
 ## create

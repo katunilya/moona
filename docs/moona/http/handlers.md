@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.handlers](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Handlers
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Handlers
     - [HTTPHandler](#httphandler)
         - [HTTPHandler().compose](#httphandlercompose)
     - [choose](#choose)

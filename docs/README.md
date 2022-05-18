@@ -1,12 +1,14 @@
-# Moona Index
+# 🌙 moona
 
 > Auto-generated documentation index.
 
-<h1 align="center">🌙 moona</h2>
+`moona` is an ASGI server framework that provides a set of guidelines on software
+development inspired by functional programming and monads. It's core design is
+hugely inspired by Finite State Machines and Railroad Architecture approach.
 
 Full Moona project documentation can be found in [Modules](MODULES.md#moona-modules)
 
-- [Moona Index](#moona-index)
+- [🌙 moona](#-moona)
     - [🤔 Motivation](#-motivation)
         - [There is always right way to write a function](#there-is-always-right-way-to-write-a-function)
         - [Computer should do only what programmer asked](#computer-should-do-only-what-programmer-asked)
@@ -18,10 +20,6 @@ Full Moona project documentation can be found in [Modules](MODULES.md#moona-modu
     - [🏗️ Develop](#-develop)
         - [`Makefile`](#makefile)
   - [Moona Modules](MODULES.md#moona-modules)
-
-`moona` is an ASGI server framework that provides a set of guidelines on software
-development inspired by functional programming and monads. It's core design is
-hugely inspired by Finite State Machines and Railroad Architecture approach.
 
 ## 🤔 Motivation
 

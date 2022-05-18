@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.response_status](https://github.com/katunilya/moona/blob/main/moona/http/response_status.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Response Status
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Response Status
     - [accepted](#accepted)
     - [bad_gateway](#bad_gateway)
     - [bad_request](#bad_request)
