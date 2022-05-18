@@ -1,7 +1,7 @@
 from pymon import Future, Pipe
 
 from moona.http.context import HTTPContext, set_response_header
-from moona.http.handlers import HTTPFunc, handler2
+from moona.http.handlers import HTTPFunc, HTTPHandler, handler2
 
 
 @handler2
@@ -65,3 +65,12 @@ def content_type_text_plain(
         Future[HTTPContext | None]: result.
     """
     return content_type("text/plain")(nxt, ctx)
+
+
+def content_length(value: int) -> HTTPHandler:
+    """`HTTPHandler` that sets "Content-Length` response header.
+
+    Args:
+        value (int): of header
+    """
+    return header("content-length", str(value))
