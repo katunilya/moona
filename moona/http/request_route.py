@@ -2,7 +2,7 @@ from typing import Callable
 
 from pymon import Future, Pipe, cmap
 
-from moona.http.context import HTTPContext, get_request_query_string
+from moona.http.context import HTTPContext, get_request_path, get_request_query_string
 from moona.http.handlers import HTTPFunc, HTTPHandler, handler, handler1, skip
 from moona.utils import decode, str_split
 
@@ -98,5 +98,35 @@ def bind_query(func: Callable[..., HTTPHandler]) -> HTTPHandler:
 
         handle = func(**query)
         return handle(nxt, ctx)
+
+    return _handler
+
+
+def bind_params(path: str, func: Callable[..., HTTPHandler]) -> HTTPHandler:
+    """Executes passed `func` on path params or skips pipeline.
+
+    Args:
+        path (str): to match with.
+        func (Callable[..., HTTPHandler]): to run on request path params.
+    """
+    path_parts = path.strip("/").split("/")
+
+    @handler
+    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+        request_path_parts = get_request_path(ctx).strip("/").split("/")
+        params = ()
+        match len(request_path_parts) == len(path_parts):
+            case True:
+                for part, request_part in zip(path_parts, request_path_parts):
+                    match part.startswith("{"), part == request_part:
+                        case True, _:
+                            params = (*params, request_part)
+                        case False, True:
+                            continue
+                        case False, False:
+                            return skip(ctx)
+                return func(*params)(nxt, ctx)
+            case False:
+                return skip(ctx)
 
     return _handler
