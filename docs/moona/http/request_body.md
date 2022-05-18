@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.request_body](https://github.com/katunilya/moona/blob/main/moona/http/request_body.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Body
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Body
     - [bind_dict](#bind_dict)
     - [bind_int](#bind_int)
     - [bind_model](#bind_model)

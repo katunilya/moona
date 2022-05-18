@@ -2,9 +2,9 @@
 
 > Auto-generated documentation modules index.
 
-Full list of [Moona](README.md#moona-index) project modules.
+Full list of [Moona](README.md#-moona) project modules.
 
-- [Moona Index](README.md#moona-index)
+- [🌙 moona](README.md#-moona)
 - [Moona](moona/index.md#moona)
     - [Asgi](moona/asgi.md#asgi)
     - [Context](moona/context.md#context)

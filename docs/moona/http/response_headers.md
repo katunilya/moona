@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.response_headers](https://github.com/katunilya/moona/blob/main/moona/http/response_headers.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Response Headers
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Response Headers
     - [auto_content_length](#auto_content_length)
     - [content_length](#content_length)
     - [content_type](#content_type)

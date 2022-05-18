@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.response_body](https://github.com/katunilya/moona/blob/main/moona/http/response_body.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Response Body
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Response Body
     - [json](#json)
     - [negotiate](#negotiate)
     - [raw](#raw)
