@@ -2,6 +2,7 @@ import pytest
 
 from moona.http import HTTPContext, end
 from moona.http.response_headers import (
+    content_length,
     content_type,
     content_type_application_json,
     content_type_text_plain,
@@ -47,3 +48,17 @@ async def test_content_type_application_json(ctx: HTTPContext):
 async def test_content_type_text_plain(ctx: HTTPContext):
     _ctx = await content_type_text_plain(end, ctx)
     assert _ctx.response_headers[b"content-type"] == b"text/plain"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "s_value, b_value",
+    [
+        (0, b"0"),
+        (12, b"12"),
+        (2355, b"2355"),
+    ],
+)
+async def test_content_length(ctx: HTTPContext, s_value, b_value):
+    _ctx = await content_length(s_value)(end, ctx)
+    assert _ctx.response_headers[b"content-length"] == b_value
