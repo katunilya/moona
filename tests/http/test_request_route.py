@@ -1,8 +1,10 @@
+from typing import Callable
+
 import pytest
 
 from moona.http.context import HTTPContext
-from moona.http.handlers import end
-from moona.http.request_route import route, route_ci, subroute, subroute_ci
+from moona.http.handlers import HTTPHandler, end
+from moona.http.request_route import bind_query, route, route_ci, subroute, subroute_ci
 
 
 @pytest.mark.asyncio
@@ -202,3 +204,27 @@ async def test_ci_subroute(ctx: HTTPContext, ctx_path, path, result_path, result
     assert (_ctx is not None) == result
     if _ctx:
         assert _ctx.request_path == result_path
+
+
+def check_for(result) -> Callable[..., HTTPHandler]:
+    def _check_for(**kwargs) -> HTTPHandler:
+        assert kwargs == result
+        return lambda _, ctx: end(ctx)
+
+    return _check_for
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "query_string, handler",
+    [
+        (b"", check_for({})),
+        (
+            b"id=123&per_page=10&page=3",
+            check_for({"id": "123", "per_page": "10", "page": "3"}),
+        ),
+    ],
+)
+async def test_bind_query(ctx: HTTPContext, query_string, handler):
+    ctx.request_query_string = query_string
+    await bind_query(handler)(end, ctx)
