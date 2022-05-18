@@ -2,6 +2,7 @@ import pytest
 
 from moona.http import HTTPContext, end
 from moona.http.response_headers import (
+    auto_content_length,
     content_length,
     content_type,
     content_type_application_json,
@@ -62,3 +63,18 @@ async def test_content_type_text_plain(ctx: HTTPContext):
 async def test_content_length(ctx: HTTPContext, s_value, b_value):
     _ctx = await content_length(s_value)(end, ctx)
     assert _ctx.response_headers[b"content-length"] == b_value
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "body, length",
+    [
+        (None, b"0"),
+        (b"", b"0"),
+        (b"body", b"4"),
+    ],
+)
+async def test_auto_content_length(ctx: HTTPContext, body, length):
+    ctx.response_body = body
+    _ctx = await auto_content_length(end, ctx)
+    assert _ctx.response_headers[b"content-length"] == length
