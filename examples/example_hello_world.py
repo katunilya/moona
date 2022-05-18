@@ -1,7 +1,3 @@
-import mona
-from mona.handlers.body import send_body_text_async
+from moona import asgi, http
 
-# ASGI that return text/plain response 'Hello, World!!!" for any HTTP request
-app = mona.create(
-    send_body_text_async("Hello, World!!!"),
-)
+app = asgi.create(http_handler=http.text("Hello, World!!!"))

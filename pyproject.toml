@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "mona"
-version = "0.2.2"
+name = "moona"
+version = "0.2.3"
 description = "ASGI server with functional approach in mind"
 authors = ["Katun Ilya <katun.ilya@gmail.com>"]
 license = "MIT"
 readme="README.md"
-repository="https://github.com/katunilya/mona"
-homepage="https://katunilya.github.io/mona/"
-documentation="https://katunilya.github.io/mona/"
+repository="https://github.com/katunilya/moona"
+homepage="https://katunilya.github.io/moona/"
+documentation="https://katunilya.github.io/moona/"
 keywords=[
     "ASGI",
     "functional",
@@ -32,6 +32,7 @@ orjson = "^3.6.7"
 pydantic = "^1.9.0"
 toolz = "^0.11.2"
 typing-extensions = "^4.1.1"
+pymon = {git = "https://github.com/katunilya/pymon.git", rev = "main"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
@@ -50,12 +51,11 @@ flake8-string-format = "^0.3.0"
 flake8-bandit = "^3.0.0"
 flake8-builtins = "^1.5.3"
 flake8-black = "^0.3.2"
-flake8-expression-complexity = "^0.0.11"
-flake8-annotations-complexity = "^0.0.7"
 flake8-requirements = "^1.5.3"
 uvicorn = "^0.17.6"
 handsdown = "^1.1.0"
 pre-commit = "^2.18.1"
+httpx = "^0.22.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
