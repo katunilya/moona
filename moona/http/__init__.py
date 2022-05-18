@@ -28,7 +28,7 @@ from .request_method import (
     TRACE,
     method,
 )
-from .request_route import route, route_ci, subroute, subroute_ci
+from .request_route import bind_query, route, route_ci, subroute, subroute_ci
 from .response_body import json, negotiate, raw, set_json, set_raw, set_text, text
 from .response_headers import (
     content_length,
