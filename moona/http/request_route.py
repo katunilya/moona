@@ -1,7 +1,10 @@
-from pymon import Future
+from typing import Callable
 
-from moona.http.context import HTTPContext
-from moona.http.handlers import HTTPFunc, handler1, skip
+from pymon import Future, Pipe, cmap
+
+from moona.http.context import HTTPContext, get_request_query_string
+from moona.http.handlers import HTTPFunc, HTTPHandler, handler, handler1, skip
+from moona.utils import decode, str_split
 
 
 @handler1
@@ -69,3 +72,31 @@ def subroute_ci(
             return nxt(ctx)
         case False:
             return skip(ctx)
+
+
+def bind_query(func: Callable[..., HTTPHandler]) -> HTTPHandler:
+    """Executes passed `func` on path query.
+
+    Args:
+        func (Callable[..., HTTPHandler]): to run on request path query.
+    """
+
+    @handler
+    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+        match get_request_query_string(ctx):
+            case b"":
+                query = {}
+            case raw_query:
+                query = (
+                    Pipe(raw_query)
+                    .then(decode("UTF-8"))
+                    .then(str_split("&"))
+                    .then(cmap(str_split("=")))
+                    .then(list)
+                    .then(dict)
+                ).finish()
+
+        handle = func(**query)
+        return handle(nxt, ctx)
+
+    return _handler
