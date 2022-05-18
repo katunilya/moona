@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.request_headers](https://github.com/katunilya/moona/blob/main/moona/http/request_headers.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Headers
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Headers
     - [has_header](#has_header)
     - [matches_header](#matches_header)
 

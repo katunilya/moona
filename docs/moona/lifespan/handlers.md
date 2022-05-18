@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.lifespan.handlers](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Lifespan](index.md#lifespan) / Handlers
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Lifespan](index.md#lifespan) / Handlers
     - [LifespanHandler](#lifespanhandler)
         - [LifespanHandler().compose](#lifespanhandlercompose)
     - [choose](#choose)

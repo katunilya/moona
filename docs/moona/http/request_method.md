@@ -2,7 +2,7 @@
 
 > Auto-generated documentation for [moona.http.request_method](https://github.com/katunilya/moona/blob/main/moona/http/request_method.py) module.
 
-- [Moona](../../README.md#moona-index) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Method
+- [Moona](../../README.md#-moona) / [Modules](../../MODULES.md#moona-modules) / [Moona](../index.md#moona) / [Http](index.md#http) / Request Method
     - [CONNECT](#connect)
     - [DELETE](#delete)
     - [GET](#get)
