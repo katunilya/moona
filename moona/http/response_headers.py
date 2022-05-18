@@ -1,7 +1,7 @@
 from pymon import Future, Pipe
 
-from moona.http.context import HTTPContext, set_response_header
-from moona.http.handlers import HTTPFunc, HTTPHandler, handler2
+from moona.http.context import HTTPContext, get_response_body, set_response_header
+from moona.http.handlers import HTTPFunc, HTTPHandler, handle_func_sync, handler2
 
 
 @handler2
@@ -74,3 +74,21 @@ def content_length(value: int) -> HTTPHandler:
         value (int): of header
     """
     return header("content-length", str(value))
+
+
+@handle_func_sync
+def auto_content_length(ctx: HTTPContext) -> HTTPContext:
+    """Sets "Content-Length" to current response body.
+
+    If body is `None` than 0 length is set.
+
+    Args:
+        ctx (HTTPContext): to set header to.
+    """
+    match get_response_body(ctx):
+        case None:
+            length = "0"
+        case body:
+            length = (Pipe(body) << len << str).finish()
+
+    return (Pipe(ctx) << set_response_header("content-length", length)).finish()
