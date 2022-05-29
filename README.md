@@ -1,5 +1,9 @@
 # 🌙 moona
 
+[![codecov](https://codecov.io/gh/katunilya/moona/branch/main/graph/badge.svg?token=EI6KO9FFHQ)](https://codecov.io/gh/katunilya/moona)
+
+---
+
 `moona` is an ASGI server framework that provides a set of guidelines on software
 development inspired by functional programming and monads. It's core design is
 hugely inspired by Finite State Machines and Railroad Architecture approach.

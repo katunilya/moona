@@ -34,6 +34,13 @@ jobs:
       - name: Check isort
         run: |
           poetry run isort moona/**/*.py --check-only --verbose
-      - name: Test with pytest
+      - name: Generate Report
         run: |
-          poetry run pytest
+          poetry run pytest --cov=./ --cov-report=xml
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          verbose: true
