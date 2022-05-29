@@ -34,6 +34,8 @@ jobs:
       - name: Check isort
         run: |
           poetry run isort moona/**/*.py --check-only --verbose
-      - name: Test with pytest
+      - name: Generate Report
         run: |
-          poetry run pytest
+          poetry run coverage run -m pytest
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
