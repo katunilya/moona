@@ -56,7 +56,7 @@ uvicorn = "^0.17.6"
 handsdown = "^1.1.0"
 pre-commit = "^2.18.1"
 httpx = "^0.22.0"
-coverage = "^6.4"
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -34,11 +34,17 @@ jobs:
       - name: Check isort
         run: |
           poetry run isort moona/**/*.py --check-only --verbose
-      - name: Run tests
-        run: |
-          poetry run pytest
       - name: Generate Report
         run: |
-          poetry run coverage run -m pytest
+          poetry run pytest --cov=./ --cov-report=xml
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/reports/
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          files: ./coverage1.xml,./coverage2.xml
+          name: codecov-umbrella
+          path_to_write_report: ./coverage/codecov_report.txt
+          verbose: true
