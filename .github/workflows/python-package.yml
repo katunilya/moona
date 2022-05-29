@@ -34,6 +34,9 @@ jobs:
       - name: Check isort
         run: |
           poetry run isort moona/**/*.py --check-only --verbose
+      - name: Run tests
+        run: |
+          poetry run pytest
       - name: Generate Report
         run: |
           poetry run coverage run -m pytest
