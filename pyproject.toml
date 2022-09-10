@@ -32,7 +32,7 @@ orjson = "^3.6.7"
 pydantic = "^1.9.0"
 toolz = "^0.11.2"
 typing-extensions = "^4.1.1"
-pymon = {git = "https://github.com/katunilya/pymon.git", rev = "v0.0.5"}
+fundom = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
