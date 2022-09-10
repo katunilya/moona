@@ -1,6 +1,6 @@
 from typing import Callable
 
-from pymon import Future, Pipe, cmap
+from fundom import cmap, future, pipe
 
 from moona.http.context import HTTPContext, get_request_path, get_request_query_string
 from moona.http.handlers import HTTPFunc, HTTPHandler, handler, handler1, skip
@@ -8,7 +8,7 @@ from moona.utils import decode, str_split
 
 
 @handler1
-def route(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def route(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Handler that processes ctx only on right path.
 
     Request path must be exactly the same as path passed as an argument to the handler
@@ -23,7 +23,7 @@ def route(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | No
 
 
 @handler1
-def subroute(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def subroute(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Handler that proceeds only when Request path starts with passed path.
 
     Leading part of the path is removed after processing the request. For example
@@ -40,7 +40,7 @@ def subroute(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext |
 
 
 @handler1
-def route_ci(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def route_ci(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Handler that processes ctx only on right path.
 
     Request path must be case-insensitive to path passed as an argument to the handler
@@ -57,7 +57,7 @@ def route_ci(path: str, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext |
 @handler1
 def subroute_ci(
     path: str, nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Handler that proceeds only when Request path starts with passed path.
 
     Leading part of the path is removed after processing the request. For example
@@ -82,18 +82,18 @@ def bind_query(func: Callable[..., HTTPHandler]) -> HTTPHandler:
     """
 
     @handler
-    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
         match get_request_query_string(ctx):
             case b"":
                 query = {}
             case raw_query:
                 query = (
-                    Pipe(raw_query)
-                    .then(decode("UTF-8"))
-                    .then(str_split("&"))
-                    .then(cmap(str_split("=")))
-                    .then(list)
-                    .then(dict)
+                    pipe(raw_query)
+                    << decode("UTF-8")
+                    << str_split("&")
+                    << cmap(str_split("="))
+                    << list
+                    << dict
                 ).finish()
 
         handle = func(**query)
@@ -112,7 +112,7 @@ def bind_params(path: str, func: Callable[..., HTTPHandler]) -> HTTPHandler:
     path_parts = path.strip("/").split("/")
 
     @handler
-    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
         request_path_parts = get_request_path(ctx).strip("/").split("/")
         params = ()
         match len(request_path_parts) == len(path_parts):

@@ -18,7 +18,7 @@
 
 ## HTTPHandler
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L41)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L40)
 
 ```python
 dataclass(frozen=True, slots=True)
@@ -30,7 +30,7 @@ Abstraction over function that hander `HTTPContext`.
 
 ### HTTPHandler().compose
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L54)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L53)
 
 ```python
 def compose(h: _HTTPHandler) -> HTTPHandler:
@@ -48,7 +48,7 @@ Compose 2 [HTTPHandler](#httphandler)s into one.
 
 ## choose
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L141)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L140)
 
 ```python
 def choose(handlers: list[HTTPHandler]) -> HTTPHandler:
@@ -70,7 +70,7 @@ Iterate though handlers till one would return some `HTTPContext`.
 
 ## compose
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L15)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L14)
 
 ```python
 def compose(h1: _HTTPHandler, h2: _HTTPHandler) -> HTTPHandler:
@@ -93,10 +93,10 @@ Compose 2 [HTTPHandler](#httphandler)s into one.
 
 ## end
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L223)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L222)
 
 ```python
-def end(ctx: HTTPContext) -> Future[HTTPContext]:
+def end(ctx: HTTPContext) -> future[HTTPContext]:
 ```
 
 [HTTPFunc](#handlers) that finishes the pipeline of request handling.
@@ -107,7 +107,7 @@ def end(ctx: HTTPContext) -> Future[HTTPContext]:
 
 #### Returns
 
-- `Future[HTTPContext]` - ended ctx.
+- `future[HTTPContext]` - ended ctx.
 
 #### See also
 
@@ -115,7 +115,7 @@ def end(ctx: HTTPContext) -> Future[HTTPContext]:
 
 ## handle_func
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L79)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L78)
 
 ```python
 def handle_func(func: HTTPFunc) -> HTTPHandler:
@@ -138,7 +138,7 @@ Converts [HTTPFunc](#handlers) to [HTTPHandler](#httphandler).
 
 ## handle_func_sync
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L104)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L103)
 
 ```python
 def handle_func_sync(
@@ -163,7 +163,7 @@ func (Callable[[HTTPContext], HTTPContext | None]): to convert to [HTTPHandler](
 
 ## handler
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L74)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L73)
 
 ```python
 def handler(func: _HTTPHandler) -> HTTPHandler:
@@ -177,11 +177,11 @@ Decorator that converts function to HTTPHandler callable.
 
 ## handler1
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L169)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L168)
 
 ```python
 def handler1(
-    func: Callable[[A, HTTPFunc, HTTPContext], Future[HTTPContext | None]],
+    func: Callable[[A, HTTPFunc, HTTPContext], future[HTTPContext | None]],
 ) -> Callable[[A], HTTPHandler]:
 ```
 
@@ -198,11 +198,11 @@ Makes it "curried".
 
 ## handler2
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L183)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L182)
 
 ```python
 def handler2(
-    func: Callable[[A, B, HTTPFunc, HTTPContext], Future[HTTPContext | None]],
+    func: Callable[[A, B, HTTPFunc, HTTPContext], future[HTTPContext | None]],
 ) -> Callable[[A, B], HTTPHandler]:
 ```
 
@@ -220,11 +220,11 @@ Makes it "curried".
 
 ## handler3
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L197)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L196)
 
 ```python
 def handler3(
-    func: Callable[[A, B, C, HTTPFunc, HTTPContext], Future[HTTPContext | None]],
+    func: Callable[[A, B, C, HTTPFunc, HTTPContext], future[HTTPContext | None]],
 ) -> Callable[[A, B, C], HTTPHandler]:
 ```
 
@@ -243,10 +243,10 @@ Makes it "curried".
 
 ## skip
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L211)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L210)
 
 ```python
-def skip(_: HTTPContext) -> Future[None]:
+def skip(_: HTTPContext) -> future[None]:
 ```
 
 [HTTPFunc](#handlers) that skips pipeline by returning `None` instead of context.
@@ -257,7 +257,7 @@ def skip(_: HTTPContext) -> Future[None]:
 
 #### Returns
 
-- `Future[None]` - result.
+- `future[None]` - result.
 
 #### See also
 

@@ -1,6 +1,6 @@
 import orjson
+from fundom import future, pipe
 from pydantic import BaseModel
-from pymon import Future, Pipe
 
 from moona.http.context import HTTPContext, set_response_body
 from moona.http.events import respond, start
@@ -12,7 +12,7 @@ from moona.http.response_headers import (
 
 
 @handler1
-def set_raw(data: bytes, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_raw(data: bytes, nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response body to passed `bytes`.
 
     Args:
@@ -20,7 +20,7 @@ def set_raw(data: bytes, nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext 
         nxt (HTTPFunc): to run next.
         ctx (HTTPContext): to run on.
     """
-    return Pipe(ctx) << set_response_body(data) >> nxt
+    return pipe(ctx) << set_response_body(data) >> nxt
 
 
 def set_text(data: str) -> HTTPHandler:
@@ -42,7 +42,7 @@ def set_json(data: BaseModel) -> HTTPHandler:
     Args:
         data (BaseModel): body.
     """
-    raw = Pipe(data) << BaseModel.dict << orjson.dumps
+    raw = pipe(data) << BaseModel.dict << orjson.dumps
     return set_raw(raw.value) >> content_type_application_json
 
 

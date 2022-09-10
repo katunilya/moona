@@ -105,7 +105,7 @@ Before we wen't too far let's sum up 2 problems of try-except approach:
 Another good example of infinite checks - `None` value. Often we do something
 only if some other function previously returned some actual result.
 
-`moona` uses monads from [`pymon`](https://github.com/katunilya/pymon) (under development).
+`moona` uses monads from [`fundom`](https://github.com/katunilya/fundom) (under development).
 
 ### Be declarative means you named your child good
 
@@ -136,7 +136,7 @@ Currently `moona` supports to kinds of ASGI scope - "http" and "lifespan".
 ### HTTP Handlers
 
 HTTPHandler is a function with interface `(nxt: HTTPFunc, ctx: HTTPContext) ->
-Future[HTTPContext | None]`
+future[HTTPContext | None]`
 
 In `moona` `HTTPHandler` is actually callable class. This is required for
 providing `>>` syntax for composing multiple `HTTPHandler`s.
