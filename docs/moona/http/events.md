@@ -35,7 +35,7 @@ Receive request body from client.
 
 ```python
 @handle_func
-def respond(ctx: HTTPContext) -> Future[HTTPContext | None]:
+def respond(ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Send response body to the client and close the context.
@@ -56,7 +56,7 @@ Send response body to the client and close the context.
 
 ```python
 @handler
-def start(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def start(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Send message to client and return `HTTPContext` that sent that.

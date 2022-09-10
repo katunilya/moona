@@ -18,7 +18,7 @@
 
 ## LifespanHandler
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L41)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L40)
 
 ```python
 dataclass(frozen=True, slots=True)
@@ -30,7 +30,7 @@ Abstraction over function that hander `LifespanContext`.
 
 ### LifespanHandler().compose
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L54)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L53)
 
 ```python
 def compose(h: _LifespanHandler) -> LifespanHandler:
@@ -48,7 +48,7 @@ Compose 2 [LifespanHandler](#lifespanhandler)s into one.
 
 ## choose
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L141)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L140)
 
 ```python
 def choose(handlers: list[LifespanHandler]) -> LifespanHandler:
@@ -70,7 +70,7 @@ Iterate though handlers till one would return some `LifespanContext`.
 
 ## compose
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L18)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L17)
 
 ```python
 def compose(h1: _LifespanHandler, h2: _LifespanHandler) -> LifespanHandler:
@@ -93,10 +93,10 @@ Compose 2 [LifespanHandler](#lifespanhandler)s into one.
 
 ## end
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L229)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L228)
 
 ```python
-def end(ctx: LifespanContext) -> Future[LifespanContext]:
+def end(ctx: LifespanContext) -> future[LifespanContext]:
 ```
 
 [LifespanFunc](#handlers) that finishes the pipeline of request handling.
@@ -107,11 +107,11 @@ def end(ctx: LifespanContext) -> Future[LifespanContext]:
 
 #### Returns
 
-- `Future[LifespanContext]` - ended ctx.
+- `future[LifespanContext]` - ended ctx.
 
 ## handle_func
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L79)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L78)
 
 ```python
 def handle_func(func: LifespanFunc) -> LifespanHandler:
@@ -134,7 +134,7 @@ Converts [LifespanFunc](#handlers) to [LifespanHandler](#lifespanhandler).
 
 ## handle_func_sync
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L102)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L101)
 
 ```python
 def handle_func_sync(
@@ -159,7 +159,7 @@ func (Callable[[LifespanContext], LifespanContext | None]): to convert to
 
 ## handler
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L74)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L73)
 
 ```python
 def handler(func: _LifespanHandler) -> LifespanHandler:
@@ -173,7 +173,7 @@ Decorator that converts function to LifespanHandler callable.
 
 ## handler1
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L171)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L170)
 
 ```python
 def handler1(
@@ -183,7 +183,7 @@ def handler1(
             LifespanFunc,
             LifespanContext,
         ],
-        Future[LifespanContext | None],
+        future[LifespanContext | None],
     ],
 ) -> Callable[[A], LifespanHandler]:
 ```
@@ -200,7 +200,7 @@ Makes it "curried".
 
 ## handler2
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L185)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L184)
 
 ```python
 def handler2(
@@ -211,7 +211,7 @@ def handler2(
             LifespanFunc,
             LifespanContext,
         ],
-        Future[LifespanContext | None],
+        future[LifespanContext | None],
     ],
 ) -> Callable[[A, B], LifespanHandler]:
 ```
@@ -229,7 +229,7 @@ Makes it "curried".
 
 ## handler3
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L201)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L200)
 
 ```python
 def handler3(
@@ -241,7 +241,7 @@ def handler3(
             LifespanFunc,
             LifespanContext,
         ],
-        Future[LifespanContext | None],
+        future[LifespanContext | None],
     ],
 ) -> Callable[[A, B, C], LifespanHandler]:
 ```
@@ -260,10 +260,10 @@ Makes it "curried".
 
 ## skip
 
-[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L217)
+[[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L216)
 
 ```python
-def skip(_: LifespanContext) -> Future[None]:
+def skip(_: LifespanContext) -> future[None]:
 ```
 
 [LifespanFunc](#handlers) that skips pipeline by returning `None` instead of context.
@@ -274,4 +274,4 @@ def skip(_: LifespanContext) -> Future[None]:
 
 #### Returns
 
-- `Future[None]` - result.
+- `future[None]` - result.

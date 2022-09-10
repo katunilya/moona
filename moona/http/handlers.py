@@ -3,13 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, TypeVar
 
-from pymon import Future, Pipe, cmap, creducel, hof_2, this_async
-from pymon.core import returns_future
+from fundom import cmap, foldl, future, hof1, pipe, this_future
 
 from moona.http.context import HTTPContext
 
-HTTPFunc = Callable[[HTTPContext], Future[HTTPContext | None]]
-_HTTPHandler = Callable[[HTTPFunc, HTTPContext], Future[HTTPContext | None]]
+HTTPFunc = Callable[[HTTPContext], future[HTTPContext | None]]
+_HTTPHandler = Callable[[HTTPFunc, HTTPContext], future[HTTPContext | None]]
 
 
 def compose(h1: _HTTPHandler, h2: _HTTPHandler) -> HTTPHandler:
@@ -23,9 +22,9 @@ def compose(h1: _HTTPHandler, h2: _HTTPHandler) -> HTTPHandler:
         HTTPHandler: resulting handler.
     """
 
-    def handler(final: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
-        _h1 = hof_2(h1)
-        _h2 = hof_2(h2)
+    def handler(final: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
+        _h1 = hof1(h1)
+        _h2 = hof1(h2)
         func = _h1(_h2(final))
 
         match ctx.closed:
@@ -41,12 +40,12 @@ def compose(h1: _HTTPHandler, h2: _HTTPHandler) -> HTTPHandler:
 class HTTPHandler:
     """Abstraction over function that hander `HTTPContext`."""
 
-    _handler: Callable[[HTTPContext], Future[HTTPContext | None]]
+    _handler: Callable[[HTTPContext], future[HTTPContext | None]]
 
     def __call__(  # noqa
         self, nxt: HTTPFunc, ctx: HTTPContext
-    ) -> Future[HTTPContext | None]:
-        return returns_future(self._handler)(nxt, ctx)
+    ) -> future[HTTPContext | None]:
+        return future.returns(self._handler)(nxt, ctx)
 
     def __init__(self, handler: _HTTPHandler) -> None:
         object.__setattr__(self, "_handler", handler)
@@ -127,7 +126,7 @@ def handle_func_sync(func: Callable[[HTTPContext], HTTPContext | None]) -> HTTPH
 
 
 def __choose_reducer(f: HTTPFunc, s: HTTPFunc) -> HTTPFunc:
-    @returns_future
+    @future.returns
     async def func(ctx: HTTPContext) -> HTTPFunc:
         match await f(ctx):
             case None:
@@ -155,10 +154,10 @@ def choose(handlers: list[HTTPHandler]) -> HTTPHandler:
                 return await nxt(ctx)
             case _:
                 func: HTTPFunc = (
-                    Pipe(handlers)
-                    .then(cmap(hof_2))
+                    pipe(handlers)
+                    .then(cmap(hof1))
                     .then(cmap(lambda h: h(nxt)))
-                    .then(creducel(__choose_reducer, skip))
+                    .then(foldl(__choose_reducer, skip))
                     .finish()
                 )
                 return await func(ctx)
@@ -167,7 +166,7 @@ def choose(handlers: list[HTTPHandler]) -> HTTPHandler:
 
 
 def handler1(
-    func: Callable[[A, HTTPFunc, HTTPContext], Future[HTTPContext | None]]
+    func: Callable[[A, HTTPFunc, HTTPContext], future[HTTPContext | None]]
 ) -> Callable[[A], HTTPHandler]:
     """Decorator for HTTPHandlers with 1 additional argument.
 
@@ -181,7 +180,7 @@ def handler1(
 
 
 def handler2(
-    func: Callable[[A, B, HTTPFunc, HTTPContext], Future[HTTPContext | None]]
+    func: Callable[[A, B, HTTPFunc, HTTPContext], future[HTTPContext | None]]
 ) -> Callable[[A, B], HTTPHandler]:
     """Decorator for HTTPHandlers with 2 additional arguments.
 
@@ -195,7 +194,7 @@ def handler2(
 
 
 def handler3(
-    func: Callable[[A, B, C, HTTPFunc, HTTPContext], Future[HTTPContext | None]]
+    func: Callable[[A, B, C, HTTPFunc, HTTPContext], future[HTTPContext | None]]
 ) -> Callable[[A, B, C], HTTPHandler]:
     """Decorator for HTTPHandlers with 1 additional argument.
 
@@ -208,25 +207,25 @@ def handler3(
     return wrapper
 
 
-def skip(_: HTTPContext) -> Future[None]:
+def skip(_: HTTPContext) -> future[None]:
     """`HTTPFunc` that skips pipeline by returning `None` instead of context.
 
     Args:
         _ (HTTPContext): ctx we don't care of.
 
     Returns:
-        Future[None]: result.
+        future[None]: result.
     """
-    return Future(this_async(None))
+    return this_future(None)
 
 
-def end(ctx: HTTPContext) -> Future[HTTPContext]:
+def end(ctx: HTTPContext) -> future[HTTPContext]:
     """`HTTPFunc` that finishes the pipeline of request handling.
 
     Args:
         ctx (HTTPContext): to end.
 
     Returns:
-        Future[HTTPContext]: ended ctx.
+        future[HTTPContext]: ended ctx.
     """
-    return Future(this_async(ctx))
+    return this_future(ctx)

@@ -12,7 +12,7 @@
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/utils.py#L6)
 
 ```python
-@hof_2
+@hof1
 def decode(encoding: str, data: bytes) -> str:
 ```
 
@@ -21,7 +21,7 @@ def decode(encoding: str, data: bytes) -> str:
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/utils.py#L11)
 
 ```python
-@hof_2
+@hof1
 def encode(encoding: str, data: str) -> bytes:
 ```
 
@@ -30,6 +30,6 @@ def encode(encoding: str, data: str) -> bytes:
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/utils.py#L16)
 
 ```python
-@hof_2
+@hof1
 def str_split(separator: str, data: str) -> Iterable[str]:
 ```

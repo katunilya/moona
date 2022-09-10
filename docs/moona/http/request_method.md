@@ -20,7 +20,7 @@
 
 ```python
 @handler
-def CONNECT(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def CONNECT(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with CONNECT method.
@@ -42,7 +42,7 @@ Matches request with CONNECT method.
 
 ```python
 @handler
-def DELETE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def DELETE(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with DELETE method.
@@ -64,7 +64,7 @@ Matches request with DELETE method.
 
 ```python
 @handler
-def GET(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def GET(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with GET method.
@@ -86,7 +86,7 @@ Matches request with GET method.
 
 ```python
 @handler
-def HEAD(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def HEAD(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with HEAD method.
@@ -108,7 +108,7 @@ Matches request with HEAD method.
 
 ```python
 @handler
-def OPTIONS(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def OPTIONS(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with OPTIONS method.
@@ -130,7 +130,7 @@ Matches request with OPTIONS method.
 
 ```python
 @handler
-def PATCH(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def PATCH(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with PATCH method.
@@ -152,7 +152,7 @@ Matches request with PATCH method.
 
 ```python
 @handler
-def POST(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def POST(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with POST method.
@@ -174,7 +174,7 @@ Matches request with POST method.
 
 ```python
 @handler
-def PUT(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def PUT(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with PUT method.
@@ -196,7 +196,7 @@ Matches request with PUT method.
 
 ```python
 @handler
-def TRACE(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def TRACE(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
 ```
 
 Matches request with TRACE method.
@@ -222,7 +222,7 @@ def method(
     method: str,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Handler that matches request method with passed method.
@@ -237,7 +237,7 @@ When methods are equal pipeline is continued, otherwise skipped.
 
 #### Returns
 
-Future[HTTPContext | None]: result.
+future[HTTPContext | None]: result.
 
 #### See also
 

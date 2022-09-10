@@ -20,7 +20,7 @@ def create(
 Constructs ASGI Server function from passed handler.
 
 Supports 2 types of request scopes: "http" and "lifetime". For "http" scope
-`HTTPContext` is created and used as an argument for the `handler` (via `Future`).
+`HTTPContext` is created and used as an argument for the `handler` (via `future`).
 For "lifetime" `LifetimeContext` is created and also used as argument for `handler`.
 
 #### Notes

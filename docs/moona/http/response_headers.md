@@ -76,7 +76,7 @@ def content_type(value: str):
 def content_type_application_json(
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Sets "Content-Type: application/json" response header.
@@ -88,7 +88,7 @@ Sets "Content-Type: application/json" response header.
 
 #### Returns
 
-Future[HTTPContext | None]: result
+future[HTTPContext | None]: result
 
 #### See also
 
@@ -103,7 +103,7 @@ Future[HTTPContext | None]: result
 def content_type_text_plain(
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Sets "Content-Type: text/plain" response header.
@@ -115,7 +115,7 @@ Sets "Content-Type: text/plain" response header.
 
 #### Returns
 
-Future[HTTPContext | None]: result.
+future[HTTPContext | None]: result.
 
 #### See also
 
@@ -133,7 +133,7 @@ def header(
     value: str,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 `HTTPHandler` that sets response header.
@@ -147,7 +147,7 @@ def header(
 
 #### Returns
 
-Future[HTTPContext | None]: result.
+future[HTTPContext | None]: result.
 
 #### See also
 

@@ -57,7 +57,7 @@ def route(
     path: str,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Handler that processes ctx only on right path.
@@ -82,7 +82,7 @@ def route_ci(
     path: str,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Handler that processes ctx only on right path.
@@ -107,7 +107,7 @@ def subroute(
     path: str,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Handler that proceeds only when Request path starts with passed path.
@@ -132,7 +132,7 @@ def subroute_ci(
     path: str,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Handler that proceeds only when Request path starts with passed path.
