@@ -314,8 +314,8 @@ Returns `HTTPContext.started`.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/context.py#L82)
 
 ```python
-@hof_2
-def send_message(msg: Message, ctx: HTTPContext) -> Future[HTTPContext]:
+@hof1
+def send_message(msg: Message, ctx: HTTPContext) -> future[HTTPContext]:
 ```
 
 Sends message from [HTTPContext](#httpcontext) to client.
@@ -339,7 +339,7 @@ Sends message from [HTTPContext](#httpcontext) to client.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/context.py#L151)
 
 ```python
-@hof_2
+@hof1
 def set_closed(value: bool, ctx: HTTPContext) -> HTTPContext:
 ```
 
@@ -354,7 +354,7 @@ Sync [HTTPContext](#httpcontext) that sets `closed` to `value`.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/context.py#L137)
 
 ```python
-@hof_2
+@hof1
 def set_received(value: bool, ctx: HTTPContext) -> HTTPContext:
 ```
 
@@ -369,7 +369,7 @@ Sync [HTTPContext](#httpcontext) that sets `received` to `value`.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/context.py#L96)
 
 ```python
-@hof_2
+@hof1
 def set_response_body(data: bytes, ctx: HTTPContext) -> HTTPContext:
 ```
 
@@ -391,7 +391,7 @@ Response body is some byte string so default `HTTPFunc` accepts `bytes`.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/context.py#L122)
 
 ```python
-@hof_3
+@hof2
 def set_response_header(
     name: str,
     value: str,
@@ -416,7 +416,7 @@ Set `value` for response header `name`.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/context.py#L110)
 
 ```python
-@hof_2
+@hof1
 def set_response_status(code: int, ctx: HTTPContext) -> HTTPContext:
 ```
 
@@ -436,7 +436,7 @@ Set response status code.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/context.py#L144)
 
 ```python
-@hof_2
+@hof1
 def set_started(value: bool, ctx: HTTPContext) -> HTTPContext:
 ```
 

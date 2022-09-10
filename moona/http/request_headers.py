@@ -1,6 +1,6 @@
 from logging.handlers import HTTPHandler
 
-from pymon import Future
+from fundom import future
 
 from moona.http.context import HTTPContext
 from moona.http.handlers import HTTPFunc, handler, skip
@@ -15,7 +15,7 @@ def has_header(name: str) -> HTTPHandler:
     raw_name = name.encode("UTF-8").lower()
 
     @handler
-    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
         match ctx.request_headers.get(raw_name, None):
             case None:
                 return skip(ctx)
@@ -37,7 +37,7 @@ def matches_header(name: str, value: str) -> HTTPHandler:
     raw_value = value.encode("UTF-8")
 
     @handler
-    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+    def _handler(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
         match ctx.request_headers.get(raw_name, None) == raw_value:
             case True:
                 return nxt(ctx)

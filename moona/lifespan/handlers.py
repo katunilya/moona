@@ -4,14 +4,13 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Callable, TypeVar
 
-from pymon import Future, Pipe, cmap, creducel, hof_2, this_async
-from pymon.core import returns_future
+from fundom import cmap, foldl, future, hof1, pipe, returns_future
 
 from moona.lifespan import LifespanContext
 
-LifespanFunc = Callable[[LifespanContext], Future[LifespanContext | None]]
+LifespanFunc = Callable[[LifespanContext], future[LifespanContext | None]]
 _LifespanHandler = Callable[
-    [LifespanFunc, LifespanContext], Future[LifespanContext | None]
+    [LifespanFunc, LifespanContext], future[LifespanContext | None]
 ]
 
 
@@ -28,9 +27,9 @@ def compose(h1: _LifespanHandler, h2: _LifespanHandler) -> LifespanHandler:
 
     def handler(
         final: LifespanFunc, ctx: LifespanContext
-    ) -> Future[LifespanContext | None]:
-        _h1 = hof_2(h1)
-        _h2 = hof_2(h2)
+    ) -> future[LifespanContext | None]:
+        _h1 = hof1(h1)
+        _h2 = hof1(h2)
         func = _h1(_h2(final))
         return func(ctx)
 
@@ -41,11 +40,11 @@ def compose(h1: _LifespanHandler, h2: _LifespanHandler) -> LifespanHandler:
 class LifespanHandler:
     """Abstraction over function that hander `LifespanContext`."""
 
-    _handler: Callable[[LifespanContext], Future[LifespanContext | None]]
+    _handler: Callable[[LifespanContext], future[LifespanContext | None]]
 
     def __call__(  # noqa
         self, nxt: LifespanFunc, ctx: LifespanContext
-    ) -> Future[LifespanContext | None]:
+    ) -> future[LifespanContext | None]:
         return returns_future(self._handler)(nxt, ctx)
 
     def __init__(self, handler: _LifespanHandler) -> None:
@@ -126,7 +125,7 @@ def handle_func_sync(
 
 
 def __choose_reducer(f: LifespanFunc, s: LifespanFunc) -> LifespanFunc:
-    @returns_future
+    @future.returns
     async def func(ctx: LifespanContext) -> LifespanFunc:
         _ctx = deepcopy(ctx)
         match await f(_ctx):
@@ -157,10 +156,10 @@ def choose(handlers: list[LifespanHandler]) -> LifespanHandler:
                 return await nxt(ctx)
             case _:
                 func: LifespanFunc = (
-                    Pipe(handlers)
-                    .then(cmap(hof_2))
+                    pipe(handlers)
+                    .then(cmap(hof1))
                     .then(cmap(lambda h: h(nxt)))
-                    .then(creducel(__choose_reducer))
+                    .then(foldl(__choose_reducer))
                     .finish()
                 )
                 return await func(ctx)
@@ -169,7 +168,7 @@ def choose(handlers: list[LifespanHandler]) -> LifespanHandler:
 
 
 def handler1(
-    func: Callable[[A, LifespanFunc, LifespanContext], Future[LifespanContext | None]]
+    func: Callable[[A, LifespanFunc, LifespanContext], future[LifespanContext | None]]
 ) -> Callable[[A], LifespanHandler]:
     """Decorator for LifespanHandlers with 1 additional argument.
 
@@ -184,7 +183,7 @@ def handler1(
 
 def handler2(
     func: Callable[
-        [A, B, LifespanFunc, LifespanContext], Future[LifespanContext | None]
+        [A, B, LifespanFunc, LifespanContext], future[LifespanContext | None]
     ]
 ) -> Callable[[A, B], LifespanHandler]:
     """Decorator for LifespanHandlers with 2 additional arguments.
@@ -200,7 +199,7 @@ def handler2(
 
 def handler3(
     func: Callable[
-        [A, B, C, LifespanFunc, LifespanContext], Future[LifespanContext | None]
+        [A, B, C, LifespanFunc, LifespanContext], future[LifespanContext | None]
     ]
 ) -> Callable[[A, B, C], LifespanHandler]:
     """Decorator for LifespanHandlers with 1 additional argument.
@@ -214,25 +213,25 @@ def handler3(
     return wrapper
 
 
-def skip(_: LifespanContext) -> Future[None]:
+def skip(_: LifespanContext) -> future[None]:
     """`LifespanFunc` that skips pipeline by returning `None` instead of context.
 
     Args:
         _ (LifespanContext): ctx we don't care of.
 
     Returns:
-        Future[None]: result.
+        future[None]: result.
     """
-    return Future(this_async(None))
+    return future(returns_future(None))
 
 
-def end(ctx: LifespanContext) -> Future[LifespanContext]:
+def end(ctx: LifespanContext) -> future[LifespanContext]:
     """`LifespanFunc` that finishes the pipeline of request handling.
 
     Args:
         ctx (LifespanContext): to end.
 
     Returns:
-        Future[LifespanContext]: ended ctx.
+        future[LifespanContext]: ended ctx.
     """
-    return Future(this_async(ctx))
+    return future(returns_future(ctx))

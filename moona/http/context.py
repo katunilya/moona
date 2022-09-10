@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import NamedTuple, TypeVar
 
-from pymon.core import Future, hof_2, hof_3, returns
+from fundom import future, hof1, hof2
 from toolz import keymap
 
 from moona.context import BaseContext, Message, Receive, Scope, Send
@@ -79,8 +79,9 @@ class HTTPContext(BaseContext):
         self.closed = False
 
 
-@hof_2
-def send_message(msg: Message, ctx: HTTPContext) -> Future[HTTPContext]:
+@hof1
+@future.returns
+async def send_message(msg: Message, ctx: HTTPContext) -> HTTPContext:
     """Sends message from `HTTPContext` to client.
 
     Args:
@@ -90,10 +91,11 @@ def send_message(msg: Message, ctx: HTTPContext) -> Future[HTTPContext]:
     Returns:
         HTTPContext: context.
     """
-    return Future(ctx.send(msg)) << returns(ctx)
+    await future(ctx.send(msg))
+    return ctx
 
 
-@hof_2
+@hof1
 def set_response_body(data: bytes, ctx: HTTPContext) -> HTTPContext:
     """Set response body.
 
@@ -107,7 +109,7 @@ def set_response_body(data: bytes, ctx: HTTPContext) -> HTTPContext:
     return ctx
 
 
-@hof_2
+@hof1
 def set_response_status(code: int, ctx: HTTPContext) -> HTTPContext:
     """Set response status code.
 
@@ -119,7 +121,7 @@ def set_response_status(code: int, ctx: HTTPContext) -> HTTPContext:
     return ctx
 
 
-@hof_3
+@hof2
 def set_response_header(name: str, value: str, ctx: HTTPContext) -> HTTPContext:
     """Set `value` for response header `name`.
 
@@ -134,21 +136,21 @@ def set_response_header(name: str, value: str, ctx: HTTPContext) -> HTTPContext:
     return ctx
 
 
-@hof_2
+@hof1
 def set_received(value: bool, ctx: HTTPContext) -> HTTPContext:
     """Sync `HTTPContext` that sets `received` to `value`."""
     ctx.received = value
     return ctx
 
 
-@hof_2
+@hof1
 def set_started(value: bool, ctx: HTTPContext) -> HTTPContext:
     """Sync `HTTPContext` that sets `started` to `value`."""
     ctx.started = value
     return ctx
 
 
-@hof_2
+@hof1
 def set_closed(value: bool, ctx: HTTPContext) -> HTTPContext:
     """Sync `HTTPContext` that sets `closed` to `value`."""
     ctx.closed = value

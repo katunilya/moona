@@ -96,7 +96,7 @@ Compose 2 [HTTPHandler](#httphandler)s into one.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L223)
 
 ```python
-def end(ctx: HTTPContext) -> Future[HTTPContext]:
+def end(ctx: HTTPContext) -> future[HTTPContext]:
 ```
 
 [HTTPFunc](#handlers) that finishes the pipeline of request handling.
@@ -107,7 +107,7 @@ def end(ctx: HTTPContext) -> Future[HTTPContext]:
 
 #### Returns
 
-- `Future[HTTPContext]` - ended ctx.
+- `future[HTTPContext]` - ended ctx.
 
 #### See also
 
@@ -181,7 +181,7 @@ Decorator that converts function to HTTPHandler callable.
 
 ```python
 def handler1(
-    func: Callable[[A, HTTPFunc, HTTPContext], Future[HTTPContext | None]],
+    func: Callable[[A, HTTPFunc, HTTPContext], future[HTTPContext | None]],
 ) -> Callable[[A], HTTPHandler]:
 ```
 
@@ -202,7 +202,7 @@ Makes it "curried".
 
 ```python
 def handler2(
-    func: Callable[[A, B, HTTPFunc, HTTPContext], Future[HTTPContext | None]],
+    func: Callable[[A, B, HTTPFunc, HTTPContext], future[HTTPContext | None]],
 ) -> Callable[[A, B], HTTPHandler]:
 ```
 
@@ -224,7 +224,7 @@ Makes it "curried".
 
 ```python
 def handler3(
-    func: Callable[[A, B, C, HTTPFunc, HTTPContext], Future[HTTPContext | None]],
+    func: Callable[[A, B, C, HTTPFunc, HTTPContext], future[HTTPContext | None]],
 ) -> Callable[[A, B, C], HTTPHandler]:
 ```
 
@@ -246,7 +246,7 @@ Makes it "curried".
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/http/handlers.py#L211)
 
 ```python
-def skip(_: HTTPContext) -> Future[None]:
+def skip(_: HTTPContext) -> future[None]:
 ```
 
 [HTTPFunc](#handlers) that skips pipeline by returning `None` instead of context.
@@ -257,7 +257,7 @@ def skip(_: HTTPContext) -> Future[None]:
 
 #### Returns
 
-- `Future[None]` - result.
+- `future[None]` - result.
 
 #### See also
 

@@ -97,7 +97,7 @@ def set_raw(
     data: bytes,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
 ```
 
 Sets response body to passed `bytes`.

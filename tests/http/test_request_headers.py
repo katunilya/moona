@@ -16,7 +16,7 @@ from moona.http.request_headers import has_header, matches_header
         ("Random-Header", b"", False),
     ],
 )
-async def test_has_header_1(ctx: HTTPContext, s_name, b_name, result):
+async def test_has_header(ctx: HTTPContext, s_name, b_name, result):
     ctx.request_headers[b_name] = b""
     _ctx = await has_header(s_name)(end, ctx)
     assert (_ctx is not None) == result

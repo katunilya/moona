@@ -96,7 +96,7 @@ Compose 2 [LifespanHandler](#lifespanhandler)s into one.
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L229)
 
 ```python
-def end(ctx: LifespanContext) -> Future[LifespanContext]:
+def end(ctx: LifespanContext) -> future[LifespanContext]:
 ```
 
 [LifespanFunc](#handlers) that finishes the pipeline of request handling.
@@ -107,7 +107,7 @@ def end(ctx: LifespanContext) -> Future[LifespanContext]:
 
 #### Returns
 
-- `Future[LifespanContext]` - ended ctx.
+- `future[LifespanContext]` - ended ctx.
 
 ## handle_func
 
@@ -183,7 +183,7 @@ def handler1(
             LifespanFunc,
             LifespanContext,
         ],
-        Future[LifespanContext | None],
+        future[LifespanContext | None],
     ],
 ) -> Callable[[A], LifespanHandler]:
 ```
@@ -211,7 +211,7 @@ def handler2(
             LifespanFunc,
             LifespanContext,
         ],
-        Future[LifespanContext | None],
+        future[LifespanContext | None],
     ],
 ) -> Callable[[A, B], LifespanHandler]:
 ```
@@ -241,7 +241,7 @@ def handler3(
             LifespanFunc,
             LifespanContext,
         ],
-        Future[LifespanContext | None],
+        future[LifespanContext | None],
     ],
 ) -> Callable[[A, B, C], LifespanHandler]:
 ```
@@ -263,7 +263,7 @@ Makes it "curried".
 [[find in source code]](https://github.com/katunilya/moona/blob/main/moona/lifespan/handlers.py#L217)
 
 ```python
-def skip(_: LifespanContext) -> Future[None]:
+def skip(_: LifespanContext) -> future[None]:
 ```
 
 [LifespanFunc](#handlers) that skips pipeline by returning `None` instead of context.
@@ -274,4 +274,4 @@ def skip(_: LifespanContext) -> Future[None]:
 
 #### Returns
 
-- `Future[None]` - result.
+- `future[None]` - result.

@@ -1,4 +1,4 @@
-from pymon.core import Future, Pipe
+from fundom.core import future, pipe
 
 from moona.http.context import (
     HTTPContext,
@@ -13,7 +13,7 @@ from moona.http.handlers import HTTPFunc, handle_func, handler, skip
 
 
 @handler
-def start(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def start(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Send message to client and return `HTTPContext` that sent that.
 
     Args:
@@ -29,11 +29,11 @@ def start(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
                 "headers": list(ctx.response_headers.items()),
                 "status": ctx.response_status,
             }
-            return Pipe(ctx) << set_started(True) >> send_message(message) >> nxt
+            return pipe(ctx) << set_started(True) >> send_message(message) >> nxt
 
 
 @handle_func
-def respond(ctx: HTTPContext) -> Future[HTTPContext | None]:
+def respond(ctx: HTTPContext) -> future[HTTPContext | None]:
     """Send response body to the client and close the context.
 
     Args:
@@ -41,7 +41,7 @@ def respond(ctx: HTTPContext) -> Future[HTTPContext | None]:
         ctx (HTTPContext): context to send body from.
     """
     return (
-        Pipe(ctx)
+        pipe(ctx)
         << set_closed(True)
         >> send_message({"type": "http.response.body", "body": ctx.response_body})
     )
@@ -65,8 +65,8 @@ async def receive(nxt: HTTPFunc, ctx: HTTPContext) -> HTTPContext | None:
                         case True:
                             return await receive(nxt, ctx)
                         case False:
-                            return await (Pipe(ctx) << set_received(True) >> nxt)
+                            return await (pipe(ctx) << set_received(True) >> nxt)
                 case {"type": "http.disconnect"}:
-                    return await (Pipe(ctx) << set_closed(True) >> skip)
+                    return await (pipe(ctx) << set_closed(True) >> skip)
         case True:
             return await nxt(ctx)
