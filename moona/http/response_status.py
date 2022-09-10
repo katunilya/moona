@@ -1,5 +1,5 @@
+from fundom import future, pipe
 from pydantic import BaseModel
-from pymon import Future, Pipe
 
 from moona.http.context import HTTPContext, set_response_status
 from moona.http.handlers import HTTPFunc, HTTPHandler, handler, handler1
@@ -67,13 +67,13 @@ NOT_EXTENDED = 510
 @handler1
 def set_status(
     code: int, nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Set response status to `code`."""
-    return Pipe(ctx) << set_response_status(code) >> nxt
+    return pipe(ctx) << set_response_status(code) >> nxt
 
 
 @handler
-def set_ok(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_ok(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to OK.
 
     Args:
@@ -84,7 +84,7 @@ def set_ok(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
 
 
 @handler
-def set_created(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_created(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to CREATED.
 
     Args:
@@ -95,7 +95,7 @@ def set_created(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
 
 
 @handler
-def set_accepted(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_accepted(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to ACCEPTED.
 
     Args:
@@ -106,7 +106,7 @@ def set_accepted(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
 
 
 @handler
-def set_no_content(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_no_content(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to NO_CONTENT.
 
     Args:
@@ -117,7 +117,7 @@ def set_no_content(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None
 
 
 @handler
-def set_bad_request(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_bad_request(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to BAD_REQUEST.
 
     Args:
@@ -128,7 +128,7 @@ def set_bad_request(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | Non
 
 
 @handler
-def set_unauthorized(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_unauthorized(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to UNAUTHORIZED.
 
     Args:
@@ -139,7 +139,7 @@ def set_unauthorized(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | No
 
 
 @handler
-def set_forbidden(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_forbidden(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to FORBIDDEN.
 
     Args:
@@ -150,7 +150,7 @@ def set_forbidden(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]
 
 
 @handler
-def set_not_found(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_not_found(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to NOT_FOUND.
 
     Args:
@@ -163,7 +163,7 @@ def set_not_found(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]
 @handler
 def set_method_not_allowed(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to METHOD_NOT_ALLOWED.
 
     Args:
@@ -174,7 +174,7 @@ def set_method_not_allowed(
 
 
 @handler
-def set_not_acceptable(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_not_acceptable(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to NOT_ACCEPTABLE.
 
     Args:
@@ -185,7 +185,7 @@ def set_not_acceptable(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | 
 
 
 @handler
-def set_conflict(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_conflict(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to CONFLICT.
 
     Args:
@@ -196,7 +196,7 @@ def set_conflict(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
 
 
 @handler
-def set_gone(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_gone(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to GONE.
 
     Args:
@@ -209,7 +209,7 @@ def set_gone(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
 @handler
 def set_unsupported_media_type(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to UNSUPPORTED_MEDIA_TYPE.
 
     Args:
@@ -220,7 +220,7 @@ def set_unsupported_media_type(
 
 
 @handler
-def set_im_a_teapot(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_im_a_teapot(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to IM_A_TEAPOT.
 
     Args:
@@ -233,7 +233,7 @@ def set_im_a_teapot(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | Non
 @handler
 def set_unprocessable_entity(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to UNPROCESSABLE_ENTITY.
 
     Args:
@@ -246,7 +246,7 @@ def set_unprocessable_entity(
 @handler
 def set_precondition_required(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to PRECONDITION_REQUIRED.
 
     Args:
@@ -259,7 +259,7 @@ def set_precondition_required(
 @handler
 def set_too_many_requests(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to TOO_MANY_REQUESTS.
 
     Args:
@@ -272,7 +272,7 @@ def set_too_many_requests(
 @handler
 def set_internal_server_error(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to INTERNAL_SERVER_ERROR.
 
     Args:
@@ -283,7 +283,7 @@ def set_internal_server_error(
 
 
 @handler
-def set_not_implemented(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_not_implemented(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to NOT_IMPLEMENTED.
 
     Args:
@@ -294,7 +294,7 @@ def set_not_implemented(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext |
 
 
 @handler
-def set_bad_gateway(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_bad_gateway(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to BAD_GATEWAY.
 
     Args:
@@ -307,7 +307,7 @@ def set_bad_gateway(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | Non
 @handler
 def set_service_unavailable(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to SERVICE_UNAVAILABLE.
 
     Args:
@@ -318,7 +318,7 @@ def set_service_unavailable(
 
 
 @handler
-def set_gateway_timeout(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def set_gateway_timeout(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets response status code to GATEWAY_TIMEOUT.
 
     Args:
@@ -331,7 +331,7 @@ def set_gateway_timeout(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext |
 @handler
 def set_http_version_not_supported(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets response status code to HTTP_VERSION_NOT_SUPPORTED.
 
     Args:
@@ -369,7 +369,7 @@ def accepted(data: bytes | str | BaseModel) -> HTTPHandler:
 
 
 @handler
-def no_content(nxt: HTTPFunc, ctx: HTTPContext) -> Future[HTTPContext | None]:
+def no_content(nxt: HTTPFunc, ctx: HTTPContext) -> future[HTTPContext | None]:
     """Sets status code NO_CONTENT and respond with passed data.
 
     Args:

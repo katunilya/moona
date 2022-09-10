@@ -1,4 +1,4 @@
-from pymon import Future, Pipe
+from fundom import future, pipe
 
 from moona.http.context import HTTPContext, get_response_body, set_response_header
 from moona.http.handlers import HTTPFunc, HTTPHandler, handle_func_sync, handler2
@@ -10,7 +10,7 @@ def header(
     value: str,
     nxt: HTTPFunc,
     ctx: HTTPContext,
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """`HTTPHandler` that sets response header.
 
     Args:
@@ -20,9 +20,9 @@ def header(
         ctx (HTTPContext): to process.
 
     Returns:
-        Future[HTTPContext | None]: result.
+        future[HTTPContext | None]: result.
     """
-    return Pipe(ctx) << set_response_header(name, value) >> nxt
+    return pipe(ctx) << set_response_header(name, value) >> nxt
 
 
 def content_type(value: str):
@@ -39,7 +39,7 @@ def content_type(value: str):
 
 def content_type_application_json(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets "Content-Type: application/json" response header.
 
     Args:
@@ -47,14 +47,14 @@ def content_type_application_json(
         ctx (HTTPContext): to process.
 
     Returns:
-        Future[HTTPContext | None]: result
+        future[HTTPContext | None]: result
     """
     return content_type("application/json")(nxt, ctx)
 
 
 def content_type_text_plain(
     nxt: HTTPFunc, ctx: HTTPContext
-) -> Future[HTTPContext | None]:
+) -> future[HTTPContext | None]:
     """Sets "Content-Type: text/plain" response header.
 
     Args:
@@ -62,7 +62,7 @@ def content_type_text_plain(
         ctx (HTTPContext): to process
 
     Returns:
-        Future[HTTPContext | None]: result.
+        future[HTTPContext | None]: result.
     """
     return content_type("text/plain")(nxt, ctx)
 
@@ -89,6 +89,6 @@ def auto_content_length(ctx: HTTPContext) -> HTTPContext:
         case None:
             length = "0"
         case body:
-            length = (Pipe(body) << len << str).finish()
+            length = (pipe(body) << len << str).finish()
 
-    return (Pipe(ctx) << set_response_header("content-length", length)).finish()
+    return (pipe(ctx) << set_response_header("content-length", length)).finish()
