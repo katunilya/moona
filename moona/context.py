@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, Protocol
 
 Message = dict[str, Any]
 Scope = Message
@@ -11,7 +10,7 @@ ASGIApp = Callable[[Scope, Receive, Send], Awaitable[None]]
 ASGIData = tuple[Scope, Receive, Send]
 
 
-class BaseContext(ABC):
+class BaseContext(Protocol):
     """Base class for each kind of Context handled by application.
 
     Mainly there are 3 kinds:
